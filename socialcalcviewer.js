@@ -106,7 +106,7 @@ See the comments in the main SocialCalc code module file of the SocialCalc packa
 
 // Constructor:
 
-SocialCalc.SpreadsheetViewer = function() {
+SocialCalc.SpreadsheetViewer = function(idPrefix) {
 
    var scc = SocialCalc.Constants;
 
@@ -134,7 +134,7 @@ SocialCalc.SpreadsheetViewer = function() {
 
    // Constants:
 
-   this.idPrefix = "SocialCalc-"; // prefix added to element ids used here, should end in "-"
+   this.idPrefix = idPrefix || "SocialCalc-"; // prefix added to element ids used here, should end in "-"
    this.imagePrefix = scc.defaultImagePrefix; // prefix added to img src
 
    this.statuslineheight = scc.SVStatuslineheight; // in pixels
@@ -146,8 +146,16 @@ SocialCalc.SpreadsheetViewer = function() {
 
    this.sheet = new SocialCalc.Sheet();
    this.context = new SocialCalc.RenderContext(this.sheet);
-   this.context.showGrid=true;
-   this.context.showRCHeaders=true;
+   // eddy SpreadsheetViewer {
+   if(SocialCalc._app == true || SocialCalc._view == true) scc.defaultImagePrefix = this.imagePrefix = "../"+ this.imagePrefix;
+   if(SocialCalc._app == true) {
+     this.context.showGrid= false; 
+     this.context.showRCHeaders= false;
+   } else {
+     this.context.showGrid= true; 
+     this.context.showRCHeaders= true;     
+   }
+   // } SpreadsheetViewer
    this.editor = new SocialCalc.TableEditor(this.context);
    this.editor.noEdit = true;
    this.editor.StatusCallback.statusline =
@@ -257,6 +265,15 @@ SocialCalc.InitializeSpreadsheetViewer = function(spreadsheet, node, height, wid
           params: {spreadsheetobj:spreadsheet}};
       }
 
+   // eddy InitializeSpreadsheetViewer {
+   if(SocialCalc._app == true) {
+     spreadsheet.formDataViewer = new SocialCalc.SpreadsheetViewer("te_FormData-");
+     // remove callback to stop drawing of table.
+     spreadsheet.formDataViewer.sheet.statuscallback = null;
+     // setup app viewer object
+     SocialCalc.CurrentSpreadsheetViewerObject = spreadsheet;
+   }
+   
    // done - refresh screen needed
 
    return;
@@ -525,6 +542,8 @@ SocialCalc.SizeSSDiv = function(spreadsheet) {
       spreadsheet.spreadsheetDiv.style.width = newval + "px";
       resized = true;
       }
+
+   spreadsheet.spreadsheetDiv.style.position = "relative";
 
    return resized;
 

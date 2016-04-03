@@ -72,6 +72,18 @@ SocialCalc.Constants = {
 // Main SocialCalc module, socialcalc-3.js:
 //
 
+// eddy cellDataType {
+//    datatype: if present, v=numeric value, t=text value, f=formula,
+//              or c=constant that is not a simple number (like "$1.20")
+   cellDataType: { 
+	v:"value",
+	n:"value",
+	t:"text",
+	f:"formula",
+	c:"constant"	
+   },
+// }   
+   
    //*** Common Constants
 
    textdatadefaulttype: "t", // This sets the default type for text on reading source file
@@ -123,7 +135,7 @@ SocialCalc.Constants = {
    defaultCellFontSize: "small",
    defaultCellFontFamily: "Verdana,Arial,Helvetica,sans-serif",
 
-   defaultPaneDividerWidth: "2", // a string
+   defaultPaneDividerWidth: "3", // a string
    defaultPaneDividerHeight: "3", // a string
 
    defaultGridCSS: "1px solid #C0C0C0;", // used as style to set each border when grid enabled (was #ECECEC)
@@ -132,6 +144,12 @@ SocialCalc.Constants = {
    defaultCommentStyle: "background-repeat:no-repeat;background-position:top right;background-image:url(images/sc-commentbg.gif);", // style added to cells with non-null comments when grid enabled
    defaultCommentNoGridClass: "", // class added to cells with non-null comments when grid not enabled
    defaultCommentNoGridStyle: "", // style added to cells with non-null comments when grid not enabled
+
+   defaultReadonlyClass: "", // class added to readonly cells when grid enabled
+   defaultReadonlyStyle: "background-repeat:no-repeat;background-position:top right;background-image:url(images/sc-lockbg.gif);", // style added to readonly cells when grid enabled
+   defaultReadonlyNoGridClass: "", // class added to readonly cells when grid not enabled
+   defaultReadonlyNoGridStyle: "", // style added to readonly cells when grid not enabled
+   defaultReadonlyComment: "Locked cell",
 
    defaultColWidth: "80", // text
    defaultMinimumColWidth: 10, // numeric
@@ -144,19 +162,30 @@ SocialCalc.Constants = {
    defaultHighlightTypeRangeStyle: "color:#000;backgroundColor:#E5E5E5;",
 
    defaultColnameClass: "", // regular column heading letters, needs a cursor property 
-   defaultColnameStyle: "font-size:small;text-align:center;color:#FFFFFF;background-color:#808080;cursor:e-resize;",
+   defaultColnameStyle: "overflow:visible;font-size:small;text-align:center;color:#FFFFFF;background-color:#808080;",
    defaultSelectedColnameClass: "", // column with selected cell, needs a cursor property 
-   defaultSelectedColnameStyle: "font-size:small;text-align:center;color:#FFFFFF;background-color:#404040;cursor:e-resize;",
+   defaultSelectedColnameStyle: "overflow:visible;font-size:small;text-align:center;color:#FFFFFF;background-color:#404040;",
    defaultRownameClass: "", // regular row heading numbers
-   defaultRownameStyle: "font-size:small;text-align:right;color:#FFFFFF;background-color:#808080;",
+   defaultRownameStyle: "position:relative;overflow:visible;font-size:small;text-align:right;color:#FFFFFF;background-color:#808080;",
    defaultSelectedRownameClass: "", // column with selected cell, needs a cursor property 
-   defaultSelectedRownameStyle: "font-size:small;text-align:right;color:#FFFFFF;background-color:#404040;",
+   defaultSelectedRownameStyle: "position:relative;overflow:visible;font-size:small;text-align:right;color:#FFFFFF;background-color:#404040;",
    defaultUpperLeftClass: "", // Corner cell in upper left
    defaultUpperLeftStyle: "font-size:small;",
    defaultSkippedCellClass: "", // used if present for spanned cells peeking into a pane (at least one of class/style needed)
    defaultSkippedCellStyle: "font-size:small;background-color:#CCC", // used if present
    defaultPaneDividerClass: "", // used if present for the look of the space between panes (at least one of class/style needed)
    defaultPaneDividerStyle: "font-size:small;background-color:#C0C0C0;padding:0px;", // used if present
+   defaultUnhideLeftClass: "",
+   defaultUnhideLeftStyle: "float:right;width:9px;height:12px;cursor:pointer;background-image:url(images/sc-unhideleft.gif);padding:0;", // used if present
+   defaultUnhideRightClass: "",
+   defaultUnhideRightStyle: "float:left;width:9px;height:12px;cursor:pointer;background-image:url(images/sc-unhideright.gif);padding:0;", // used if present
+   defaultUnhideTopClass: "",
+   defaultUnhideTopStyle: "float:left;left:1px;position:absolute;bottom:-4px;width:12px;height:9px;cursor:pointer;background-image:url(images/sc-unhidetop.gif);padding:0;",
+   defaultUnhideBottomClass: "",
+   defaultUnhideBottomStyle: "float:left;width:12px;height:9px;cursor:pointer;background-image:url(images/sc-unhidebottom.gif);padding:0;",
+
+   defaultColResizeBarClass: "col-resize-bar",
+   defaultRowResizeBarClass: "row-resize-bar",
 
    s_rcMissingSheet: "Render Context must have a sheet object", // unlikely thrown error
 
@@ -168,6 +197,8 @@ SocialCalc.Constants = {
 
    //*** SocialCalc.format_number_for_display
 
+   defaultFormatp: '#,##0.0%',
+   defaultFormatc: '[$$]#,##0.00',
    defaultFormatdt: 'd-mmm-yyyy h:mm:ss',
    defaultFormatd: 'd-mmm-yyyy',
    defaultFormatt: '[h]:mm:ss',
@@ -180,7 +211,7 @@ SocialCalc.Constants = {
 
    //*** SocialCalc.TableEditor
 
-   defaultImagePrefix: "images/sc-", // URL prefix for images (e.g., "/images/sc")
+   defaultImagePrefix: "images/sc_", // URL prefix for images (e.g., "/images/sc")
    defaultTableEditorIDPrefix: "te_", // if present, many TableEditor elements are assigned IDs with this prefix
    defaultPageUpDnAmount: 15, // number of rows to move cursor on PgUp/PgDn keys (numeric)
 
@@ -204,7 +235,7 @@ SocialCalc.Constants = {
    s_statusline_sum: "SUM",
    s_statusline_recalcneeded: '<span style="color:#999;">(Recalc needed)</span>',
    s_statusline_circref: '<span style="color:red;">Circular reference: ',
-
+   s_statusline_sendemail: "Sending Email ",  // eddy
    //** SocialCalc.InputBoxDisplayCellContents
 
    s_inputboxdisplaymultilinetext: "[Multi-line text: Click icon on right to edit]",
@@ -218,6 +249,9 @@ SocialCalc.Constants = {
    defaultInputEchoPromptStyle: "filter:alpha(opacity=90);opacity:.9;backgroundColor:#FFD;"+
       "borderLeft:1px solid #884;borderRight:1px solid #884;borderBottom:1px solid #884;"+
       "fontSize:small;fontStyle:italic;padding:2px 10px 1px 2px;cursor:default;", // if present, pseudo style
+   defaultInputEchoHintClass: "", // if present, the class of the popup inputEcho div
+   defaultInputEchoHintStyle: "filter:alpha(opacity=80);opacity:.8;backgroundColor:#884;border:1px solid #884;"+
+      "fontSize:small;fontWeight:bold;padding:2px 2px 2px 2px;color:#FFF;position:absolute;top:-20px;cursor:default;", // if present, pseudo style
 
    //** SocialCalc.InputEchoText
 
@@ -251,8 +285,7 @@ SocialCalc.Constants = {
    TCmainClass: "", // if present, the CSS class of the main div for a table control
    TCendcapStyle: "backgroundColor:#FFF;", // backgroundColor may be used while waiting for image that may not come
    TCendcapClass: "",
-   TCpanesliderStyle: "backgroundColor:#CCC;",
-   TCpanesliderClass: "",
+   TCpanesliderClass: "tc-paneslider",
    s_panesliderTooltiph: "Drag to lock pane vertically", // tooltip for horizontal table control pane slider
    s_panesliderTooltipv: "Drag to lock pane horizontally",
    TClessbuttonStyle: "backgroundColor:#AAA;",
@@ -272,7 +305,7 @@ SocialCalc.Constants = {
 
    //*** SocialCalc.TCPSDragFunctionStart
 
-   TCPStrackinglineClass: "", // at least one of class/style for pane slider tracking line display in table control
+   TCPStrackinglineClass: "tracklingine", // at least one of class/style for pane slider tracking line display in table control
    TCPStrackinglineStyle: "overflow:hidden;position:absolute;zIndex:100;",
                            // if present, pseudo style (text-align is textAlign)
    TCPStrackinglineThickness: "2px", // narrow dimension of trackling line (string with units)
@@ -325,7 +358,7 @@ SocialCalc.Constants = {
    SCTabbackground: "background-color:#CCC;",
    SCTabselectedCSS: "font-size:small;padding:6px 30px 6px 8px;color:#FFF;background-color:#404040;cursor:default;border-right:1px solid #CCC;",
    SCTabplainCSS: "font-size:small;padding:6px 30px 6px 8px;color:#FFF;background-color:#808080;cursor:default;border-right:1px solid #CCC;",
-   SCToolbartext: "font-size:x-small;font-weight:bold;color:#FFF;padding-bottom:4px;",
+   SCToolbartext: "font-size:x-small;font-weight:bold;color:#FFF",
 
    SCFormulabarheight: 30, // in pixels, will contain a text input box
 
@@ -347,7 +380,7 @@ SocialCalc.Constants = {
             "[break]:|1,234%:#,##0%|1,234.5%:#,##0.0%|1,234.56%:#,##0.00%|"+
             "[newcol]:|$1,234:$#,##0|$1,234.5:$#,##0.0|$1,234.56:$#,##0.00|[break]:|"+
             "(1,234):#,##0_);(#,##0)|(1,234.5):#,##0.0_);(#,##0.0)|(1,234.56):#,##0.00_);(#,##0.00)|[break]:|"+
-            "($1,234):#,##0_);($#,##0)|($1,234.5):$#,##0.0_);($#,##0.0)|($1,234.56):$#,##0.00_);($#,##0.00)|"+
+            "($1,234):$#,##0_);($#,##0)|($1,234.5):$#,##0.0_);($#,##0.0)|($1,234.56):$#,##0.00_);($#,##0.00)|"+
             "[newcol]:|1/4/06:m/d/yy|01/04/2006:mm/dd/yyyy|2006-01-04:yyyy-mm-dd|4-Jan-06:d-mmm-yy|04-Jan-2006:dd-mmm-yyyy|January 4, 2006:mmmm d, yyyy|"+
             "[break]:|1\\c23:h:mm|1\\c23 PM:h:mm AM/PM|1\\c23\\c45:h:mm:ss|01\\c23\\c45:hh:mm:ss|26\\c23 (h\\cm):[hh]:mm|69\\c45 (m\\cs):[mm]:ss|69 (s):[ss]|"+
             "[newcol]:|2006-01-04 01\\c23\\c45:yyyy-mm-dd hh:mm:ss|January 4, 2006:mmmm d, yyyy hh:mm:ss|Wed:ddd|Wednesday:dddd|",
@@ -375,6 +408,10 @@ SocialCalc.Constants = {
                   "20 pixels:20|40:40|60:60|80:80|100:100|120:120|140:140|160:160|"+
                   "[newcol]:|180 pixels:180|200:200|220:220|240:240|260:260|280:280|300:300|",
    SCFormatRecalc: "[cancel]:|[break]:|%loc!Auto!:|%loc!Manual!:off|",
+   SCFormatUserMaxCol: "[cancel]:|[break]:|%loc!Default!:|[custom]:|[newcol]:|"+
+                  "Unlimited:0|10:10|20:20|30:30|40:40|50:50|60:60|80:80|100:100|",
+   SCFormatUserMaxRow: "[cancel]:|[break]:|%loc!Default!:|[custom]:|[newcol]:|"+
+                  "Unlimited:0|10:10|20:20|30:30|40:40|50:50|60:60|80:80|100:100|",
 
    //*** SocialCalc.InitializeSpreadsheetControl
 
@@ -437,7 +474,7 @@ SocialCalc.Constants = {
    s_loc_default_padding: "Default Padding",
    s_loc_delete: "Delete",
    s_loc_delete_column: "Delete Column",
-   s_loc_delete_contents: "Delete Contents",
+   s_loc_delete_contents: "Delete Cell Contents",
    s_loc_delete_row: "Delete Row",
    s_loc_description: "Description",
    s_loc_display_clipboard_in: "Display Clipboard in",
@@ -454,9 +491,11 @@ SocialCalc.Constants = {
    s_loc_functions: "Functions",
    s_loc_grid: "Grid",
    s_loc_hidden: "Hidden",
+   s_loc_hide_column: "Hide Column",
+   s_loc_hide_row: "Hide Row",
    s_loc_horizontal: "Horizontal",
-   s_loc_insert_column: "Insert Column",
-   s_loc_insert_row: "Insert Row",
+   s_loc_insert_column: "Insert Column Before",
+   s_loc_insert_row: "Insert Row Before",
    s_loc_italic: "Italic",
    s_loc_last_sort: "Last Sort",
    s_loc_left: "Left",
@@ -465,9 +504,10 @@ SocialCalc.Constants = {
    s_loc_link_input_box: "Link Input Box",
    s_loc_list: "List",
    s_loc_load_socialcalc_clipboard_with_this: "Load SocialCalc Clipboard With This",
+   s_loc_lock_cell: "Lock Cell",
    s_loc_major_sort: "Major Sort",
    s_loc_manual: "Manual",
-   s_loc_merge_cells: "Merge Cells",
+   s_loc_merge_cells: "Merge/Unmerge Cells",
    s_loc_middle: "Middle",
    s_loc_minor_sort: "Minor Sort",
    s_loc_move_insert: "Move Insert",
@@ -516,6 +556,7 @@ SocialCalc.Constants = {
    s_loc_undone_steps: "UNDONE STEPS",
    s_loc_url: "URL",
    s_loc_undo: "Undo",
+   s_loc_unlock_cell: "Unlock Cell",
    s_loc_unmerge_cells: "Unmerge Cells",
    s_loc_up: "Up",
    s_loc_value: "Value",
@@ -700,6 +741,9 @@ SocialCalc.Constants = {
    s_fdef_VLOOKUP: 'Look for the matching value for the given value in the range and return the corresponding value in the cell specified by the column offset. If rangelookup is 1 (the default) and not 0, match if within numeric brackets (match>=value) instead of exact match. ',
    s_fdef_WEEKDAY: 'Returns the day of week specified by the date value. If type is 1 (the default), Sunday is day and Saturday is day 7. If type is 2, Monday is day 1 and Sunday is day 7. If type is 3, Monday is day 0 and Sunday is day 6. ',
    s_fdef_YEAR: 'Returns the year part of a date value. ',
+   s_fdef_SUMPRODUCT: 'Sums the pairwise products of 2 or more ranges. The ranges must be of equal length.',
+   s_fdef_CEILING: 'Rounds the given number up to the nearest integer or multiple of significance. Significance is the value to whose multiple of ten the value is to be rounded up (.01, .1, 1, 10, etc.)',
+   s_fdef_FLOOR: 'Rounds the given number down to the nearest multiple of significance. Significance is the value to whose multiple of ten the number is to be rounded down (.01, .1, 1, 10, etc.)',
 
    s_farg_v: "value",
    s_farg_vn: "value1, value2, ...",
@@ -709,11 +753,11 @@ SocialCalc.Constants = {
    s_farg_rangec: "range, criteria",
    s_farg_date: "year, month, day",
    s_farg_dfunc: "databaserange, fieldname, criteriarange",
-   s_farg_ddb: "cost, salvage, lifetime, period [, factor]",
-   s_farg_find: "string1, string2 [, start]",
+   s_farg_ddb: "cost, salvage, lifetime, period, [factor]",
+   s_farg_find: "string1, string2, [start]",
    s_farg_fv: "rate, n, payment, [pv, [paytype]]",
    s_farg_hlookup: "value, range, row, [rangelookup]",
-   s_farg_iffunc: "logical-expression, true-value, false-value",
+   s_farg_iffunc: "logical-expression, true-value, [false-value]",
    s_farg_index: "range, rownum, colnum",
    s_farg_irr: "range, [guess]",
    s_farg_tc: "text, count",
@@ -730,15 +774,17 @@ SocialCalc.Constants = {
    s_farg_valpre: "value, precision",
    s_farg_csl: "cost, salvage, lifetime",
    s_farg_cslp: "cost, salvage, lifetime, period",
-   s_farg_subs: "text1, oldtext, newtext [, occurrence]",
-   s_farg_sumif: "range1, criteria [, range2]",
+   s_farg_subs: "text1, oldtext, newtext, [occurrence]",
+   s_farg_sumif: "range1, criteria, [range2]",
    s_farg_hms: "hour, minute, second",
    s_farg_txt: "text",
    s_farg_vlookup: "value, range, col, [rangelookup]",
    s_farg_weekday: "date, [type]",
    s_farg_dt: "date",
+   s_farg_rangen: "range1, range2, ...",
+   s_farg_vsig: 'value, [significance]',
 
-   function_classlist: ["all", "stat", "lookup", "datetime", "financial", "test", "math", "text"], // order of function classes
+   function_classlist: ["all", "stat", "lookup", "datetime", "financial", "test", "math", "text", "gui", "action"], // order of function classes
 
    s_fclass_all: "All",
    s_fclass_stat: "Statistics",
@@ -748,6 +794,8 @@ SocialCalc.Constants = {
    s_fclass_test: "Test",
    s_fclass_math: "Math",
    s_fclass_text: "Text",
+   s_fclass_action: "Email & Copy",
+   s_fclass_gui: "Button & Input",
 
    lastone: null
 
@@ -814,5 +862,20 @@ SocialCalc.ConstantsSetClasses = function(prefix) {
          scc[item+"Style"] = defaults[item].style;
          }
       }
+   }
+
+// Set the image prefix on all images.
+
+SocialCalc.ConstantsSetImagePrefix = function(imagePrefix) {
+
+   var scc = SocialCalc.Constants;
+
+   for (var item in scc) {
+      if (typeof scc[item] == "string") {
+         scc[item] = scc[item].replace(scc.defaultImagePrefix, imagePrefix);
+         }
+      }
+   scc.defaultImagePrefix = imagePrefix;
+
    }
 

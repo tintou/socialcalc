@@ -137,6 +137,7 @@ SocialCalc.TableEditor = function(context) {
    this.busy = false; // true when executing command, calculating, etc.
    this.ensureecell = false; // if true, ensure ecell is visible after timeout
    this.deferredCommands = []; // commands to execute after busy, in form: {cmdstr: "cmds", saveundo: t/f}
+   this.deferredEmailCommands = []; // Email commands to execute after busy, in form: {cmdstr: "cmds", saveundo: t/f}
 
    this.gridposition = null; // screen coords of full grid
    this.headposition = null; // screen coords of upper left of grid within header rows
@@ -208,7 +209,7 @@ SocialCalc.TableEditor = function(context) {
             // get what to copy to clipboard
             cliptext = SocialCalc.ConvertSaveToOtherFormat(SocialCalc.CreateSheetSave(editor.context.sheetobj, sel), "tab");
 
-            if (charname == "[ctrl-c]" || editor.noEdit) { // if copy or cut but in no edit
+            if (charname == "[ctrl-c]" || editor.noEdit || editor.ECellReadonly()) { // if copy or cut but in no edit
                cmd = "copy "+sel+" formulas";
                }
             else { // [ctrl-x]
@@ -221,10 +222,6 @@ SocialCalc.TableEditor = function(context) {
             ta.focus();
             ta.select();
             window.setTimeout(function() {
-               if (!SocialCalc.GetSpreadsheetControlObject) return; // in case not loaded
-               var s = SocialCalc.GetSpreadsheetControlObject();
-               if (!s) return;
-               var editor = s.editor;
                var ta = editor.pasteTextarea;
                ta.blur();
                ta.style.display = "none";
@@ -234,7 +231,7 @@ SocialCalc.TableEditor = function(context) {
             return true;
 
          case "[ctrl-v]":
-            if (editor.noEdit) return true; // not if no edit
+            if (editor.noEdit || editor.ECellReadonly()) return true; // not if no edit
             ta = editor.pasteTextarea;
             ta.value = "";
             cell=SocialCalc.GetEditorCellElement(editor, editor.ecell.row, editor.ecell.col);
@@ -247,10 +244,6 @@ SocialCalc.TableEditor = function(context) {
             ta.value = "";  // must follow "block" setting for Webkit
             ta.focus();
             window.setTimeout(function() {
-               if (!SocialCalc.GetSpreadsheetControlObject) return;
-               var s = SocialCalc.GetSpreadsheetControlObject();
-               if (!s) return;
-               var editor = s.editor;
                var ta = editor.pasteTextarea;
                var value = ta.value;
                ta.blur();
@@ -266,7 +259,16 @@ SocialCalc.TableEditor = function(context) {
                   }
                var cr;
                if (editor.range.hasrange) {
-                  cr = SocialCalc.crToCoord(editor.range.left, editor.range.top);
+                  var clipsheet = new SocialCalc.Sheet();
+                  clipsheet.ParseSheetSave(SocialCalc.Clipboard.clipboard);
+                  var matches = clipsheet.copiedfrom.match(/(.+):(.+)/);
+                  if (matches !== null && matches[1] === matches[2]) {
+                    // copy one cell to selected range
+                    cr = SocialCalc.crToCoord(editor.range.left, editor.range.top) +
+                      ':' + SocialCalc.crToCoord(editor.range.right, editor.range.bottom);
+                  } else {
+                    cr = SocialCalc.crToCoord(editor.range.left, editor.range.top);
+                  }
                   }
                else {
                   cr = editor.ecell.coord;
@@ -285,10 +287,6 @@ SocialCalc.TableEditor = function(context) {
             if (!SocialCalc.Constants.AllowCtrlS) break;
             window.setTimeout(
                function() {
-                  if (!SocialCalc.GetSpreadsheetControlObject) return;
-                  var s = SocialCalc.GetSpreadsheetControlObject();
-                  if (!s) return;
-                  var editor = s.editor;
                   var sheet = editor.context.sheetobj;
                   var cell = sheet.GetAssuredCell(editor.ecell.coord);
                   var ntvf = cell.nontextvalueformat ? sheet.valueformats[cell.nontextvalueformat-0] || "" : "";
@@ -421,6 +419,7 @@ SocialCalc.TableEditor.prototype.ReplaceCell = function(cell, row, col) {SocialC
 SocialCalc.TableEditor.prototype.UpdateCellCSS = function(cell, row, col) {SocialCalc.UpdateCellCSS(this, cell, row, col);};
 SocialCalc.TableEditor.prototype.SetECellHeaders = function(selected) {SocialCalc.SetECellHeaders(this, selected);};
 SocialCalc.TableEditor.prototype.EnsureECellVisible = function() {SocialCalc.EnsureECellVisible(this);};
+SocialCalc.TableEditor.prototype.ECellReadonly = function(coord) {return SocialCalc.ECellReadonly(this, coord);};
 SocialCalc.TableEditor.prototype.RangeAnchor = function(coord) {SocialCalc.RangeAnchor(this, coord);};
 SocialCalc.TableEditor.prototype.RangeExtend = function(coord) {SocialCalc.RangeExtend(this, coord);};
 SocialCalc.TableEditor.prototype.RangeRemove = function() {SocialCalc.RangeRemove(this);};
@@ -445,6 +444,18 @@ SocialCalc.TableEditor.prototype.ScrollTableDownOneRow = function() {return Soci
 SocialCalc.TableEditor.prototype.ScrollTableLeftOneCol = function() {return SocialCalc.ScrollTableLeftOneCol(this);};
 SocialCalc.TableEditor.prototype.ScrollTableRightOneCol = function() {return SocialCalc.ScrollTableRightOneCol(this);};
 
+SocialCalc.TableEditor.prototype.StopPropagation = function() {
+    return SocialCalc.StopPropagation(this);
+};
+
+SocialCalc.TableEditor.prototype.SetMouseMoveUp = function() {
+    return SocialCalc.SetMouseMoveUp(this);
+};
+
+SocialCalc.TableEditor.prototype.RemoveMouseMoveUp = function() {
+    return SocialCalc.RemoveMouseMoveUp(this);
+};
+
 // Functions:
 
 SocialCalc.CreateTableEditor = function(editor, width, height) {
@@ -453,16 +464,18 @@ SocialCalc.CreateTableEditor = function(editor, width, height) {
    var AssignID = SocialCalc.AssignID;
 
    editor.toplevel = document.createElement("div");
+   editor.toplevel.style.position = "relative";
+   AssignID(editor, editor.toplevel, "toplevel");
    editor.width = width;
    editor.height = height;
 
    editor.griddiv = document.createElement("div");
-   editor.tablewidth = width - scc.defaultTableControlThickness;
-   editor.tableheight = height - scc.defaultTableControlThickness;
-   editor.griddiv.style.width=editor.tablewidth+"px";
-   editor.griddiv.style.height=editor.tableheight+"px";
-   editor.griddiv.style.overflow="hidden";
-   editor.griddiv.style.cursor="default";
+   editor.tablewidth = Math.max(0, width - scc.defaultTableControlThickness);
+   editor.tableheight = Math.max(0, height - scc.defaultTableControlThickness);
+   editor.griddiv.style.width = editor.tablewidth+"px";
+   editor.griddiv.style.height = editor.tableheight+"px";
+   editor.griddiv.style.overflow = "hidden";
+   editor.griddiv.style.cursor = "default";
    if (scc.cteGriddivClass) editor.griddiv.className = scc.cteGriddivClass;
    AssignID(editor, editor.griddiv, "griddiv");
 
@@ -512,7 +525,7 @@ SocialCalc.CreateTableEditor = function(editor, width, height) {
    tr.appendChild(td);
    editor.logo = td;
    AssignID(editor, editor.logo, "logo");
-   SocialCalc.TooltipRegister(td.firstChild.firstChild, "SocialCalc", null);
+   SocialCalc.TooltipRegister(td.firstChild.firstChild, "SocialCalc", null, editor.toplevel);
 
    editor.toplevel.appendChild(editor.layouttable);
 
@@ -542,12 +555,6 @@ SocialCalc.CreateTableEditor = function(editor, width, height) {
 
    SocialCalc.MouseWheelRegister(editor.toplevel, {WheelMove: SocialCalc.EditorProcessMouseWheel, editor: editor});
 
-   if (editor.inputBox) { // this seems to fix an obscure bug with Firefox 2 Mac where Ctrl-V doesn't get fired right
-      if (editor.inputBox.element) {
-         editor.inputBox.element.focus();
-         editor.inputBox.element.blur();
-         }
-      }
    SocialCalc.KeyboardSetFocus(editor);
 
    // do status reporting things
@@ -582,8 +589,8 @@ SocialCalc.ResizeTableEditor = function(editor, width, height) {
    editor.toplevel.style.width = width+"px";
    editor.toplevel.style.height = height+"px";
 
-   editor.tablewidth = width - scc.defaultTableControlThickness;
-   editor.tableheight = height - scc.defaultTableControlThickness;
+   editor.tablewidth = Math.max(0, width - scc.defaultTableControlThickness);
+   editor.tableheight = Math.max(0, height - scc.defaultTableControlThickness);
    editor.griddiv.style.width=editor.tablewidth+"px";
    editor.griddiv.style.height=editor.tableheight+"px";
 
@@ -746,9 +753,11 @@ SocialCalc.EditorRenderSheet = function(editor) {
    if (editor.ecell) editor.SetECellHeaders("selected");
 
    SocialCalc.AssignID(editor, editor.fullgrid, "fullgrid"); // give it an id
-
+   // eddy EditorRenderSheet {
+   if(!SocialCalc._app) editor.fullgrid.className = "te_download";
    editor.EditorMouseRegister();
-
+   // } EditorRenderSheet
+   
    }
 
 //
@@ -766,7 +775,11 @@ SocialCalc.EditorScheduleSheetCommands = function(editor, cmdstr, saveundo, igno
       return;
       }
 
-   switch (cmdstr) {
+   // eddy ExecuteSheetCommand {
+   var cmdTokens = cmdstr.split(" ");
+
+   switch (cmdTokens[0]) {
+	   // } eddy ExecuteSheetCommand 
       case "recalc":
       case "redisplay":
          editor.context.sheetobj.ScheduleSheetCommands(cmdstr, false);
@@ -779,7 +792,12 @@ SocialCalc.EditorScheduleSheetCommands = function(editor, cmdstr, saveundo, igno
       case "redo":
          editor.SheetRedo();
          break;
-
+         
+      case "setemailparameters":    	  
+		  SocialCalc.TriggerIoAction.Email(cmdTokens[1], cmdTokens[2]);
+    	  break;
+         
+         
       default:
          editor.context.sheetobj.ScheduleSheetCommands(cmdstr, saveundo);
          break;
@@ -833,13 +851,11 @@ SocialCalc.EditorSheetStatusCallback = function(recalcdata, status, arg, editor)
             cell = SocialCalc.GetEditorCellElement(editor, cr.row, cr.col);
             editor.ReplaceCell(cell, cr.row, cr.col);
             }
-
          if (editor.deferredCommands.length) {
             dcmd = editor.deferredCommands.shift();
             editor.EditorScheduleSheetCommands(dcmd.cmdstr, dcmd.saveundo, true);
             return;
             }
-
          if (sheetobj.attribs.needsrecalc &&
                (sheetobj.attribs.recalc!="off" || sheetobj.recalconce)
                && editor.recalcFunction) {
@@ -860,6 +876,33 @@ SocialCalc.EditorSheetStatusCallback = function(recalcdata, status, arg, editor)
 //               signalstatus("cmdendnorender");
                }
             }
+
+         // Handle hidden column.
+         if (sheetobj.hiddencolrow == "col") {
+            if (editor.ecell !== null) {
+               var col = editor.ecell.col;
+               while (sheetobj.colattribs.hide[SocialCalc.rcColname(col)] == "yes") {
+                  col++;
+                  }
+               var coord = SocialCalc.crToCoord(col, editor.ecell.row);
+               editor.MoveECell(coord);
+               sheetobj.hiddencolrow = "";
+               }
+            }
+
+         // Handle hidden row.
+         if (sheetobj.hiddencolrow == "row") {
+            if (editor.ecell !== null) {
+               var row = editor.ecell.row;
+               while (sheetobj.rowattribs.hide[row] == "yes") {
+                  row++;
+                  }
+               var coord = SocialCalc.crToCoord(editor.ecell.col, row);
+               editor.MoveECell(coord);
+               sheetobj.hiddencolrow = "";
+               }
+            }
+
          return;
 
       case "calcstart":
@@ -890,6 +933,14 @@ SocialCalc.EditorSheetStatusCallback = function(recalcdata, status, arg, editor)
          break;
 
       case "doneposcalc":
+          if (editor.deferredEmailCommands.length) {
+              signalstatus(status);
+              var emailcmd = editor.deferredEmailCommands.shift();
+              editor.EditorScheduleSheetCommands(emailcmd.cmdstr, emailcmd.saveundo, true);
+              return;
+              }
+    	  
+    	  
          if (editor.deferredCommands.length) {
             signalstatus(status);
             dcmd = editor.deferredCommands.shift();
@@ -901,9 +952,14 @@ SocialCalc.EditorSheetStatusCallback = function(recalcdata, status, arg, editor)
             if (editor.state=="start") editor.DisplayCellContents(); // make sure up to date
             }
          return;
-
+      // eddy EditorSheetStatusCallback {
+      case "emailing":
+      case "confirmemailsent":
+        break;
+      // } EditorSheetStatusCallback eddy 
+         
       default:
-addmsg("Unknown status: "+status);
+    	 alert("Unknown status: "+status);
          break;
 
       }
@@ -913,34 +969,6 @@ addmsg("Unknown status: "+status);
    return;
 
    }
-
-// Timer-driven steps for use with SocialCalc.EditorSheetStatusCallback
-
-SocialCalc.EditorStepInfo = {
-//   status: "", // saved value to pass to callback
-   editor: null // for callback
-//   arg: null, // for callback
-//   timerobj: null
-   };
-
-/*
-SocialCalc.EditorStepSet = function(editor, status, arg) {
-   var esi = SocialCalc.EditorStepInfo;
-addmsg("step: "+status);
-   if (esi.timerobj) {
-alert("Already waiting. Old/new: "+esi.status+"/"+status);
-      }
-   esi.editor = editor;
-   esi.status = status;
-   esi.timerobj = window.setTimeout(SocialCalc.EditorStepDone, 1);
-   }
-
-SocialCalc.EditorStepDone = function() {
-   var esi = SocialCalc.EditorStepInfo;
-   esi.timerobj = null;
-   SocialCalc.EditorSheetStatusCallback(null, esi.status, null, esi.editor);
-   }
-*/
 
 //
 // str = SocialCalc.EditorGetStatuslineString(editor, status, arg, params)
@@ -988,7 +1016,16 @@ SocialCalc.EditorGetStatuslineString = function(editor, status, arg, params) {
       case "doneposcalc":
          document.body.style.cursor = "default";
          editor.griddiv.style.cursor = "default";
+         // eddy EditorGetStatuslineString {
+         // all updates done, So let future event clear the "sent" message in the status bar
+         if(params.emailing == "sent") {
+        	 progress = params.emailreponse;
+        	 params.emailreponse = "";
+        	 params.emailing = "done";
+         }
+         // } eddy EditorGetStatuslineString 
          break;
+         
       case "calcorder":
          progress = scc.s_statusline_ordering+Math.floor(100*arg.count/(arg.total||1))+"%";
          break;
@@ -1012,11 +1049,33 @@ SocialCalc.EditorGetStatuslineString = function(editor, status, arg, params) {
       case "calcfinished":
          params.calculating = false;
          break;
+      // eddy EditorGetStatuslineString {
+      case "emailing":
+    	 params.emailing = "sending";
+    	 params.emailreponse ="";
+         break;
+      case "confirmemailsent":
+     	 params.emailing = "sent";
+     	 if(typeof params.emailreponse === 'undefined') params.emailreponse ="";
+     	 params.emailreponse += arg;
+         break;    	  
+      // } eddy EditorGetStatuslineString 
+         
       default:
          progress = status;
          break;
       }
 
+   // eddy EditorGetStatuslineString {
+   // if send email then update status bar with "sending" and then "sent"
+   if(params.emailing == "sending") {
+  	 progress += scc.s_statusline_sendemail;
+   }
+   if(params.emailing == "sent") {
+  	 progress += params.emailreponse;
+   }   
+   // } eddy EditorGetStatuslineString 
+   
    if (!progress && params.calculating) {
       progress = scc.s_statusline_calculating;
       }
@@ -1042,7 +1101,7 @@ SocialCalc.EditorGetStatuslineString = function(editor, status, arg, params) {
       progress = coord + " (" + (editor.range.right-editor.range.left+1) + "x" + (editor.range.bottom-editor.range.top+1) +
                  ") "+scc.s_statusline_sum+"=" + sum + " " + progress;
       }
-   sstr = editor.ecell.coord+" &nbsp; "+progress;
+   sstr = (editor.ecell || {}).coord+" &nbsp; "+progress;
 
    if (!params.calculating && editor.context.sheetobj.attribs.needsrecalc=="yes") {
       sstr += ' &nbsp; '+scc.s_statusline_recalcneeded;
@@ -1053,7 +1112,9 @@ SocialCalc.EditorGetStatuslineString = function(editor, status, arg, params) {
       circ = circ.replace(/\|/, " referenced by ");
       sstr += ' &nbsp; '+scc.s_statusline_circref + circ + '</span>';
       }
-
+   // eddy EditorGetStatuslineString {
+   sstr += "";
+   // } eddy EditorGetStatuslineString 
    return sstr;
 
    }
@@ -1161,15 +1222,47 @@ SocialCalc.EditorMouseUnregister = function(editor) {
 
    }
 
+SocialCalc.StopPropagation = function(event) {
+    if (event.stopPropagation) event.stopPropagation(); // DOM Level 2
+    else event.cancelBubble = true; // IE 5+
+    if (event.preventDefault) event.preventDefault(); // DOM Level 2
+    else event.returnValue = false; // IE 5+
+}
+
+SocialCalc.SetMouseMoveUp = function(move, up, element, event) {
+       // Event code from JavaScript, Flanagan, 5th Edition, pg. 422
+   if (document.addEventListener) { // DOM Level 2 -- Firefox, et al
+      document.addEventListener("mousemove", move, true); // capture everywhere
+      document.addEventListener("mouseup", up, true); // capture everywhere
+      }
+   else if (element.attachEvent) { // IE 5+
+      element.setCapture();
+      element.attachEvent("onmousemove", move);
+      element.attachEvent("onmouseup", up);
+      element.attachEvent("onlosecapture", up);
+   }
+    SocialCalc.StopPropagation(event);
+}
+
+SocialCalc.RemoveMouseMoveUp = function(move, up, element, event) {
+    SocialCalc.StopPropagation(event);
+    if (document.removeEventListener) { // DOM Level 2
+	document.removeEventListener("mousemove", move, true);
+	document.removeEventListener("mouseup", up, true);
+    }
+    else if (element.detachEvent) { // IE
+	element.detachEvent("onlosecapture", up);
+	element.detachEvent("onmouseup", up);
+	element.detachEvent("onmousemove", move);
+	element.releaseCapture();
+    }
+}
+
 SocialCalc.ProcessEditorMouseDown = function(e) {
 
    var editor, result, coord, textarea, wval, range;
 
    var event = e || window.event;
-
-   var viewport = SocialCalc.GetViewportInfo();
-   var clientX = event.clientX + viewport.horizontalScroll;
-   var clientY = event.clientY + viewport.verticalScroll;
 
    var mouseinfo = SocialCalc.EditorMouseInfo;
    var ele = event.target || event.srcElement; // source object is often within what we want
@@ -1188,15 +1281,32 @@ SocialCalc.ProcessEditorMouseDown = function(e) {
    editor = mobj.editor;
    mouseinfo.element = ele;
    range = editor.range;
+
+   var pos = SocialCalc.GetElementPositionWithScroll(editor.toplevel);
+   var clientX = event.clientX - pos.left;
+   var clientY = event.clientY - pos.top;
    result = SocialCalc.GridMousePosition(editor, clientX, clientY);
 
-   if (!result || result.rowheader) return; // not on a cell or col header
+   if (!result) return; // not on a cell or col header
    mouseinfo.editor = editor; // remember for later
 
-   if (result.colheader && result.coltoresize) { // col header - do drag resize
-      SocialCalc.ProcessEditorColsizeMouseDown(e, ele, result);
-      return;
-      }
+    if (result.rowheader) {
+	if (result.rowselect)  {
+	    SocialCalc.ProcessEditorRowselectMouseDown(e, ele, result);
+	} else {
+	    SocialCalc.ProcessEditorRowsizeMouseDown(e, ele, result);
+	}
+	return;
+    }
+
+    if (result.colheader) {
+	if (result.colselect)  {
+	    SocialCalc.ProcessEditorColselectMouseDown(e, ele, result);
+	} else {
+	    SocialCalc.ProcessEditorColsizeMouseDown(e, ele, result);
+	}
+	return;
+    }
 
    if (!result.coord) return; // not us
 
@@ -1204,8 +1314,24 @@ SocialCalc.ProcessEditorMouseDown = function(e) {
       if (e.shiftKey)
          editor.RangeAnchor();
       }
-
    coord = editor.MoveECell(result.coord);
+   // eddy ProcessEditorMouseDown {
+   if(SocialCalc._app == true) { // "app" wigets need to keep focus - needed because "coord" always equals A1 
+     SocialCalc.CmdGotFocus(true); // cell widgets need to keep focus
+     return;
+   }
+   
+   var clickedCell = editor.context.sheetobj.cells[coord];
+   if(clickedCell) {
+     if(clickedCell.valuetype.charAt(1) == 'i') { // IF cell contains ioWidget
+        var formula_name= clickedCell.valuetype.substring(2);	 
+	    var cell_widget=document.getElementById(formula_name+'_'+coord);
+		SocialCalc.CmdGotFocus(cell_widget); // cell widgets need to keep focus 
+		// SocialCalc.Keyboard.FocusWidget = coord;
+		return; // let ioWidget keep the focus 
+		}
+	 }
+   // }
 
    if (range.hasrange) {
       if (e.shiftKey)
@@ -1221,23 +1347,10 @@ SocialCalc.ProcessEditorMouseDown = function(e) {
 
    SocialCalc.KeyboardSetFocus(editor);
    if (editor.state!="start" && editor.inputBox) editor.inputBox.element.focus();
-
-   // Event code from JavaScript, Flanagan, 5th Edition, pg. 422
-   if (document.addEventListener) { // DOM Level 2 -- Firefox, et al
-      document.addEventListener("mousemove", SocialCalc.ProcessEditorMouseMove, true); // capture everywhere
-      document.addEventListener("mouseup", SocialCalc.ProcessEditorMouseUp, true); // capture everywhere
-      }
-   else if (ele.attachEvent) { // IE 5+
-      ele.setCapture();
-      ele.attachEvent("onmousemove", SocialCalc.ProcessEditorMouseMove);
-      ele.attachEvent("onmouseup", SocialCalc.ProcessEditorMouseUp);
-      ele.attachEvent("onlosecapture", SocialCalc.ProcessEditorMouseUp);
-      }
-   if (event.stopPropagation) event.stopPropagation(); // DOM Level 2
-   else event.cancelBubble = true; // IE 5+
-   if (event.preventDefault) event.preventDefault(); // DOM Level 2
-   else event.returnValue = false; // IE 5+
-
+    SocialCalc.SetMouseMoveUp(SocialCalc.ProcessEditorMouseMove,
+			      SocialCalc.ProcessEditorMouseUp,
+			      ele,
+			      event);
    return;
 
    }
@@ -1294,16 +1407,15 @@ SocialCalc.ProcessEditorMouseMove = function(e) {
 
    var event = e || window.event;
 
-   var viewport = SocialCalc.GetViewportInfo();
-   var clientX = event.clientX + viewport.horizontalScroll;
-   var clientY = event.clientY + viewport.verticalScroll;
-
    var mouseinfo = SocialCalc.EditorMouseInfo;
    editor = mouseinfo.editor;
    if (!editor) return; // not us, ignore
    if (mouseinfo.ignore) return; // ignore this
    element = mouseinfo.element;
 
+   var pos = SocialCalc.GetElementPositionWithScroll(editor.toplevel);
+   var clientX = event.clientX - pos.left;
+   var clientY = event.clientY - pos.top;
    result = SocialCalc.GridMousePosition(editor, clientX, clientY); // get cell with move
 
    if (!result) return;
@@ -1327,14 +1439,8 @@ SocialCalc.ProcessEditorMouseMove = function(e) {
    mouseinfo.mouselastcoord = result.coord;
 
    editor.EditorMouseRange(result.coord);
-
-   if (event.stopPropagation) event.stopPropagation(); // DOM Level 2
-   else event.cancelBubble = true; // IE 5+
-   if (event.preventDefault) event.preventDefault(); // DOM Level 2
-   else event.returnValue = false; // IE 5+
-
+   SocialCalc.StopPropagation(event); 
    return;
-
    }
 
 
@@ -1344,16 +1450,15 @@ SocialCalc.ProcessEditorMouseUp = function(e) {
 
    var event = e || window.event;
 
-   var viewport = SocialCalc.GetViewportInfo();
-   var clientX = event.clientX + viewport.horizontalScroll;
-   var clientY = event.clientY + viewport.verticalScroll;
-
    var mouseinfo = SocialCalc.EditorMouseInfo;
    editor = mouseinfo.editor;
    if (!editor) return; // not us, ignore
    if (mouseinfo.ignore) return; // ignore this
    element = mouseinfo.element;
 
+   var pos = SocialCalc.GetElementPositionWithScroll(editor.toplevel);
+   var clientX = event.clientX - pos.left;
+   var clientY = event.clientY - pos.top;
    result = SocialCalc.GridMousePosition(editor, clientX, clientY); // get cell with up
 
    SocialCalc.SetDragAutoRepeat(editor, null); // stop repeating if it was
@@ -1373,25 +1478,11 @@ SocialCalc.ProcessEditorMouseUp = function(e) {
       }
 
    editor.EditorMouseRange(result.coord);
-
-   if (event.stopPropagation) event.stopPropagation(); // DOM Level 2
-   else event.cancelBubble = true; // IE 5+
-   if (event.preventDefault) event.preventDefault(); // DOM Level 2
-   else event.returnValue = false; // IE 5+
-
-   if (document.removeEventListener) { // DOM Level 2
-      document.removeEventListener("mousemove", SocialCalc.ProcessEditorMouseMove, true);
-      document.removeEventListener("mouseup", SocialCalc.ProcessEditorMouseUp, true);
-      }
-   else if (element.detachEvent) { // IE
-      element.detachEvent("onlosecapture", SocialCalc.ProcessEditorMouseUp);
-      element.detachEvent("onmouseup", SocialCalc.ProcessEditorMouseUp);
-      element.detachEvent("onmousemove", SocialCalc.ProcessEditorMouseMove);
-      element.releaseCapture();
-      }
-
    mouseinfo.editor = null;
-
+   SocialCalc.RemoveMouseMoveUp(SocialCalc.ProcessEditorMouseMove,
+				  SocialCalc.ProcessEditorMouseUp,
+				  element,
+				  event);
    return false;
 
    }
@@ -1402,45 +1493,35 @@ SocialCalc.ProcessEditorColsizeMouseDown = function(e, ele, result) {
    var event = e || window.event;
    var mouseinfo = SocialCalc.EditorMouseInfo;
    var editor = mouseinfo.editor;
-   var viewport = SocialCalc.GetViewportInfo();
-   var clientX = event.clientX + viewport.horizontalScroll;
+   var pos = SocialCalc.GetElementPositionWithScroll(editor.toplevel);
+   var clientX = event.clientX - pos.left;
 
    mouseinfo.mouseresizecolnum = result.coltoresize; // remember col being resized
    mouseinfo.mouseresizecol = SocialCalc.rcColname(result.coltoresize);
    mouseinfo.mousedownclientx = clientX;
+   mouseinfo.mousecoltounhide = result.coltounhide;
 
-   var sizedisplay = document.createElement("div");
-   mouseinfo.mouseresizedisplay = sizedisplay;
-   sizedisplay.style.width = "auto";
-   sizedisplay.style.position = "absolute";
-   sizedisplay.style.zIndex = 100;
-   sizedisplay.style.top = (editor.headposition.top+0)+"px";
-   sizedisplay.style.left = editor.colpositions[result.coltoresize]+"px";
-   sizedisplay.innerHTML = '<table cellpadding="0" cellspacing="0"><tr><td style="height:100px;'+
-      'border:1px dashed black;background-color:white;width:' +
-      (editor.context.colwidth[mouseinfo.mouseresizecolnum]-2) + 'px;">&nbsp;</td>'+
-      '<td><div style="font-size:small;color:white;background-color:gray;padding:4px;">'+
-      editor.context.colwidth[mouseinfo.mouseresizecolnum] + '</div></td></tr></table>';
-   SocialCalc.setStyles(sizedisplay.firstChild.lastChild.firstChild.childNodes[0], "filter:alpha(opacity=85);opacity:.85;"); // so no warning msg with Firefox about filter
+   if (result.coltoresize) {
+      var sizedisplay = document.createElement("div");
+      mouseinfo.mouseresizedisplay = sizedisplay;
+      sizedisplay.style.width = "auto";
+      sizedisplay.style.position = "absolute";
+      sizedisplay.style.zIndex = 100;
+      sizedisplay.style.top = editor.headposition.top+"px";
+      sizedisplay.style.left = editor.colpositions[result.coltoresize]+"px";
+      sizedisplay.innerHTML = '<table cellpadding="0" cellspacing="0"><tr><td style="height:100px;'+
+        'border:1px dashed black;background-color:white;width:' +
+        (editor.context.colwidth[mouseinfo.mouseresizecolnum]-2) + 'px;">&nbsp;</td>'+
+        '<td><div style="font-size:small;color:white;background-color:gray;padding:4px;">'+
+        editor.context.colwidth[mouseinfo.mouseresizecolnum] + '</div></td></tr></table>';
+      SocialCalc.setStyles(sizedisplay.firstChild.lastChild.firstChild.childNodes[0], "filter:alpha(opacity=85);opacity:.85;"); // so no warning msg with Firefox about filter
 
-   editor.toplevel.appendChild(sizedisplay);
-
-   // Event code from JavaScript, Flanagan, 5th Edition, pg. 422
-   if (document.addEventListener) { // DOM Level 2 -- Firefox, et al
-      document.addEventListener("mousemove", SocialCalc.ProcessEditorColsizeMouseMove, true); // capture everywhere
-      document.addEventListener("mouseup", SocialCalc.ProcessEditorColsizeMouseUp, true); // capture everywhere
+      editor.toplevel.appendChild(sizedisplay);
       }
-   else if (editor.toplevel.attachEvent) { // IE 5+
-      editor.toplevel.setCapture();
-      editor.toplevel.attachEvent("onmousemove", SocialCalc.ProcessEditorColsizeMouseMove);
-      editor.toplevel.attachEvent("onmouseup", SocialCalc.ProcessEditorColsizeMouseUp);
-      editor.toplevel.attachEvent("onlosecapture", SocialCalc.ProcessEditorColsizeMouseUp);
-      }
-   if (event.stopPropagation) event.stopPropagation(); // DOM Level 2
-   else event.cancelBubble = true; // IE 5+
-   if (event.preventDefault) event.preventDefault(); // DOM Level 2
-   else event.returnValue = false; // IE 5+
-
+    SocialCalc.SetMouseMoveUp( SocialCalc.ProcessEditorColsizeMouseMove,
+			       SocialCalc.ProcessEditorColsizeMouseUp,
+			       editor.toplevel,
+			       event);
    return;
    }
 
@@ -1451,28 +1532,25 @@ SocialCalc.ProcessEditorColsizeMouseMove = function(e) {
    var mouseinfo = SocialCalc.EditorMouseInfo;
    var editor = mouseinfo.editor;
    if (!editor) return; // not us, ignore
-   var viewport = SocialCalc.GetViewportInfo();
-   var clientX = event.clientX + viewport.horizontalScroll;
 
-   var newsize = (editor.context.colwidth[mouseinfo.mouseresizecolnum]-0) + (clientX - mouseinfo.mousedownclientx);
-   if (newsize < SocialCalc.Constants.defaultMinimumColWidth) newsize = SocialCalc.Constants.defaultMinimumColWidth;
+   if (mouseinfo.mouseresizecolnum) {
+      var pos = SocialCalc.GetElementPositionWithScroll(editor.toplevel);
+      var clientX = event.clientX - pos.left;
 
-   var sizedisplay = mouseinfo.mouseresizedisplay;
-//   sizedisplay.firstChild.lastChild.firstChild.childNodes[1].firstChild.innerHTML = newsize+"";
-//   sizedisplay.firstChild.lastChild.firstChild.childNodes[0].firstChild.style.width = (newsize-2)+"px";
-   sizedisplay.innerHTML = '<table cellpadding="0" cellspacing="0"><tr><td style="height:100px;'+
-      'border:1px dashed black;background-color:white;width:' + (newsize-2) + 'px;">&nbsp;</td>'+
-      '<td><div style="font-size:small;color:white;background-color:gray;padding:4px;">'+
-      newsize + '</div></td></tr></table>';
-   SocialCalc.setStyles(sizedisplay.firstChild.lastChild.firstChild.childNodes[0], "filter:alpha(opacity=85);opacity:.85;"); // so no warning msg with Firefox about filter
+      var newsize = (editor.context.colwidth[mouseinfo.mouseresizecolnum]-0) + (clientX - mouseinfo.mousedownclientx);
+      if (newsize < SocialCalc.Constants.defaultMinimumColWidth) newsize = SocialCalc.Constants.defaultMinimumColWidth;
 
-   if (event.stopPropagation) event.stopPropagation(); // DOM Level 2
-   else event.cancelBubble = true; // IE 5+
-   if (event.preventDefault) event.preventDefault(); // DOM Level 2
-   else event.returnValue = false; // IE 5+
-
+      var sizedisplay = mouseinfo.mouseresizedisplay;
+//      sizedisplay.firstChild.lastChild.firstChild.childNodes[1].firstChild.innerHTML = newsize+"";
+//      sizedisplay.firstChild.lastChild.firstChild.childNodes[0].firstChild.style.width = (newsize-2)+"px";
+      sizedisplay.innerHTML = '<table cellpadding="0" cellspacing="0"><tr><td style="height:100px;'+
+          'border:1px dashed black;background-color:white;width:' + (newsize-2) + 'px;">&nbsp;</td>'+
+          '<td><div style="font-size:small;color:white;background-color:gray;padding:4px;">'+
+          newsize + '</div></td></tr></table>';
+      SocialCalc.setStyles(sizedisplay.firstChild.lastChild.firstChild.childNodes[0], "filter:alpha(opacity=85);opacity:.85;"); // so no warning msg with Firefox about filter
+      }
+   SocialCalc.StopPropagation(event);
    return;
-
    }
 
 
@@ -1483,39 +1561,37 @@ SocialCalc.ProcessEditorColsizeMouseUp = function(e) {
    var editor = mouseinfo.editor;
    if (!editor) return; // not us, ignore
    element = mouseinfo.element;
-   var viewport = SocialCalc.GetViewportInfo();
-   var clientX = event.clientX + viewport.horizontalScroll;
+   var pos = SocialCalc.GetElementPositionWithScroll(editor.toplevel);
+   var clientX = event.clientX - pos.left;
+   SocialCalc.RemoveMouseMoveUp(
+       SocialCalc.ProcessEditorColsizeMouseMove,
+       SocialCalc.ProcessEditorColsizeMouseUp, 
+       editor.toplevel,
+       event);
 
-   if (event.stopPropagation) event.stopPropagation(); // DOM Level 2
-   else event.cancelBubble = true; // IE 5+
-   if (event.preventDefault) event.preventDefault(); // DOM Level 2
-   else event.returnValue = false; // IE 5+
-
-   if (document.removeEventListener) { // DOM Level 2
-      document.removeEventListener("mousemove", SocialCalc.ProcessEditorColsizeMouseMove, true);
-      document.removeEventListener("mouseup", SocialCalc.ProcessEditorColsizeMouseUp, true);
+   if (mouseinfo.mousecoltounhide) {
+      editor.EditorScheduleSheetCommands("set "+SocialCalc.rcColname(mouseinfo.mousecoltounhide)+" hide", true, false);
+      /*
+      if (editor.ecell && editor.ecell.col == mouseinfo.mousecoltounhide+1) {
+         editor.MoveECell(SocialCalc.crToCoord(mouseinfo.mousecoltounhide, editor.ecell.row));
+         }*/
       }
-   else if (editor.toplevel.detachEvent) { // IE
-      editor.toplevel.detachEvent("onlosecapture", SocialCalc.ProcessEditorColsizeMouseUp);
-      editor.toplevel.detachEvent("onmouseup", SocialCalc.ProcessEditorColsizeMouseUp);
-      editor.toplevel.detachEvent("onmousemove", SocialCalc.ProcessEditorColsizeMouseMove);
-      editor.toplevel.releaseCapture();
+   else if (mouseinfo.mouseresizecolnum) {
+      var newsize = (editor.context.colwidth[mouseinfo.mouseresizecolnum]-0) + (clientX - mouseinfo.mousedownclientx);
+      if (newsize < SocialCalc.Constants.defaultMinimumColWidth) newsize = SocialCalc.Constants.defaultMinimumColWidth;
+
+      editor.EditorScheduleSheetCommands("set "+mouseinfo.mouseresizecol+" width "+newsize, true, false);
+
+      if (editor.timeout) window.clearTimeout(editor.timeout);
+      editor.timeout = window.setTimeout(SocialCalc.FinishColRowSize, 1); // wait - Firefox 2 has a bug otherwise with next mousedown
       }
-
-   var newsize = (editor.context.colwidth[mouseinfo.mouseresizecolnum]-0) + (clientX - mouseinfo.mousedownclientx);
-   if (newsize < SocialCalc.Constants.defaultMinimumColWidth) newsize = SocialCalc.Constants.defaultMinimumColWidth;
-
-   editor.EditorScheduleSheetCommands("set "+mouseinfo.mouseresizecol+" width "+newsize, true, false);
-
-   if (editor.timeout) window.clearTimeout(editor.timeout);
-   editor.timeout = window.setTimeout(SocialCalc.FinishColsize, 1); // wait - Firefox 2 has a bug otherwise with next mousedown
 
    return false;
 
    }
 
 
-SocialCalc.FinishColsize = function() {
+SocialCalc.FinishColRowSize = function() {
 
    var mouseinfo = SocialCalc.EditorMouseInfo;
    var editor = mouseinfo.editor;
@@ -1533,6 +1609,212 @@ SocialCalc.FinishColsize = function() {
    return;
 
    }
+
+
+SocialCalc.ProcessEditorRowselectMouseDown = function(e, ele, result) {
+    var event = e || window.event;
+    var mouseinfo = SocialCalc.EditorMouseInfo;
+    var editor = mouseinfo.editor;
+    var sheet = SocialCalc.GetSpreadsheetControlObject().sheet;
+    coord1 = SocialCalc.crToCoord(1, result.row)
+    coord2 = SocialCalc.crToCoord(sheet.LastCol(),
+				  result.row)
+    coord3 = SocialCalc.crToCoord(editor.firstscrollingcol,
+				  result.row)
+    editor.RangeAnchor(coord1);
+    editor.RangeExtend(coord2);
+    editor.MoveECell(coord3);
+    SocialCalc.SetMouseMoveUp(SocialCalc.ProcessEditorRowselectMouseMove,
+			      SocialCalc.ProcessEditorRowselectMouseUp,
+			      editor.toplevel,
+			      event);
+}
+
+SocialCalc.ProcessEditorRowselectMouseMove = function(e) {
+    var event = e || window.event;
+    var mouseinfo = SocialCalc.EditorMouseInfo;
+    var editor = mouseinfo.editor;
+    var sheet = SocialCalc.GetSpreadsheetControlObject().sheet;
+
+    if (!editor) return; // not us, ignore
+
+    var pos = SocialCalc.GetElementPositionWithScroll(editor.toplevel);
+    var clientX = event.clientX - pos.left;
+    var clientY = event.clientY - pos.top;
+    result = SocialCalc.GridMousePosition(editor, clientX, clientY);
+    coord2 = SocialCalc.crToCoord(sheet.LastCol(),
+				  result.row)
+    coord3 = SocialCalc.crToCoord(editor.firstscrollingcol,
+				  result.row)
+    editor.RangeExtend(coord2);
+    editor.MoveECell(coord3);
+    return;
+}
+
+SocialCalc.ProcessEditorRowselectMouseUp = function(e) {
+    var event = e || window.event;
+    var mouseinfo = SocialCalc.EditorMouseInfo;
+    var editor = mouseinfo.editor;
+    if (!editor) return; // not us, ignore
+    SocialCalc.RemoveMouseMoveUp(SocialCalc.ProcessEditorRowselectMouseMove,
+				 SocialCalc.ProcessEditorRowselectMouseUp,
+				 editor.toplevel,
+				 e);
+    return;
+}
+
+SocialCalc.ProcessEditorColselectMouseDown = function(e, ele, result) {
+    var event = e || window.event;
+    var mouseinfo = SocialCalc.EditorMouseInfo;
+    var editor = mouseinfo.editor;
+    var sheet = SocialCalc.GetSpreadsheetControlObject().sheet;
+
+    coord1 = SocialCalc.crToCoord(result.col, 1)
+    coord2 = SocialCalc.crToCoord(result.col,
+				  sheet.LastRow())
+    coord3 = SocialCalc.crToCoord(result.col,
+				  editor.firstscrollingrow)
+    
+    editor.RangeAnchor(coord1);
+    editor.RangeExtend(coord2);
+    editor.MoveECell(coord3);
+    SocialCalc.SetMouseMoveUp(SocialCalc.ProcessEditorColselectMouseMove,
+			      SocialCalc.ProcessEditorColselectMouseUp,
+			      editor.toplevel,
+			      event);
+
+}
+
+SocialCalc.ProcessEditorColselectMouseMove = function(e) {
+    var event = e || window.event;
+    var mouseinfo = SocialCalc.EditorMouseInfo;
+    var editor = mouseinfo.editor;
+    var sheet = SocialCalc.GetSpreadsheetControlObject().sheet;
+
+    if (!editor) return; // not us, ignore
+
+    var pos = SocialCalc.GetElementPositionWithScroll(editor.toplevel);
+    var clientX = event.clientX - pos.left;
+    var clientY = event.clientY - pos.top;
+    result = SocialCalc.GridMousePosition(editor, clientX, clientY);
+    coord2 = SocialCalc.crToCoord(result.col,
+				  sheet.LastRow())
+    coord3 = SocialCalc.crToCoord(result.col,
+				  editor.firstscrollingrow)
+    editor.RangeExtend(coord2);
+    editor.MoveECell(coord3);
+    return;
+}
+
+SocialCalc.ProcessEditorColselectMouseUp = function(e) {
+    var event = e || window.event;
+    var mouseinfo = SocialCalc.EditorMouseInfo;
+    var editor = mouseinfo.editor;
+    if (!editor) return; // not us, ignore
+    SocialCalc.RemoveMouseMoveUp(SocialCalc.ProcessEditorColselectMouseMove,
+				 SocialCalc.ProcessEditorColselectMouseUp,
+				 editor.toplevel,
+				 e);
+    return;
+}
+
+SocialCalc.ProcessEditorRowsizeMouseDown = function(e, ele, result) {
+
+   var event = e || window.event;
+   var mouseinfo = SocialCalc.EditorMouseInfo;
+   var editor = mouseinfo.editor;
+   var pos = SocialCalc.GetSpreadsheetControlObject().spreadsheetDiv.firstChild.offsetHeight;
+   var clientY = event.clientY - pos;
+
+   mouseinfo.mouseresizerownum = result.rowtoresize; // remember col being resized
+   mouseinfo.mouseresizerow = result.rowtoresize;
+   mouseinfo.mousedownclienty = clientY;
+   mouseinfo.mouserowtounhide = result.rowtounhide;
+
+  if (result.rowtoresize) {
+    var sizedisplay = document.createElement("div");
+    mouseinfo.mouseresizedisplay = sizedisplay;
+    sizedisplay.style.width = editor.context.totalwidth+"px";
+    sizedisplay.style.height = editor.rowpositions[result.rowtoresize]+"px";
+    sizedisplay.style.position = "absolute";
+    sizedisplay.style.zIndex = 100;
+    sizedisplay.style.top = editor.rowpositions[result.rowtoresize]+"px";
+    sizedisplay.style.left = editor.headposition.left+"px";
+    sizedisplay.innerHTML = '<table cellpadding="0" cellspacing="0"><tr><td style="width:100px' +
+      'border:1px dashed black;background-color:white;height:' +
+      (editor.context.rowheight[mouseinfo.mouseresizerownum]-2) + 'px;">&nbsp;</td>'+
+      '<td><div style="font-size:small;color:white;background-color:gray;padding:4px;">'+
+      editor.context.rowheight[mouseinfo.mouseresizerownum] + '</div></td></tr></table>';
+    SocialCalc.setStyles(sizedisplay.firstChild.lastChild.firstChild.childNodes[0], "filter:alpha(opacity=85);opacity:.5;"); // so no warning msg with Firefox about filter
+
+    editor.toplevel.appendChild(sizedisplay);
+  }
+    SocialCalc.SetMouseMoveUp(SocialCalc.ProcessEditorRowsizeMouseMove,
+			      SocialCalc.ProcessEditorRowsizeMouseUp,
+			      editor.toplevel,
+			      event);
+    return;
+   }
+
+
+SocialCalc.ProcessEditorRowsizeMouseMove = function(e) {
+
+   var event = e || window.event;
+   var mouseinfo = SocialCalc.EditorMouseInfo;
+   var editor = mouseinfo.editor;
+   if (!editor) return; // not us, ignore
+
+  if (mouseinfo.mouseresizerownum) {
+    var pos = SocialCalc.GetSpreadsheetControlObject().spreadsheetDiv.firstChild.offsetHeight;
+    var clientY = event.clientY - pos;
+
+    var newsize = (editor.context.rowheight[mouseinfo.mouseresizerownum]-0) + (clientY - mouseinfo.mousedownclienty);
+    if (newsize < SocialCalc.Constants.defaultAssumedRowHeight) newsize = SocialCalc.Constants.defaultAssumedRowHeight;
+
+    var sizedisplay = mouseinfo.mouseresizedisplay;
+    sizedisplay.innerHTML = '<table cellpadding="0" cellspacing="0"><tr><td style="width:100px;'+
+      'border:1px dashed black;background-color:white;height:' + (newsize-2) + 'px;">&nbsp;</td>'+
+      '<td><div style="font-size:small;color:white;background-color:gray;padding:4px;">'+
+      newsize + '</div></td></tr></table>';
+    SocialCalc.setStyles(sizedisplay.firstChild.lastChild.firstChild.childNodes[0], "filter:alpha(opacity=85);opacity:.5;"); // so no warning msg with Firefox about filter
+  }
+
+   SocialCalc.StopPropagation(event);
+   return;
+
+   }
+
+
+SocialCalc.ProcessEditorRowsizeMouseUp = function(e) {
+
+   var event = e || window.event;
+   var mouseinfo = SocialCalc.EditorMouseInfo;
+   var editor = mouseinfo.editor;
+   if (!editor) return; // not us, ignore
+   element = mouseinfo.element;
+   var pos = SocialCalc.GetSpreadsheetControlObject().spreadsheetDiv.firstChild.offsetHeight;
+   var clientY = event.clientY - pos;
+   SocialCalc.RemoveMouseMoveUp(
+       SocialCalc.ProcessEditorRowsizeMouseMove,
+       SocialCalc.ProcessEditorRowsizeMouseUp,
+       editor.toplevel,
+       event);
+   if (mouseinfo.mouserowtounhide) {
+      editor.EditorScheduleSheetCommands("set "+mouseinfo.mouserowtounhide+" hide", true, false);
+      }
+   else if (mouseinfo.mouseresizerownum) {
+     var newsize = (editor.context.rowheight[mouseinfo.mouseresizerownum]-0) + (clientY - mouseinfo.mousedownclienty);
+     if (newsize < SocialCalc.Constants.defaultAssumedRowHeight) newsize = SocialCalc.Constants.defaultAssumedRowHeight;
+     editor.EditorScheduleSheetCommands("set "+mouseinfo.mouseresizerownum+" height "+newsize, true, false);
+
+     if (editor.timeout) window.clearTimeout(editor.timeout);
+     editor.timeout = window.setTimeout(SocialCalc.FinishColRowSize, 1); // wait - Firefox 2 has a bug otherwise with next mousedown
+   }
+
+   return false;
+
+   }
+
 
 //
 // Handle auto-repeat of dragging the cursor into the borders of the sheet
@@ -1683,10 +1965,6 @@ SocialCalc.ProcessEditorDblClick = function(e) {
 
    var event = e || window.event;
 
-   var viewport = SocialCalc.GetViewportInfo();
-   var clientX = event.clientX + viewport.horizontalScroll;
-   var clientY = event.clientY + viewport.verticalScroll;
-
    var mouseinfo = SocialCalc.EditorMouseInfo;
    var ele = event.target || event.srcElement; // source object is often within what we want
    var mobj;
@@ -1703,6 +1981,9 @@ SocialCalc.ProcessEditorDblClick = function(e) {
 
    editor = mobj.editor;
 
+   var pos = SocialCalc.GetElementPositionWithScroll(editor.toplevel);
+   var clientX = event.clientX - pos.left;
+   var clientY = event.clientY - pos.top;
    result = SocialCalc.GridMousePosition(editor, clientX, clientY);
    if (!result || !result.coord) return; // not within cell area - ignore
 
@@ -1723,12 +2004,7 @@ SocialCalc.ProcessEditorDblClick = function(e) {
       default:
          break;
       }
-
-   if (event.stopPropagation) event.stopPropagation(); // DOM Level 2
-   else event.cancelBubble = true; // IE 5+
-   if (event.preventDefault) event.preventDefault(); // DOM Level 2
-   else event.returnValue = false; // IE 5+
-
+   SocialCalc.StopPropagation(event);
    return;
 
    }
@@ -1743,7 +2019,6 @@ SocialCalc.EditorOpenCellEdit = function(editor) {
    if (editor.inputBox.element.disabled) return true; // multi-line: ignore
    editor.inputBox.ShowInputBox(true);
    editor.inputBox.Focus();
-   editor.state = "inputboxdirect";
    editor.inputBox.SetText("");
    editor.inputBox.DisplayCellContents();
    editor.inputBox.Select("end");
@@ -1780,7 +2055,7 @@ SocialCalc.EditorProcessKey = function(editor, ch, e) {
             return !result;
             }
          if (ch=="[del]" || ch=="[backspace]") {
-            if (!editor.noEdit) {
+            if (!editor.noEdit && !editor.ECellReadonly()) {
                editor.EditorApplySetCommandsToRange("empty", "");
                }
             break;
@@ -1797,7 +2072,7 @@ SocialCalc.EditorProcessKey = function(editor, ch, e) {
             }
 
          if (ch=="[f2]") {
-            if (editor.noEdit) return true;
+            if (editor.noEdit || editor.ECellReadonly()) return true;
             SocialCalc.EditorOpenCellEdit(editor);
             return false;
             }
@@ -1812,6 +2087,7 @@ SocialCalc.EditorProcessKey = function(editor, ch, e) {
             }
          if (!editor.ecell) return true; // no ecell
          if (!editor.inputBox) return true; // no inputBox so no editing
+         if (editor.ECellReadonly()) return true;
          editor.inputBox.element.disabled = false; // make sure editable
          editor.state = "input";
          editor.inputBox.ShowInputBox(true);
@@ -1933,7 +2209,7 @@ SocialCalc.EditorAddToInput = function(editor, str, prefix) {
 
    var wval = editor.workingvalues;
 
-   if (editor.noEdit) return;
+   if (editor.noEdit || editor.ECellReadonly()) return;
 
    switch (editor.state) {
       case "start":
@@ -1997,12 +2273,16 @@ SocialCalc.EditorSaveEdit = function(editor, text) {
    else if (fch=="'") {
       type = "text t";
       value = value.substring(1);
+      valueinfo = SocialCalc.DetermineValueType(value); // determine type again
+      if (valueinfo.type.charAt(0)=="t") {
+         type = "text "+valueinfo.type;
+         }
       }
    else if (value.length==0) {
       type = "empty";
       }
    else {
-      valueinfo = SocialCalc.DetermineValueType(value)
+      valueinfo = SocialCalc.DetermineValueType(value);
       if (valueinfo.type=="n" && value==(valueinfo.value+"")) { // see if don't need "constant"
          type = "value n";
          }
@@ -2023,10 +2303,48 @@ SocialCalc.EditorSaveEdit = function(editor, text) {
 
    cmdline = "set "+wval.ecoord+" "+type+" "+value;
    editor.EditorScheduleSheetCommands(cmdline, true, false);
+   // eddy EditorSaveEdit {
+   if(typeof sheetobj.ioEventTree === 'undefined') return;	
+   if(typeof sheetobj.ioParameterList === 'undefined') return;
+   if(typeof sheetobj.ioEventTree[wval.ecoord] !== 'undefined') {
+	   SocialCalc.EditedTriggerCell(sheetobj.ioEventTree[wval.ecoord], wval.ecoord, editor, sheetobj);   		
+   }
+   		
+   // }
 
    return;
 
    }
+
+
+// Eddy EditedTriggerCell {
+
+
+SocialCalc.EditedTriggerCell  = function(actionFormulaCells, editedCellRef, editor, sheet) {
+ 
+	 for(var actionCellId in actionFormulaCells) {
+		 
+			var parameters = sheet.ioParameterList[actionCellId];
+            if(typeof parameters === 'undefined') continue;	
+			
+			switch(parameters.function_name) {
+				  case "EMAILONEDIT" :
+				  case "EMAILONEDITIF" :
+					  cmdline = "setemailparameters "+actionCellId+ " " + editedCellRef;
+					// hold off on commands until recalc done
+				      editor.deferredEmailCommands.push({cmdstr: cmdline, saveundo: false});
+//					  editor.EditorScheduleSheetCommands(cmdline, false, false);
+					  break;
+			}
+	 }
+	
+}	
+// } Eddy EditedTriggerCell
+
+
+
+
+
 
 //
 // SocialCalc.EditorApplySetCommandsToRange(editor, cmd)
@@ -2061,10 +2379,10 @@ SocialCalc.EditorProcessMouseWheel = function(event, delta, mousewheelinfo, wobj
    if (wobj.functionobj.editor.busy) return; // ignore if busy
 
    if (delta > 0) {
-      wobj.functionobj.editor.ScrollRelative(true, -1);
+      wobj.functionobj.editor.ScrollRelative(true, Math.floor(-delta * 1.5));
       }
    if (delta < 0) {
-      wobj.functionobj.editor.ScrollRelative(true, +1);
+      wobj.functionobj.editor.ScrollRelative(true, Math.ceil(-delta * 1.5));
       }
 
    }
@@ -2081,7 +2399,7 @@ SocialCalc.EditorProcessMouseWheel = function(event, delta, mousewheelinfo, wobj
 
 SocialCalc.GridMousePosition = function(editor, clientX, clientY) { 
 
-   var row, col, colpane;
+   var row, rowpane, col, colpane, rowtoresize, coltoresize;
    var result = {};
 
    for (row=1; row<editor.rowpositions.length; row++) {
@@ -2104,12 +2422,76 @@ SocialCalc.GridMousePosition = function(editor, clientX, clientY) {
       if (clientX < editor.headposition.left && clientX >= editor.gridposition.left) {
          result.rowheader = true;
          result.distance = editor.headposition.left - clientX;
+         result.rowtoresize = false;
+         result.rowselect = false;
+
+         // resize bar
+         for (rowtoresize=1; rowtoresize<editor.rowpositions.length; rowtoresize++) {
+            if (!editor.rowheight[rowtoresize]) continue;
+            if (((editor.rowpositions[rowtoresize] + editor.rowheight[rowtoresize]) - 3) <= clientY
+               && ((editor.rowpositions[rowtoresize] + editor.rowheight[rowtoresize]) + 3) >= clientY) {
+               result.rowtoresize = rowtoresize;
+               break;
+            }
+         }
+
+         // Handle unhide row.
+         if (unhide = editor.context.rowunhidetop[row]) {
+           pos = SocialCalc.GetElementPosition(unhide);
+           if (clientX >= pos.left && clientX < pos.left+unhide.offsetWidth
+               && clientY >= (editor.rowpositions[row] + editor.rowheight[row] - unhide.offsetHeight)
+               && clientY < (editor.rowpositions[row] + editor.rowheight[row])) {
+             result.rowtounhide = row+1;
+           }
+         }
+         if (unhide = editor.context.rowunhidebottom[row]) {
+           pos = SocialCalc.GetElementPosition(unhide);
+           if (clientX >= pos.left && clientX < pos.left+unhide.offsetWidth
+               && clientY >= (editor.rowpositions[row])
+               && clientY < (editor.rowpositions[row] + unhide.offsetHeight)) {
+             result.rowtounhide = row-1;
+           }
+         }
+         for (rowpane=0; rowpane<editor.context.rowpanes.length; rowpane++) {
+           if (result.rowtoresize >= editor.context.rowpanes[rowpane].first &&
+             result.rowtoresize <= editor.context.rowpanes[rowpane].last) { // visible column
+             return result;
+           }
+         }
+         delete result.rowtoresize;
+         result.rowselect = true;
          return result;
          }
       else if (clientY < editor.headposition.top && clientY > editor.gridposition.top) { // > because of sizing row
          result.colheader = true;
          result.distance = editor.headposition.top - clientY;
-         result.coltoresize = col-(editor.colpositions[col]+editor.colwidth[col]/2>clientX?1:0) || 1;
+         result.coltoresize = false;
+	 result.colselect = false;
+
+         // resize bar
+         for (coltoresize=1; coltoresize<editor.colpositions.length; coltoresize++) {
+            if (!editor.colwidth[coltoresize]) continue;
+            if (((editor.colpositions[coltoresize] + editor.colwidth[coltoresize]) - 3) <= clientX
+               && ((editor.colpositions[coltoresize] + editor.colwidth[coltoresize]) + 3) >= clientX) {
+               result.coltoresize = coltoresize;
+               break;
+            }
+         }
+
+         // Handle unhide column.
+         if (unhide = editor.context.colunhideleft[col]) {
+            pos = SocialCalc.GetElementPosition(unhide);
+            if (clientX >= pos.left && clientX < pos.left+unhide.offsetWidth && clientY >= pos.top  && clientY < pos.top+unhide.offsetHeight) {
+               result.coltounhide = col+1;
+               }
+            }
+         if (unhide = editor.context.colunhideright[col]) {
+            pos = SocialCalc.GetElementPosition(unhide);
+            if (clientX >= pos.left && clientX < pos.left+unhide.offsetWidth && clientY >= pos.top  && clientY < pos.top+unhide.offsetHeight) {
+               result.coltounhide = col-1;
+               }
+            }
+
          for (colpane=0; colpane<editor.context.colpanes.length; colpane++) {
             if (result.coltoresize >= editor.context.colpanes[colpane].first &&
                 result.coltoresize <= editor.context.colpanes[colpane].last) { // visible column
@@ -2117,6 +2499,7 @@ SocialCalc.GridMousePosition = function(editor, clientX, clientY) {
                }
             }
          delete result.coltoresize;
+         result.colselect = true;
          return result;
          }
       else if (clientX >= editor.verticaltablecontrol.controlborder) {
@@ -2205,6 +2588,7 @@ SocialCalc.MoveECellWithKey = function(editor, ch) {
 
    var coord, row, col, cell;
    var shifted = false;
+   var delta = 1;
 
    if (!editor.ecell) {
       return null;
@@ -2225,18 +2609,21 @@ SocialCalc.MoveECellWithKey = function(editor, ch) {
          break;
       case "[aup]":
          row--;
+         delta = -1;
          break;
       case "[pgdn]":
          row += editor.pageUpDnAmount - 1 + ((cell && cell.rowspan) || 1);
          break;
       case "[pgup]":
          row -= editor.pageUpDnAmount;
+         delta = -1;
          break;
       case "[aright]":
          col += (cell && cell.colspan) || 1;
          break;
       case "[aleft]":
          col--;
+         delta = -1;
          break;
       case "[home]":
          row = 1;
@@ -2246,6 +2633,28 @@ SocialCalc.MoveECellWithKey = function(editor, ch) {
          return null;
       }
 
+   // Adjust against usermax col and row.
+   if (editor.context.sheetobj.attribs.usermaxcol) col = Math.min(editor.context.sheetobj.attribs.usermaxcol, col);
+   if (editor.context.sheetobj.attribs.usermaxrow) row = Math.min(editor.context.sheetobj.attribs.usermaxrow, row);
+
+   // Handle hidden column.
+   while (editor.context.sheetobj.colattribs.hide[SocialCalc.rcColname(col)] == "yes") {
+      col += delta;
+      if (col < 1) {
+         delta = -delta;
+         col = 1;
+         }
+      }
+   
+   // Handle hidden row.
+   while (editor.context.sheetobj.rowattribs.hide[row] == "yes") {
+      row += delta;
+      if (row < 1) {
+         delta = -delta;
+         row = 1;
+         }
+      }
+   
    if (!editor.range.hasrange) {
       if (shifted)
          editor.RangeAnchor();
@@ -2276,6 +2685,14 @@ SocialCalc.MoveECell = function(editor, newcell) {
    var cell, f;
 
    var highlights = editor.context.highlights;
+   
+   // adjust against user max col/row
+   var ecell = SocialCalc.coordToCr(newcell);
+   if (editor.context.sheetobj.attribs.usermaxcol && ecell.col > editor.context.sheetobj.attribs.usermaxcol)
+      ecell.col = editor.context.sheetobj.attribs.usermaxcol;
+   if (editor.context.sheetobj.attribs.usermaxrow && ecell.row > editor.context.sheetobj.attribs.usermaxrow)
+      ecell.row = editor.context.sheetobj.attribs.usermaxrow;
+   newcell = SocialCalc.crToCoord(ecell.col, ecell.row);
 
    if (editor.ecell) {
       if (editor.ecell.coord==newcell) return newcell; // already there - don't do anything and don't tell anybody
@@ -2294,6 +2711,8 @@ SocialCalc.MoveECell = function(editor, newcell) {
    editor.ecell = SocialCalc.coordToCr(newcell);
    editor.ecell.coord = newcell;
    cell=SocialCalc.GetEditorCellElement(editor, editor.ecell.row, editor.ecell.col);
+   // eddy MoveECell {
+   // }
    highlights[newcell] = "cursor";
 
    for (f in editor.MoveECellCallback) { // let others know
@@ -2326,18 +2745,18 @@ SocialCalc.EnsureECellVisible = function(editor) {
 
    if (editor.ecell.row > editor.lastnonscrollingrow) {
       if (editor.ecell.row < editor.firstscrollingrow) {
-         vamount = editor.ecell.row - editor.firstscrollingrow;
+         vamount = editor.ecell.row - editor.firstscrollingrow - Math.floor((editor.lastvisiblerow - editor.firstscrollingrow)/2);
          }
-      else if (editor.ecell.row > editor.lastvisiblerow) {
-         vamount = editor.ecell.row - editor.lastvisiblerow;
+      else if (editor.ecell.row + 1 > editor.lastvisiblerow) {
+         vamount = editor.ecell.row - editor.lastvisiblerow + Math.floor((editor.lastvisiblerow - editor.firstscrollingrow)/2);
          }
       }   
    if (editor.ecell.col > editor.lastnonscrollingcol) {
       if (editor.ecell.col < editor.firstscrollingcol) {
-         hamount = editor.ecell.col - editor.firstscrollingcol;
+         hamount = editor.ecell.col - editor.firstscrollingcol - Math.floor((editor.lastvisiblecol - editor.firstscrollingcol)/2);
          }
-      else if (editor.ecell.col > editor.lastvisiblecol) {
-        hamount = editor.ecell.col- editor.lastvisiblecol;
+      else if (editor.ecell.col + 1 > editor.lastvisiblecol) {
+        hamount = editor.ecell.col- editor.lastvisiblecol + Math.floor((editor.lastvisiblecol - editor.firstscrollingcol)/2);
          }
       }
 
@@ -2386,6 +2805,9 @@ SocialCalc.UpdateCellCSS = function(editor, cell, row, col) {
 
 SocialCalc.SetECellHeaders = function(editor, selected) {
 
+   // eddy SetECellHeaders {
+   if(editor.context.showRCHeaders === false) return;
+   // } SetECellHeaders
    var ecell = editor.ecell;
    var context = editor.context;
 
@@ -2396,16 +2818,28 @@ SocialCalc.SetECellHeaders = function(editor, selected) {
 
    if (!ecell) return;
 
+   // Handle ecell on a hidden column/row.
+   while (context.sheetobj.colattribs.hide[SocialCalc.rcColname(ecell.col)] == "yes") {
+      ecell.col++;
+      }
+   while (context.sheetobj.rowattribs.hide[ecell.row] == "yes") {
+      ecell.row++;
+      }
+
+   ecell.coord = SocialCalc.crToCoord(ecell.col, ecell.row);
+
    for (rowpane=0; rowpane<context.rowpanes.length; rowpane++) {
       first = context.rowpanes[rowpane].first;
       last = context.rowpanes[rowpane].last;
       if (ecell.row >= first && ecell.row <= last) {
-         headercell = editor.fullgrid.childNodes[1].childNodes[2+rowindex+ecell.row-first].childNodes[0];
-         if (headercell) {
-            if (context.classnames) headercell.className=context.classnames[selected+"rowname"];
-            if (context.explicitStyles) headercell.style.cssText=context.explicitStyles[selected+"rowname"];
-            headercell.style.verticalAlign="top"; // to get around Safari making top of centered row number be
-                                                  // considered top of row (and can't get <row> position in Safari)
+         if (editor.fullgrid !== null) {
+            headercell = editor.fullgrid.childNodes[1].childNodes[2+rowindex+ecell.row-first].childNodes[0];
+            if (headercell) {
+               if (context.classnames) headercell.className=context.classnames[selected+"rowname"];
+               if (context.explicitStyles) headercell.style.cssText=context.explicitStyles[selected+"rowname"];
+               headercell.style.verticalAlign="top"; // to get around Safari making top of centered row number be
+                                                     // considered top of row (and can't get <row> position in Safari)
+               }
             }
          }
       rowindex += last - first + 1 + 1;
@@ -2415,14 +2849,35 @@ SocialCalc.SetECellHeaders = function(editor, selected) {
       first = context.colpanes[colpane].first;
       last = context.colpanes[colpane].last;
       if (ecell.col >= first && ecell.col <= last) {
-         headercell = editor.fullgrid.childNodes[1].childNodes[1].childNodes[1+colindex+ecell.col-first];
-         if (headercell) {
-            if (context.classnames) headercell.className=context.classnames[selected+"colname"];
-            if (context.explicitStyles) headercell.style.cssText=context.explicitStyles[selected+"colname"];
+         if (editor.fullgrid !== null) {
+            headercell = editor.fullgrid.childNodes[1].childNodes[1].childNodes[1+colindex+ecell.col-first];
+            if (headercell) {
+               if (context.classnames) headercell.className=context.classnames[selected+"colname"];
+               if (context.explicitStyles) headercell.style.cssText=context.explicitStyles[selected+"colname"];
+               }
             }
          }
       colindex += last - first + 1 + 1;
       }
+   }
+
+//
+// ECellReadonly(editor, ecoord)
+//
+// Returns true if ecoord is readonly (or ecell if missing).
+//
+
+SocialCalc.ECellReadonly = function(editor, ecoord) {
+   
+   if (!ecoord && editor.ecell) {
+      ecoord = editor.ecell.coord; 
+      }
+
+   if (!ecoord) return false;
+
+   var cell = editor.context.sheetobj.cells[ecoord];
+   return cell && cell.readonly;
+
    }
 
 //
@@ -2688,7 +3143,7 @@ SocialCalc.Range2Remove = function(editor) {
 
 SocialCalc.FitToEditTable = function(editor) {
 
-   var colnum, colname, colwidth, totalwidth, totalrows, rowpane, needed;
+   var colnum, colname, colwidth, totalwidth, totalrows, rownum, rowpane, needed;
 
    var context=editor.context;
    var sheetobj=context.sheetobj;
@@ -2700,32 +3155,41 @@ SocialCalc.FitToEditTable = function(editor) {
    for (colpane=0; colpane<context.colpanes.length-1; colpane++) { // Get width of all but last pane
       for (colnum=context.colpanes[colpane].first; colnum<=context.colpanes[colpane].last; colnum++) {
          colname=SocialCalc.rcColname(colnum);
-         colwidth = sheetobj.colattribs.width[colname] || sheetobj.attribs.defaultcolwidth || SocialCalc.Constants.defaultColWidth;
-         if (colwidth=="blank" || colwidth=="auto") colwidth="";
-         totalwidth+=(colwidth && ((colwidth-0)>0)) ? (colwidth-0) : 10;
+         if (sheetobj.colattribs.hide[colname] != "yes") {
+            colwidth = sheetobj.colattribs.width[colname] || sheetobj.attribs.defaultcolwidth || SocialCalc.Constants.defaultColWidth;
+            if (colwidth=="blank" || colwidth=="auto") colwidth="";
+            totalwidth+=(colwidth && ((colwidth-0)>0)) ? (colwidth-0) : 10;
+            }
          }
       }
 
    for (colnum=context.colpanes[colpane].first; colnum<=10000; colnum++) { //!!! max for safety, but makes that col max!!!
       colname=SocialCalc.rcColname(colnum);
-      colwidth = sheetobj.colattribs.width[colname] || sheetobj.attribs.defaultcolwidth || SocialCalc.Constants.defaultColWidth;
-      if (colwidth=="blank" || colwidth=="auto") colwidth="";
-      totalwidth+=(colwidth && ((colwidth-0)>0)) ? (colwidth-0) : 10;
+      if (sheetobj.colattribs.hide[colname] != "yes") {
+         colwidth = sheetobj.colattribs.width[colname] || sheetobj.attribs.defaultcolwidth || SocialCalc.Constants.defaultColWidth;
+         if (colwidth=="blank" || colwidth=="auto") colwidth="";
+         totalwidth+=(colwidth && ((colwidth-0)>0)) ? (colwidth-0) : 10;
+         }
       if (totalwidth > editor.tablewidth) break;
       }
 
-   context.colpanes[colpane].last = colnum;
+   context.colpanes[colpane].last = context.sheetobj.attribs.usermaxcol || colnum;
 
    // Calculate row height data
 
    totalrows=context.showRCHeaders ? 1 : 0;
    for (rowpane=0; rowpane<context.rowpanes.length-1; rowpane++) { // count all panes but last one
       totalrows += context.rowpanes[rowpane].last - context.rowpanes[rowpane].first + 1;
+      for (rownum=context.rowpanes[rowpane].first; rownum<=context.rowpanes[rowpane].last; rownum++) {
+         if (sheetobj.rowattribs.hide[rownum] == "yes") {
+            totalrows--;
+            }
+         }
       }
 
    needed = editor.tableheight - totalrows * context.pixelsPerRow; // estimate amount needed
 
-   context.rowpanes[rowpane].last = context.rowpanes[rowpane].first + Math.floor(needed / context.pixelsPerRow) + 1;
+   context.rowpanes[rowpane].last = context.sheetobj.attribs.usermaxrow || context.rowpanes[rowpane].first + Math.floor(needed / context.pixelsPerRow) + 1;
 
    }
 
@@ -2744,8 +3208,11 @@ SocialCalc.CalculateEditorPositions = function(editor) {
    var rowpane, colpane, i;
 
    editor.gridposition = SocialCalc.GetElementPosition(editor.griddiv);
-   editor.headposition =
-      SocialCalc.GetElementPosition(editor.griddiv.firstChild.lastChild.childNodes[2].childNodes[1]); // 3rd tr 2nd td
+   
+   var element = editor.griddiv.firstChild.lastChild.childNodes[1].childNodes[0]; // 2nd tr 1st td
+   editor.headposition = SocialCalc.GetElementPosition(element);
+   editor.headposition.left += element.offsetWidth;
+   editor.headposition.top += element.offsetHeight;
 
    editor.rowpositions = [];
    for (rowpane=0; rowpane<editor.context.rowpanes.length; rowpane++) {
@@ -2766,10 +3233,16 @@ SocialCalc.CalculateEditorPositions = function(editor) {
    editor.lastvisiblecol = i-1;
 
    editor.firstscrollingrow = editor.context.rowpanes[editor.context.rowpanes.length-1].first;
+   while (editor.context.sheetobj.rowattribs.hide[editor.firstscrollingrow] == "yes") {
+      editor.firstscrollingrow++;
+      }
    editor.firstscrollingrowtop = editor.rowpositions[editor.firstscrollingrow] || editor.headposition.top;
    editor.lastnonscrollingrow = editor.context.rowpanes.length-1 > 0 ?
          editor.context.rowpanes[editor.context.rowpanes.length-2].last : 0;
    editor.firstscrollingcol = editor.context.colpanes[editor.context.colpanes.length-1].first;
+   while (editor.context.sheetobj.colattribs.hide[SocialCalc.rcColname(editor.firstscrollingcol)] == "yes") {
+      editor.firstscrollingcol++;
+      }
    editor.firstscrollingcolleft = editor.colpositions[editor.firstscrollingcol] || editor.headposition.left;
    editor.lastnonscrollingcol = editor.context.colpanes.length-1 > 0 ?
          editor.context.colpanes[editor.context.colpanes.length-2].last : 0;
@@ -2792,17 +3265,14 @@ SocialCalc.ScheduleRender = function(editor) {
    if (editor.timeout) window.clearTimeout(editor.timeout); // in case called more than once, just use latest
 
    SocialCalc.EditorSheetStatusCallback(null, "schedrender", null, editor);
-   SocialCalc.EditorStepInfo.editor = editor;
-   editor.timeout = window.setTimeout(SocialCalc.DoRenderStep, 1);
+   editor.timeout = window.setTimeout(function() { SocialCalc.DoRenderStep(editor); }, 1);
 
    }
 
-// DoRenderStep()
+// DoRenderStep(editor)
 //
 
-SocialCalc.DoRenderStep = function() {
-
-   var editor = SocialCalc.EditorStepInfo.editor;
+SocialCalc.DoRenderStep = function(editor) {
 
    editor.timeout = null;
 
@@ -2812,7 +3282,7 @@ SocialCalc.DoRenderStep = function() {
 
    SocialCalc.EditorSheetStatusCallback(null, "schedposcalc", null, editor);
 
-   editor.timeout = window.setTimeout(SocialCalc.DoPositionCalculations, 1);
+   editor.timeout = window.setTimeout(function() { SocialCalc.DoPositionCalculations(editor); }, 1);
 
    }
 
@@ -2822,11 +3292,9 @@ SocialCalc.DoRenderStep = function() {
 
 SocialCalc.SchedulePositionCalculations = function(editor) {
 
-   SocialCalc.EditorStepInfo.editor = editor;
-
    SocialCalc.EditorSheetStatusCallback(null, "schedposcalc", null, editor);
 
-   editor.timeout = window.setTimeout(SocialCalc.DoPositionCalculations, 1);
+   editor.timeout = window.setTimeout(function() { SocialCalc.DoPositionCalculations(editor); }, 1);
 
    }
 
@@ -2837,9 +3305,7 @@ SocialCalc.SchedulePositionCalculations = function(editor) {
 // Note: Only call this after the DOM objects have been modified and rendered!
 //
 
-SocialCalc.DoPositionCalculations = function() {
-
-   var editor = SocialCalc.EditorStepInfo.editor;
+SocialCalc.DoPositionCalculations = function(editor) {
 
    editor.timeout = null;
 
@@ -2871,8 +3337,11 @@ SocialCalc.CalculateRowPositions = function(editor, panenum, positions, sizes) {
 
    var tbodyobj;
 
-   if (!context.showRCHeaders) throw("Needs showRCHeaders=true");
-
+   // eddy CalculateRowPositions {
+//   if (!context.showRCHeaders) throw("Needs showRCHeaders=true");
+   if (!context.showRCHeaders) return;
+   // } CalculateRowPositions
+   
    tbodyobj=editor.fullgrid.lastChild;
 
    // Calculate start of this pane as row in this table:
@@ -2886,14 +3355,10 @@ SocialCalc.CalculateRowPositions = function(editor, panenum, positions, sizes) {
    for (rownum=context.rowpanes[rowpane].first; rownum<=context.rowpanes[rowpane].last; rownum++) {
       trowobj = tbodyobj.childNodes[toprow+offset];
       offset++;
-      cellposition = SocialCalc.GetElementPosition(trowobj.firstChild);
-
-// Safari has problem: If a cell in the row is high, cell 1 is centered and it returns top of centered part 
-// but if you get position of row element, it always returns the same value (not the row's)
-// So we require row number to be vertical aligned to top
+      if (!trowobj) { continue; }
 
       if (!positions[rownum]) {
-         positions[rownum] = cellposition.top; // first one takes precedence
+         positions[rownum] = trowobj.firstChild.offsetTop;
          sizes[rownum] = trowobj.firstChild.offsetHeight;
          }
       }
@@ -2911,7 +3376,10 @@ SocialCalc.CalculateColPositions = function(editor, panenum, positions, sizes) {
 
    var tbodyobj;
 
-   if (!context.showRCHeaders) throw("Needs showRCHeaders=true");
+   // eddy CalculateColPositions {
+   // if (!context.showRCHeaders) throw("Needs showRCHeaders=true");
+   if (!context.showRCHeaders) return;
+   // } CalculateColPositions
 
    tbodyobj=editor.fullgrid.lastChild;
 
@@ -2963,6 +3431,7 @@ SocialCalc.ScrollRelative = function(editor, vertical, amount) {
 SocialCalc.ScrollRelativeBoth = function(editor, vamount, hamount) {
 
    var context=editor.context;
+   var dv = vamount > 0 ? 1 : -1, dh = hamount > 0 ? 1 : -1;
 
    var vplen=context.rowpanes.length;
    var vlimit = vplen>1 ? context.rowpanes[vplen-2].last+1 : 1; // don't scroll past here
@@ -2974,6 +3443,24 @@ SocialCalc.ScrollRelativeBoth = function(editor, vamount, hamount) {
    var hlimit = hplen>1 ? context.colpanes[hplen-2].last+1 : 1; // don't scroll past here
    if (context.colpanes[hplen-1].first+hamount < hlimit) { // limit amount
       hamount = (-context.colpanes[hplen-1].first) + hlimit;
+      }
+
+   // Handle hidden column by finding a next one that's not hidden.
+   while (context.sheetobj.colattribs.hide[SocialCalc.rcColname(context.colpanes[hplen-1].first+hamount)] == "yes") {
+      hamount += dh;
+      if (hamount < 1) {
+         hamount = 0;
+         break;
+         }
+      }
+
+   // Handle hidden row by finding a next one that's not hidden.
+   while (context.sheetobj.rowattribs.hide[context.rowpanes[vplen-1].first+vamount] == "yes") {
+      vamount += dv;
+      if (vamount < 1) {
+         vamount = 0;
+         break;
+         }
       }
 
    if ((vamount==1 || vamount==-1) && hamount==0) { // special case quick scrolls
@@ -2995,6 +3482,7 @@ SocialCalc.ScrollRelativeBoth = function(editor, vamount, hamount) {
       context.rowpanes[vplen-1].last += vamount;
       context.colpanes[hplen-1].first += hamount;
       context.colpanes[hplen-1].last += hamount;
+      editor.LimitLastPanes();
       editor.FitToEditTable();
       editor.ScheduleRender();
       }
@@ -3061,10 +3549,14 @@ SocialCalc.LimitLastPanes = function(editor) {
    plen = context.rowpanes.length;
    if (plen>1 && context.rowpanes[plen-1].first <= context.rowpanes[plen-2].last)
        context.rowpanes[plen-1].first = context.rowpanes[plen-2].last+1;
+   if (context.sheetobj.attribs.usermaxrow && context.rowpanes[plen-1].first > context.sheetobj.attribs.usermaxrow)
+       context.rowpanes[plen-1].first = context.sheetobj.attribs.usermaxrow;
 
    plen = context.colpanes.length;
    if (plen>1 && context.colpanes[plen-1].first <= context.colpanes[plen-2].last)
        context.colpanes[plen-1].first = context.colpanes[plen-2].last+1;
+   if (context.sheetobj.attribs.usermaxcol && context.colpanes[plen-1].first > context.sheetobj.attribs.usermaxcol)
+       context.colpanes[plen-1].first = context.sheetobj.attribs.usermaxcol;
 
    }
 
@@ -3086,6 +3578,11 @@ SocialCalc.ScrollTableUpOneRow = function(editor) {
       toprow += context.rowpanes[rowpane].last - context.rowpanes[rowpane].first + 2; // skip pane and spacing row
       }
 
+   // abort if scrolling beyond user max row
+   if (context.sheetobj.attribs.usermaxrow && (context.sheetobj.attribs.usermaxrow - context.rowpanes[rowpane].first < 1)) {
+      return tableobj;
+      }
+  
    tbodyobj.removeChild(tbodyobj.childNodes[toprow]);
 
    context.rowpanes[rowpane].first++;
@@ -3093,8 +3590,10 @@ SocialCalc.ScrollTableUpOneRow = function(editor) {
    editor.FitToEditTable();
    context.CalculateColWidthData(); // Just in case, since normally done in RenderSheet
 
-   newbottomrow = context.RenderRow(context.rowpanes[rowpane].last, rowpane);
-   tbodyobj.appendChild(newbottomrow);
+   if (!context.sheetobj.attribs.usermaxrow || context.rowpanes[rowpane].last != context.sheetobj.attribs.usermaxrow) {
+      newbottomrow = context.RenderRow(context.rowpanes[rowpane].last, rowpane);
+      tbodyobj.appendChild(newbottomrow);
+      }
 
    // if scrolled off a row with starting rowspans, replace rows for the largest rowspan
 
@@ -3162,7 +3661,9 @@ SocialCalc.ScrollTableDownOneRow = function(editor) {
       toprow += context.rowpanes[rowpane].last - context.rowpanes[rowpane].first + 2; // skip pane and spacing row
       }
 
-   tbodyobj.removeChild(tbodyobj.childNodes[toprow+(context.rowpanes[rowpane].last-context.rowpanes[rowpane].first)]);
+   if (!context.sheetobj.attribs.usermaxrow) {
+      tbodyobj.removeChild(tbodyobj.childNodes[toprow+(context.rowpanes[rowpane].last-context.rowpanes[rowpane].first)]);
+      }
 
    context.rowpanes[rowpane].first--;
    context.rowpanes[rowpane].last--;
@@ -3282,10 +3783,24 @@ SocialCalc.InputBox.prototype.Select = function(t) {
    if (!this.element) return;
    switch (t) {
       case "end":
-         if (this.element.selectionStart!=undefined) {
+         if (document.selection && document.selection.createRange) {
+            /* IE 4+ - Safer than setting .selectionEnd as it also works for Textareas. */
+            try {
+               var range = document.selection.createRange().duplicate();
+               range.moveToElementText(this.element);
+               range.collapse(false);
+               range.select();
+            }
+            catch (e) {
+               if (this.element.selectionStart!=undefined) {
+                  this.element.selectionStart=this.element.value.length;
+                  this.element.selectionEnd=this.element.value.length;
+               }
+            }
+         } else if (this.element.selectionStart!=undefined) {
             this.element.selectionStart=this.element.value.length;
             this.element.selectionEnd=this.element.value.length;
-            }
+         }
          break;
       }
    };
@@ -3303,10 +3818,17 @@ SocialCalc.InputBoxDisplayCellContents = function(inputbox, coord) {
    var scc = SocialCalc.Constants;
 
    if (!inputbox) return;
-   if (!coord) coord = inputbox.editor.ecell.coord;
+   if (!coord) {
+     if (!inputbox.editor) return; // not initialized yet
+     if (!inputbox.editor.ecell) return; // not initialized yet
+     coord = inputbox.editor.ecell.coord;
+   }
    var text = SocialCalc.GetCellContents(inputbox.editor.context.sheetobj, coord);
    if (text.indexOf("\n")!=-1) {
       text = scc.s_inputboxdisplaymultilinetext;
+      inputbox.element.disabled = true;
+      }
+   else if (inputbox.editor.ECellReadonly()) {
       inputbox.element.disabled = true;
       }
    else {
@@ -3393,6 +3915,7 @@ SocialCalc.InputEcho = function(editor) {
    this.container = null; // element containing main echo as well as prompt line
    this.main = null; // main echo area
    this.prompt = null;
+   this.hint = null; // focus cell hint area
 
    this.functionbox = null; // function chooser dialog
 
@@ -3404,6 +3927,12 @@ SocialCalc.InputEcho = function(editor) {
    if (scc.defaultInputEchoStyle) SocialCalc.setStyles(this.main, scc.defaultInputEchoStyle);
    this.main.innerHTML = "&nbsp;";
 
+   this.hint = document.createElement("div");
+   if (scc.defaultInputEchoHintClass) this.hint.className = scc.defaultInputEchoHintClass;
+   if (scc.defaultInputEchoHintStyle) SocialCalc.setStyles(this.hint, scc.defaultInputEchoHintStyle);
+   this.hint.innerHTML = "";
+
+   this.container.appendChild(this.hint);
    this.container.appendChild(this.main);
 
    this.prompt = document.createElement("div");
@@ -3413,9 +3942,12 @@ SocialCalc.InputEcho = function(editor) {
 
    this.container.appendChild(this.prompt);
 
-   SocialCalc.DragRegister(this.main, true, true, {MouseDown: SocialCalc.DragFunctionStart, MouseMove: SocialCalc.DragFunctionPosition,
+   SocialCalc.DragRegister(this.main, true, true, 
+                 {MouseDown: SocialCalc.DragFunctionStart, 
+                  MouseMove: SocialCalc.DragFunctionPosition,
                   MouseUp: SocialCalc.DragFunctionPosition,
-                  Disabled: null, positionobj: this.container});
+                  Disabled: null, positionobj: this.container},
+                  this.editor.toplevel);
 
    editor.toplevel.appendChild(this.container);
 
@@ -3443,6 +3975,7 @@ SocialCalc.ShowInputEcho = function(inputecho, show) {
          inputecho.container.style.left = (position.left-1)+"px";
          inputecho.container.style.top = (position.top-1)+"px";
          }
+      inputecho.hint.innerHTML = editor.ecell.coord;
       inputecho.container.style.display = "block";
       if (inputecho.interval) window.clearInterval(inputecho.interval); // just in case
       inputecho.interval = window.setInterval(SocialCalc.InputEchoHeartbeat, 50);
@@ -3466,7 +3999,7 @@ SocialCalc.SetInputEchoText = function(inputecho, str) {
       inputecho.text = newstr;
       }
 
-   var parts = str.match(/.*[\+\-\*\/\&\^\<\>\=\,\(]([A-Za-z][A-ZA-z]\w*?)\([^\)]*$/);
+   var parts = str.match(/.*[\+\-\*\/\&\^\<\>\=\,\(]([A-Za-z][A-Za-z][\w\.]*?)\([^\)]*$/);
    if (str.charAt(0)=="=" && parts) {
       fname = parts[1].toUpperCase();
       if (SocialCalc.Formula.FunctionList[fname]) {
@@ -3592,9 +4125,11 @@ SocialCalc.ShowCellHandles = function(cellhandles, show, moveshow) {
    var cell, cell2, position, position2;
    var editor = cellhandles.editor;
    var doshow = false;
-   var row, col, viewport;
+   var row, col;
+   var colinc = 1, rowinc = 1;
 
    if (!editor) return;
+   if (!editor.ecell) return;
 
    do { // a block that can you can "break" out of easily
 
@@ -3609,31 +4144,47 @@ SocialCalc.ShowCellHandles = function(cellhandles, show, moveshow) {
       if (row < editor.firstscrollingrow) break;
       if (col < editor.firstscrollingcol) break;
 
-      if (editor.rowpositions[row+1]+20>editor.horizontaltablecontrol.controlborder) {
+      // Go beyond one column if hidden.
+      while (editor.context.sheetobj.colattribs.hide[SocialCalc.rcColname(col+colinc)] == "yes") {
+         colinc++; 
+         }     
+
+      // Go beyond one row if hidden.
+      while (editor.context.sheetobj.rowattribs.hide[row+rowinc] == "yes") {
+         rowinc++; 
+         }     
+
+      // Check colspan and rowspan.
+      cell = editor.context.sheetobj.cells[SocialCalc.crToCoord(col+colinc-1, row+rowinc-1)];
+      if (typeof cell != "undefined") {
+         colinc += (cell.colspan || 1) - 1;
+         rowinc += (cell.rowspan || 1) - 1;
+         }
+
+      if (editor.rowpositions[row+rowinc]+20>editor.horizontaltablecontrol.controlborder) {
          break;
          }
-      if (editor.rowpositions[row+1]-10<editor.headposition.top) {
+      if (editor.rowpositions[row+rowinc]-10<editor.headposition.top) {
          break;
          }
-      if (editor.colpositions[col+1]+20>editor.verticaltablecontrol.controlborder) {
+      if (editor.colpositions[col+colinc]+20>editor.verticaltablecontrol.controlborder) {
          break;
          }
-      if (editor.colpositions[col+1]-30<editor.headposition.left) {
+      if (editor.colpositions[col+colinc]-30<editor.headposition.left) {
          break;
          }
 
-      cellhandles.draghandle.style.left = (editor.colpositions[col+1]-1)+"px";
-      cellhandles.draghandle.style.top = (editor.rowpositions[row+1]-1)+"px";
+      cellhandles.draghandle.style.left = (editor.colpositions[col+colinc]-1)+"px";
+      cellhandles.draghandle.style.top = (editor.rowpositions[row+rowinc]-1)+"px";
       cellhandles.draghandle.style.display = "block";
 
       if (moveshow) {
          cellhandles.draghandle.style.display = "none";
-         cellhandles.dragpalette.style.left = (editor.colpositions[col+1]-45)+"px";
-         cellhandles.dragpalette.style.top = (editor.rowpositions[row+1]-45)+"px";
+         cellhandles.dragpalette.style.left = (editor.colpositions[col+colinc]-45)+"px";
+         cellhandles.dragpalette.style.top = (editor.rowpositions[row+rowinc]-45)+"px";
          cellhandles.dragpalette.style.display = "block";
-         viewport = SocialCalc.GetViewportInfo();
-         cellhandles.dragtooltip.style.right = (viewport.width-(editor.colpositions[col+1]-1))+"px";
-         cellhandles.dragtooltip.style.bottom = (viewport.height-(editor.rowpositions[row+1]-1))+"px";
+         cellhandles.dragtooltip.style.left = (editor.colpositions[col+colinc]-45)+"px";
+         cellhandles.dragtooltip.style.top = (editor.rowpositions[row+rowinc]+45)+"px";
          cellhandles.dragtooltip.style.display = "none";
          }
 
@@ -3658,14 +4209,15 @@ SocialCalc.CellHandlesMouseMoveOnHandle = function(e) {
 
    var event = e || window.event;
    var target = event.target || event.srcElement
-   var viewport = SocialCalc.GetViewportInfo();
-   var clientX = event.clientX + viewport.horizontalScroll;
-   var clientY = event.clientY + viewport.verticalScroll;
 
-   editor = SocialCalc.Keyboard.focusTable; // get TableEditor doing keyboard stuff
+   var editor = SocialCalc.Keyboard.focusTable; // get TableEditor doing keyboard stuff
    if (!editor) return true; // we're not handling it -- let browser do default
    var cellhandles = editor.cellhandles;
    if (!cellhandles.editor) return true; // no handles
+
+   var pos = SocialCalc.GetElementPositionWithScroll(editor.toplevel);
+   var clientX = event.clientX - pos.left;
+   var clientY = event.clientY - pos.top;
 
    if (!editor.cellhandles.mouseDown) {
       editor.cellhandles.ShowCellHandles(true, true); // show move handles, too
@@ -3863,10 +4415,6 @@ SocialCalc.CellHandlesMouseDown = function(e) {
 
    var event = e || window.event;
 
-   var viewport = SocialCalc.GetViewportInfo();
-   var clientX = event.clientX + viewport.horizontalScroll;
-   var clientY = event.clientY + viewport.verticalScroll;
-
    var mouseinfo = SocialCalc.EditorMouseInfo;
 
    editor = SocialCalc.Keyboard.focusTable; // get TableEditor doing keyboard stuff
@@ -3877,6 +4425,10 @@ SocialCalc.CellHandlesMouseDown = function(e) {
    var cellhandles = editor.cellhandles;
 
    cellhandles.movedmouse = false; // detect no-op
+
+   var pos = SocialCalc.GetElementPositionWithScroll(editor.toplevel);
+   var clientX = event.clientX - pos.left;
+   var clientY = event.clientY - pos.top;
 
    if (cellhandles.timer) { // cancel timer
       window.clearTimeout(cellhandles.timer);
@@ -3938,6 +4490,11 @@ SocialCalc.CellHandlesMouseDown = function(e) {
          if (!range.hasrange) {
             editor.RangeAnchor();
             }
+         editor.range2.top = editor.range.top;
+         editor.range2.right = editor.range.right;
+         editor.range2.bottom = editor.range.bottom;
+         editor.range2.left = editor.range.left;
+         editor.range2.hasrange = true;
          break;
 
       case "Move":
@@ -3989,12 +4546,8 @@ SocialCalc.CellHandlesMouseDown = function(e) {
       cellhandles.draghandle.attachEvent("onmousemove", SocialCalc.CellHandlesMouseMove);
       cellhandles.draghandle.attachEvent("onmouseup", SocialCalc.CellHandlesMouseUp);
       cellhandles.draghandle.attachEvent("onlosecapture", SocialCalc.CellHandlesMouseUp);
-      }
-   if (event.stopPropagation) event.stopPropagation(); // DOM Level 2
-   else event.cancelBubble = true; // IE 5+
-   if (event.preventDefault) event.preventDefault(); // DOM Level 2
-   else event.returnValue = false; // IE 5+
-
+     }
+   SocialCalc.StopPropagation(event);
    return;
 
    }
@@ -4007,10 +4560,6 @@ SocialCalc.CellHandlesMouseMove = function(e) {
 
    var event = e || window.event;
 
-   var viewport = SocialCalc.GetViewportInfo();
-   var clientX = event.clientX + viewport.horizontalScroll;
-   var clientY = event.clientY + viewport.verticalScroll;
-
    var mouseinfo = SocialCalc.EditorMouseInfo;
    editor = mouseinfo.editor;
    if (!editor) return; // not us, ignore
@@ -4018,6 +4567,9 @@ SocialCalc.CellHandlesMouseMove = function(e) {
 
    element = mouseinfo.element;
 
+   var pos = SocialCalc.GetElementPositionWithScroll(editor.toplevel);
+   var clientX = event.clientX - pos.left;
+   var clientY = event.clientY - pos.top;
    result = SocialCalc.GridMousePosition(editor, clientX, clientY); // get cell with move
 
    if (!result) return;
@@ -4133,21 +4685,15 @@ SocialCalc.CellHandlesMouseMove = function(e) {
       }
 
 
-   cellhandles.fillinghandle.style.left = (clientX)+"px";
+   cellhandles.fillinghandle.style.left = clientX+"px";
    cellhandles.fillinghandle.style.top = (clientY - 17)+"px";
    cellhandles.fillinghandle.innerHTML = scc.s_CHindicatorOperationLookup[cellhandles.dragtype]+
                                          (scc.s_CHindicatorDirectionLookup[editor.cellhandles.filltype] || "");
    cellhandles.fillinghandle.style.display = "block";
 
    mouseinfo.mouselastcoord = result.coord;
-
-   if (event.stopPropagation) event.stopPropagation(); // DOM Level 2
-   else event.cancelBubble = true; // IE 5+
-   if (event.preventDefault) event.preventDefault(); // DOM Level 2
-   else event.returnValue = false; // IE 5+
-
+   SocialCalc.StopPropagation(event);
    return;
-
    }
 
 SocialCalc.CellHandlesDragAutoRepeat = function(coord, direction) {
@@ -4249,10 +4795,6 @@ SocialCalc.CellHandlesMouseUp = function(e) {
 
    var event = e || window.event;
 
-   var viewport = SocialCalc.GetViewportInfo();
-   var clientX = event.clientX + viewport.horizontalScroll;
-   var clientY = event.clientY + viewport.verticalScroll;
-
    var mouseinfo = SocialCalc.EditorMouseInfo;
    editor = mouseinfo.editor;
    if (!editor) return; // not us, ignore
@@ -4262,6 +4804,9 @@ SocialCalc.CellHandlesMouseUp = function(e) {
 
    mouseinfo.ignore = false;
 
+   var pos = SocialCalc.GetElementPositionWithScroll(editor.toplevel);
+   var clientX = event.clientX - pos.left;
+   var clientY = event.clientY - pos.top;
    result = SocialCalc.GridMousePosition(editor, clientX, clientY); // get cell with up
 
    SocialCalc.SetDragAutoRepeat(editor, null); // stop repeating if it was
@@ -4364,27 +4909,12 @@ SocialCalc.CellHandlesMouseUp = function(e) {
          break;
 
       }
-
-   if (event.stopPropagation) event.stopPropagation(); // DOM Level 2
-   else event.cancelBubble = true; // IE 5+
-   if (event.preventDefault) event.preventDefault(); // DOM Level 2
-   else event.returnValue = false; // IE 5+
-
-   if (document.removeEventListener) { // DOM Level 2
-      document.removeEventListener("mousemove", SocialCalc.CellHandlesMouseMove, true);
-      document.removeEventListener("mouseup", SocialCalc.CellHandlesMouseUp, true);
-      }
-   else if (cellhandles.draghandle.detachEvent) { // IE
-      cellhandles.draghandle.detachEvent("onlosecapture", SocialCalc.CellHandlesMouseUp);
-      cellhandles.draghandle.detachEvent("onmouseup", SocialCalc.CellHandlesMouseUp);
-      cellhandles.draghandle.detachEvent("onmousemove", SocialCalc.CellHandlesMouseMove);
-      cellhandles.draghandle.releaseCapture();
-      }
-
+    SocialCalc.RemoveMouseMoveUp(SocialCalc.CellHandlesMouseMove,
+				    SocialCalc.CellHandlesMouseUp,
+				    cellhandles.draghandle,
+				    event);
    mouseinfo.editor = null;
-
    return false;
-
    }
 
 // *************************************
@@ -4474,7 +5004,7 @@ SocialCalc.CreateTableControl = function(control) {
    var scc = SocialCalc.Constants;
    var TooltipRegister = function(element, etype, vh) {
       if (scc["s_"+etype+"Tooltip"+vh]) {
-         SocialCalc.TooltipRegister(element, scc["s_"+etype+"Tooltip"+vh], null);
+         SocialCalc.TooltipRegister(element, scc["s_"+etype+"Tooltip"+vh], null, control.editor.toplevel);
          }
       }
 
@@ -4514,7 +5044,6 @@ SocialCalc.CreateTableControl = function(control) {
    s.position = "absolute";
    s[control.vertical?"top":"left"] = "4px";
    s.zIndex = 3;
-   setStyles(control.paneslider, scc.TCpanesliderStyle);
    s.backgroundImage="url("+imageprefix+"paneslider-"+vh+".gif)";
    if (scc.TCpanesliderClass) control.paneslider.className = scc.TCpanesliderClass;
    AssignID(control.editor, control.paneslider, "paneslider"+vh);
@@ -4527,7 +5056,7 @@ SocialCalc.CreateTableControl = function(control) {
 
    functions.control = control; // make sure this is there
 
-   SocialCalc.DragRegister(control.paneslider, control.vertical, !control.vertical, functions);
+   SocialCalc.DragRegister(control.paneslider, control.vertical, !control.vertical, functions, control.editor.toplevel);
 
    control.main.appendChild(control.paneslider);
 
@@ -4551,7 +5080,7 @@ SocialCalc.CreateTableControl = function(control) {
                 Repeat:function(){if(!control.editor.busy) control.editor.ScrollRelative(control.vertical, -1);},
                 Disabled: function() {return control.editor.busy;}};
 
-   SocialCalc.ButtonRegister(control.lessbutton, params, functions);
+   SocialCalc.ButtonRegister(control.editor, control.lessbutton, params, functions);
 
    control.main.appendChild(control.lessbutton);
 
@@ -4575,7 +5104,7 @@ SocialCalc.CreateTableControl = function(control) {
                 Repeat:function(){if(!control.editor.busy) control.editor.ScrollRelative(control.vertical, +1);},
                 Disabled: function() {return control.editor.busy;}};
 
-   SocialCalc.ButtonRegister(control.morebutton, params, functions);
+   SocialCalc.ButtonRegister(control.editor, control.morebutton, params, functions);
 
    control.main.appendChild(control.morebutton);
 
@@ -4596,7 +5125,7 @@ SocialCalc.CreateTableControl = function(control) {
                 Disabled: function() {return control.editor.busy;}};
    functions.control = control;
 
-   SocialCalc.ButtonRegister(control.scrollarea, params, functions);
+   SocialCalc.ButtonRegister(control.editor, control.scrollarea, params, functions);
 
    control.main.appendChild(control.scrollarea);
 
@@ -4617,12 +5146,12 @@ SocialCalc.CreateTableControl = function(control) {
                 MouseUp: SocialCalc.TCTDragFunctionStop,
                 Disabled: function() {return control.editor.busy;}};
    functions.control = control; // make sure this is there
-   SocialCalc.DragRegister(control.thumb, control.vertical, !control.vertical, functions);
+   SocialCalc.DragRegister(control.thumb, control.vertical, !control.vertical, functions, control.editor.toplevel);
 
    params = {normalstyle: "backgroundImage:url("+imageprefix+"thumb-"+vh+"n.gif)", name:"Thumb",
              downstyle:  "backgroundImage:url("+imageprefix+"thumb-"+vh+"d.gif)",
              hoverstyle:  "backgroundImage:url("+imageprefix+"thumb-"+vh+"h.gif)"};
-   SocialCalc.ButtonRegister(control.thumb, params, null); // give it button-like visual behavior
+   SocialCalc.ButtonRegister(control.editor, control.thumb, params, null); // give it button-like visual behavior
 
    control.main.appendChild(control.thumb);
 
@@ -4637,8 +5166,8 @@ SocialCalc.CreateTableControl = function(control) {
 SocialCalc.ScrollAreaClick = function(e, buttoninfo, bobj) {
 
    var control = bobj.functionobj.control;
-   var bposition = SocialCalc.GetElementPosition(bobj.element);
-   var clickpos = control.vertical ? buttoninfo.clientY : buttoninfo.clientX;
+   var pos = SocialCalc.GetElementPositionWithScroll(control.editor.toplevel);
+   var clickpos = control.vertical ? buttoninfo.clientY-pos.top : buttoninfo.clientX-pos.left;
    if (control.editor.busy) { // ignore if busy - wait for next repeat
       return;
       }
@@ -4766,6 +5295,7 @@ SocialCalc.TCPSDragFunctionStart = function(event, draginfo, dobj) {
       row = SocialCalc.Lookup(draginfo.clientY+dobj.functionobj.control.sliderthickness, editor.rowpositions);
       draginfo.trackingline.style.top = (editor.rowpositions[row] || editor.headposition.top)+"px";
       draginfo.trackingline.style.left = editor.headposition.left+"px";
+      draginfo.trackingline.id = 'trackingline-vertical';
       if (editor.context.rowpanes.length-1) { // has 2 already
          editor.context.SetRowPaneFirstLast(1, editor.context.rowpanes[0].last+1, editor.context.rowpanes[0].last+1);
          editor.FitToEditTable();
@@ -4776,6 +5306,7 @@ SocialCalc.TCPSDragFunctionStart = function(event, draginfo, dobj) {
       col = SocialCalc.Lookup(draginfo.clientX+dobj.functionobj.control.sliderthickness, editor.colpositions);
       draginfo.trackingline.style.top = editor.headposition.top+"px";
       draginfo.trackingline.style.left = (editor.colpositions[col] || editor.headposition.left)+"px";
+      draginfo.trackingline.id = 'trackingline-horizon';
       if (editor.context.colpanes.length-1) { // has 2 already
          editor.context.SetColPaneFirstLast(1, editor.context.colpanes[0].last+1, editor.context.colpanes[0].last+1);
          editor.FitToEditTable();
@@ -4805,6 +5336,12 @@ SocialCalc.TCPSDragFunctionMove = function(event, draginfo, dobj) {
       if (draginfo.clientY < min) draginfo.clientY = min;
 
       row = SocialCalc.Lookup(draginfo.clientY+sliderthickness, editor.rowpositions);
+
+      // Handle hidden row.
+      while (editor.context.sheetobj.rowattribs.hide[row] == "yes") {
+         row++;
+         }
+
       draginfo.trackingline.style.top = (editor.rowpositions[row] || editor.headposition.top)+"px";
       }
    else {
@@ -4814,6 +5351,12 @@ SocialCalc.TCPSDragFunctionMove = function(event, draginfo, dobj) {
       if (draginfo.clientX < min) draginfo.clientX = min;
 
       col = SocialCalc.Lookup(draginfo.clientX+sliderthickness, editor.colpositions);
+
+      // Handle hidden column.
+      while (editor.context.sheetobj.colattribs.hide[SocialCalc.rcColname(col)] == "yes") {
+         col++;
+         }
+
       draginfo.trackingline.style.left = (editor.colpositions[col] || editor.headposition.left)+"px";
       }
 
@@ -4827,61 +5370,44 @@ SocialCalc.TCPSDragFunctionMove = function(event, draginfo, dobj) {
 
 SocialCalc.TCPSDragFunctionStop = function(event, draginfo, dobj) {
 
-   var row, col, max, min;
+   var row, col, max, min, dc;
    var control = dobj.functionobj.control;
    var sliderthickness = control.sliderthickness;
    var editor = control.editor;
 
    if (dobj.vertical) {
-      max = control.morebuttonstart - control.minscrollingpanesize - draginfo.offsetY; // restrict movement
-      if (draginfo.clientY > max) draginfo.clientY = max;
-      min = editor.headposition.top - sliderthickness - draginfo.offsetY;
-      if (draginfo.clientY < min) draginfo.clientY = min;
+     max = control.morebuttonstart - control.minscrollingpanesize - draginfo.offsetY; // restrict movement
+     if (draginfo.clientY > max) draginfo.clientY = max;
+     min = editor.headposition.top - sliderthickness - draginfo.offsetY;
+     if (draginfo.clientY < min) draginfo.clientY = min;
 
-      row = SocialCalc.Lookup(draginfo.clientY+sliderthickness, editor.rowpositions);
-      if (row>editor.context.sheetobj.attribs.lastrow) row=editor.context.sheetobj.attribs.lastrow; // can't extend sheet here
-      if (!row || row<=editor.context.rowpanes[0].first) { // set to no panes, leaving first pane settings
-         if (editor.context.rowpanes.length>1) editor.context.rowpanes.length = 1;
-         }
-      else if (editor.context.rowpanes.length-1) { // has 2 already
-         if (!editor.timeout) { // not waiting for position calc (so positions could be wrong)
-            editor.context.SetRowPaneFirstLast(0, editor.context.rowpanes[0].first, row-1);
-            editor.context.SetRowPaneFirstLast(1, row, row);
-            }
-         }
-      else {
-         editor.context.SetRowPaneFirstLast(0, editor.context.rowpanes[0].first, row-1);
-         editor.context.SetRowPaneFirstLast(1, row, row);
-         }
-      }
+     row = SocialCalc.Lookup(draginfo.clientY+sliderthickness, editor.rowpositions);
+     if (row>editor.context.sheetobj.attribs.lastrow) row=editor.context.sheetobj.attribs.lastrow; // can't extend sheet here
+
+     // Handle hidden row.
+     while (editor.context.sheetobj.rowattribs.hide[row] == "yes") {
+       row++;
+     }
+
+
+     editor.EditorScheduleSheetCommands('pane row ' + row, true, false);
+   }
    else {
-      max = control.morebuttonstart - control.minscrollingpanesize - draginfo.offsetX;
-      if (draginfo.clientX > max) draginfo.clientX = max;
-      min = editor.headposition.left - sliderthickness - draginfo.offsetX;
-      if (draginfo.clientX < min) draginfo.clientX = min;
+     max = control.morebuttonstart - control.minscrollingpanesize - draginfo.offsetX;
+     if (draginfo.clientX > max) draginfo.clientX = max;
+     min = editor.headposition.left - sliderthickness - draginfo.offsetX;
+     if (draginfo.clientX < min) draginfo.clientX = min;
 
-      col = SocialCalc.Lookup(draginfo.clientX+sliderthickness, editor.colpositions);
-      if (col>editor.context.sheetobj.attribs.lastcol) col=editor.context.sheetobj.attribs.lastcol; // can't extend sheet here
-      if (!col || col<=editor.context.colpanes[0].first) { // set to no panes, leaving first pane settings
-         if (editor.context.colpanes.length>1) editor.context.colpanes.length = 1;
-         }
-      else if (editor.context.colpanes.length-1) { // has 2 already
-         if (!editor.timeout) { // not waiting for position calc (so positions could be wrong)
-            editor.context.SetColPaneFirstLast(0, editor.context.colpanes[0].first, col-1);
-            editor.context.SetColPaneFirstLast(1, col, col);
-            }
-         }
-      else {
-         editor.context.SetColPaneFirstLast(0, editor.context.colpanes[0].first, col-1);
-         editor.context.SetColPaneFirstLast(1, col, col);
-         }
-      }
+     col = SocialCalc.Lookup(draginfo.clientX+sliderthickness, editor.colpositions);
+     if (col>editor.context.sheetobj.attribs.lastcol) col=editor.context.sheetobj.attribs.lastcol; // can't extend sheet here
 
-   editor.FitToEditTable();
+     // Handle hidden column.
+     while (editor.context.sheetobj.colattribs.hide[SocialCalc.rcColname(col)] == "yes") {
+       col++;
+     }
 
-   editor.griddiv.removeChild(draginfo.trackingline);
-
-   editor.ScheduleRender();
+     editor.EditorScheduleSheetCommands('pane col ' + col, true, false);
+   }
 
    }
 
@@ -5077,9 +5603,9 @@ SocialCalc.DragInfo = {
    // There is only one of these -- no "new" is done.
    // Only one dragging operation can be active at a time.
    // The registeredElements array is used to decide which item to drag.
-
+ 
    // One item for each draggable thing, each an object with:
-   //    .element, .vertical, .horizontal, .functionobj
+   //    .element, .vertical, .horizontal, .functionobj, .parent
 
    registeredElements: [],
 
@@ -5093,18 +5619,17 @@ SocialCalc.DragInfo = {
    clientY: 0,
    offsetX: 0,
    offsetY: 0,
-   horizontalScroll: 0, // retrieved at drag start
-   verticalScroll: 0
+   relativeOffset: {left:0,top:0} // retrieved at drag start
 
    }
 
 //
-// DragRegister(element, vertical, horizontal, functionobj) - make element draggable
+// DragRegister(element, vertical, horizontal, functionobj, parent) - make element draggable
 //
 // The functionobj defaults to moving the element contrained only by vertical and horizontal settings.
 //
 
-SocialCalc.DragRegister = function(element, vertical, horizontal, functionobj) {
+SocialCalc.DragRegister = function(element, vertical, horizontal, functionobj, parent) {
 
    var draginfo = SocialCalc.DragInfo;
 
@@ -5115,7 +5640,7 @@ SocialCalc.DragRegister = function(element, vertical, horizontal, functionobj) {
       }
 
    draginfo.registeredElements.push(
-      {element: element, vertical: vertical, horizontal: horizontal, functionobj: functionobj}
+      {element: element, vertical: vertical, horizontal: horizontal, functionobj: functionobj, parent: parent}
       );
 
    if (element.addEventListener) { // DOM Level 2 -- Firefox, et al
@@ -5179,13 +5704,11 @@ SocialCalc.DragMouseDown = function(event) {
       }
 
    draginfo.draggingElement = dobj;
-
-   var viewportinfo = SocialCalc.GetViewportInfo();
-   draginfo.horizontalScroll = viewportinfo.horizontalScroll;
-   draginfo.verticalScroll = viewportinfo.verticalScroll;
-
-   draginfo.clientX = e.clientX + draginfo.horizontalScroll; // get document-relative coordinates
-   draginfo.clientY = e.clientY + draginfo.verticalScroll;
+   if (dobj.parent) {
+      draginfo.relativeOffset = SocialCalc.GetElementPositionWithScroll(dobj.parent);
+      }
+   draginfo.clientX = e.clientX - draginfo.relativeOffset.left;
+   draginfo.clientY = e.clientY - draginfo.relativeOffset.top;
    draginfo.startX = draginfo.clientX;
    draginfo.startY = draginfo.clientY;
    draginfo.startZ = dobj.element.style.zIndex;
@@ -5193,23 +5716,10 @@ SocialCalc.DragMouseDown = function(event) {
    draginfo.offsetY = 0;
 
    dobj.element.style.zIndex = "100";
-
-   // Event code from JavaScript, Flanagan, 5th Edition, pg. 422
-   if (document.addEventListener) { // DOM Level 2 -- Firefox, et al
-      document.addEventListener("mousemove", SocialCalc.DragMouseMove, true); // capture everywhere
-      document.addEventListener("mouseup", SocialCalc.DragMouseUp, true);
-      }
-   else if (dobj.element.attachEvent) { // IE 5+
-      dobj.element.setCapture();
-      dobj.element.attachEvent("onmousemove", SocialCalc.DragMouseMove);
-      dobj.element.attachEvent("onmouseup", SocialCalc.DragMouseUp);
-      dobj.element.attachEvent("onlosecapture", SocialCalc.DragMouseUp);
-      }
-   if (e.stopPropagation) e.stopPropagation(); // DOM Level 2
-   else e.cancelBubble = true; // IE 5+
-   if (e.preventDefault) e.preventDefault(); // DOM Level 2
-   else e.returnValue = false; // IE 5+
-
+   SocialCalc.SetMouseMoveUp(SocialCalc.DragMouseMove,
+			     SocialCalc.DragMouseUp,
+			     dobj.element,
+			     e);
    if (dobj && dobj.functionobj && dobj.functionobj.MouseDown) dobj.functionobj.MouseDown(e, draginfo, dobj);
 
    return false;
@@ -5225,18 +5735,13 @@ SocialCalc.DragMouseMove = function(event) {
    var e = event || window.event;
 
    var draginfo = SocialCalc.DragInfo;
-   draginfo.clientX = e.clientX + draginfo.horizontalScroll;
-   draginfo.clientY = e.clientY + draginfo.verticalScroll;
-
    var dobj = draginfo.draggingElement;
 
-   if (e.stopPropagation) e.stopPropagation(); // DOM Level 2
-   else e.cancelBubble = true; // IE 5+
-
+   draginfo.clientX = e.clientX - draginfo.relativeOffset.left;
+   draginfo.clientY = e.clientY - draginfo.relativeOffset.top;
+   SocialCalc.StopPropagation(e);
    if (dobj && dobj.functionobj && dobj.functionobj.MouseMove) dobj.functionobj.MouseMove(e, draginfo, dobj);
-
    return false;
-
    }
 
 //
@@ -5248,36 +5753,19 @@ SocialCalc.DragMouseUp = function(event) {
    var e = event || window.event;
 
    var draginfo = SocialCalc.DragInfo;
-   draginfo.clientX = e.clientX + draginfo.horizontalScroll;
-   draginfo.clientY = e.clientY + draginfo.verticalScroll;
-
    var dobj = draginfo.draggingElement;
+
+   draginfo.clientX = e.clientX - draginfo.relativeOffset.left;
+   draginfo.clientY = e.clientY - draginfo.relativeOffset.top;
 
    dobj.element.style.zIndex = draginfo.startZ;
 
    if (dobj && dobj.functionobj && dobj.functionobj.MouseUp) dobj.functionobj.MouseUp(e, draginfo, dobj);
-
-   if (e.stopPropagation) e.stopPropagation(); // DOM Level 2
-   else e.cancelBubble = true; // IE 5+
-
-   if (document.removeEventListener) { // DOM Level 2
-      document.removeEventListener("mousemove", SocialCalc.DragMouseMove, true);
-      document.removeEventListener("mouseup", SocialCalc.DragMouseUp, true);
-      // Note: In old (1.5?) versions of Firefox, this causes the browser to skip the MouseUp for
-      // the button code. https://bugzilla.mozilla.org/show_bug.cgi?id=174320
-      // Firefox 1.5 is <1% share (http://marketshare.hitslink.com/report.aspx?qprid=7)
-      }
-   else if (dobj.element.detachEvent) { // IE
-      dobj.element.detachEvent("onlosecapture", SocialCalc.DragMouseUp);
-      dobj.element.detachEvent("onmouseup", SocialCalc.DragMouseUp);
-      dobj.element.detachEvent("onmousemove", SocialCalc.DragMouseMove);
-      dobj.element.releaseCapture();
-      }
-
+   SocialCalc.RemoveMouseMoveUp(SocialCalc.DragMouseMove,
+				SocialCalc.DragMouseUp,
+				dobj.element, e);
    draginfo.draggingElement = null;
-
    return false;
-
    }
 
 //
@@ -5286,13 +5774,10 @@ SocialCalc.DragMouseUp = function(event) {
 
 SocialCalc.DragFunctionStart = function(event, draginfo, dobj) {
 
-   var val;
    var element = dobj.functionobj.positionobj || dobj.element;
 
-   val = element.style.top.match(/\d*/);
-   draginfo.offsetY = (val ? val[0]-0 : 0) - draginfo.clientY;
-   val = element.style.left.match(/\d*/);
-   draginfo.offsetX = (val ? val[0]-0 : 0) - draginfo.clientX;
+   draginfo.offsetY = parseInt(element.style.top) - draginfo.clientY;
+   draginfo.offsetX = parseInt(element.style.left) - draginfo.clientX;
 
    }
 
@@ -5322,7 +5807,7 @@ SocialCalc.TooltipInfo = {
    // The registeredElements array is used to identify items.
 
    // One item for each element with a tooltip, each an object with:
-   //    .element, .tiptext, .functionobj
+   //    .element, .tiptext, .functionobj, .parent
    // Currently .functionobj can only contain .offsetx and .offsety.
    // If present they are used instead of the default ones.
 
@@ -5343,14 +5828,14 @@ SocialCalc.TooltipInfo = {
    }
 
 //
-// TooltipRegister(element, tiptext, functionobj) - make element have a tooltip
+// TooltipRegister(element, tiptext, functionobj, parent) - make element have a tooltip
 //
 
-SocialCalc.TooltipRegister = function(element, tiptext, functionobj) {
+SocialCalc.TooltipRegister = function(element, tiptext, functionobj, parent) {
 
    var tooltipinfo = SocialCalc.TooltipInfo;
    tooltipinfo.registeredElements.push(
-      {element: element, tiptext: tiptext, functionobj: functionobj}
+      {element: element, tiptext: tiptext, functionobj: functionobj, parent: parent}
       );
 
    if (tooltipinfo.registered) return; // only need to add event listener once
@@ -5381,9 +5866,8 @@ SocialCalc.TooltipMouseMove = function(event) {
 
    var tooltipinfo = SocialCalc.TooltipInfo;
 
-   tooltipinfo.viewport = SocialCalc.GetViewportInfo();
-   tooltipinfo.clientX = e.clientX + tooltipinfo.viewport.horizontalScroll;
-   tooltipinfo.clientY = e.clientY + tooltipinfo.viewport.verticalScroll;
+   tooltipinfo.clientX = e.clientX;
+   tooltipinfo.clientY = e.clientY;
 
    var tobj = SocialCalc.LookupElement(e.target || e.srcElement, tooltipinfo.registeredElements);
 
@@ -5454,8 +5938,12 @@ SocialCalc.TooltipDisplay = function(tobj) {
 
    var tooltipinfo = SocialCalc.TooltipInfo;
    var scc = SocialCalc.Constants;
-   var offsetX = (tobj.functionobj && ((typeof tobj.functionobj.offsetx) == "number")) ? tobj.functionobj.offsetx : tooltipinfo.offsetX;
-   var offsetY = (tobj.functionobj && ((typeof tobj.functionobj.offsety) == "number")) ? tobj.functionobj.offsety : tooltipinfo.offsetY;
+   var offsetX = (tobj.functionobj && ((typeof tobj.functionobj.offsetx) == "number")) ? 
+      tobj.functionobj.offsetx : tooltipinfo.offsetX;
+   var offsetY = (tobj.functionobj && ((typeof tobj.functionobj.offsety) == "number")) ? 
+      tobj.functionobj.offsety : tooltipinfo.offsetY;
+   var viewport = SocialCalc.GetViewportInfo();
+   var pos = SocialCalc.GetElementPositionWithScroll(tobj.parent);
 
    tooltipinfo.popupElement = document.createElement("div");
    if (scc.TDpopupElementClass) tooltipinfo.popupElement.className = scc.TDpopupElementClass;
@@ -5463,20 +5951,20 @@ SocialCalc.TooltipDisplay = function(tobj) {
 
    tooltipinfo.popupElement.innerHTML = tobj.tiptext;
 
-   if (tooltipinfo.clientX > tooltipinfo.viewport.width/2) { // on right side of screen
-      tooltipinfo.popupElement.style.bottom = (tooltipinfo.viewport.height - tooltipinfo.clientY + offsetY)+"px";
-      tooltipinfo.popupElement.style.right = (tooltipinfo.viewport.width - tooltipinfo.clientX + offsetX)+"px";
+   if (tooltipinfo.clientX > viewport.width/2) { // on right side of screen
+      tooltipinfo.popupElement.style.bottom = (pos.height - tooltipinfo.clientY + offsetY + pos.top)+"px";
+      tooltipinfo.popupElement.style.right = (pos.width - tooltipinfo.clientX + offsetX + pos.left)+"px";
       }
    else { // on left side of screen
-      tooltipinfo.popupElement.style.bottom = (tooltipinfo.viewport.height - tooltipinfo.clientY + offsetY)+"px";
-      tooltipinfo.popupElement.style.left = (tooltipinfo.clientX + offsetX)+"px";
+      tooltipinfo.popupElement.style.bottom = (pos.height - tooltipinfo.clientY + offsetY + pos.top)+"px";
+      tooltipinfo.popupElement.style.left = (tooltipinfo.clientX + offsetX - pos.left)+"px";
       }
 
    if (tooltipinfo.clientY < 50) { // make sure fits on screen if nothing above grid
-      tooltipinfo.popupElement.style.bottom = (tooltipinfo.viewport.height - tooltipinfo.clientY + offsetY - 50)+"px";
+      tooltipinfo.popupElement.style.bottom = (pos.height - tooltipinfo.clientY + offsetY - 50 + pos.top)+"px";
       }
 
-   document.body.appendChild(tooltipinfo.popupElement);
+   tobj.parent.appendChild(tooltipinfo.popupElement);
 
    }
 
@@ -5523,7 +6011,7 @@ SocialCalc.ButtonInfo = {
    // The registeredElements array is used to identify items.
 
    // One item for each clickable element, each an object with:
-   //    .element, .normalstyle, .hoverstyle, .downstyle, .repeatinterval, .functionobj
+   //    .element, .normalstyle, .hoverstyle, .downstyle, .repeatinterval, .functionobj, .editor
    //
    // .functionobj is an object with optional function objects for:
    //    mouseover, mouseout, mousedown, repeatinterval, mouseup, disabled
@@ -5539,27 +6027,27 @@ SocialCalc.ButtonInfo = {
 
    // Used while processing an event
 
-   horizontalScroll: 0,
-   verticalScroll: 0,
+   relativeOffset: null,
    clientX: 0,
    clientY: 0
 
    }
 
 //
-// ButtonRegister(element, paramobj, functionobj) - make element clickable
+// ButtonRegister(editor, element, paramobj, functionobj) - make element clickable
 //
-// The arguments (other than element) may be null (meaning no change for style and no repeat)
+// The arguments (other than editor and element) may be null (meaning no change for style and no repeat)
 // The paramobj has the optional normalstyle, hoverstyle, downstyle, repeatwait, repeatinterval settings
 
-SocialCalc.ButtonRegister = function(element, paramobj, functionobj) {
+SocialCalc.ButtonRegister = function(editor, element, paramobj, functionobj) {
 
    var buttoninfo = SocialCalc.ButtonInfo;
 
    if (!paramobj) paramobj = {};
 
    buttoninfo.registeredElements.push(
-      {name: paramobj.name, element: element, normalstyle: paramobj.normalstyle, hoverstyle: paramobj.hoverstyle, downstyle: paramobj.downstyle,
+      {name: paramobj.name, element: element, editor: editor,
+       normalstyle: paramobj.normalstyle, hoverstyle: paramobj.hoverstyle, downstyle: paramobj.downstyle,
        repeatwait: paramobj.repeatwait, repeatinterval: paramobj.repeatinterval, functionobj: functionobj}
       );
 
@@ -5578,7 +6066,6 @@ SocialCalc.ButtonRegister = function(element, paramobj, functionobj) {
       }
 
    return;
-
    }
 
 //
@@ -5686,15 +6173,10 @@ SocialCalc.ButtonMouseDown = function(event) {
       bobj.element.attachEvent("onmouseup", SocialCalc.ButtonMouseUp);
       bobj.element.attachEvent("onlosecapture", SocialCalc.ButtonMouseUp);
       }
-   if (e.stopPropagation) e.stopPropagation(); // DOM Level 2
-   else e.cancelBubble = true; // IE 5+
-   if (e.preventDefault) e.preventDefault(); // DOM Level 2
-   else e.returnValue = false; // IE 5+
-
-   buttoninfo.horizontalScroll = viewportinfo.horizontalScroll;
-   buttoninfo.verticalScroll = viewportinfo.verticalScroll;
-   buttoninfo.clientX = e.clientX + buttoninfo.horizontalScroll; // get document-relative coordinates
-   buttoninfo.clientY = e.clientY + buttoninfo.verticalScroll;
+   SocialCalc.StopPropagation(e);
+   buttoninfo.relativeOffset = SocialCalc.GetElementPositionWithScroll(bobj.editor.toplevel);
+   buttoninfo.clientX = e.clientX - buttoninfo.relativeOffset.left;
+   buttoninfo.clientY = e.clientY - buttoninfo.relativeOffset.top;
 
    if (bobj && bobj.functionobj && bobj.functionobj.MouseDown) bobj.functionobj.MouseDown(e, buttoninfo, bobj);
 
@@ -5723,12 +6205,7 @@ SocialCalc.ButtonMouseUp = function(event) {
       }
 
    if (!buttoninfo.buttonDown) return; // already did this (e.g., in IE, releaseCapture fires losecapture)
-
-   if (e.stopPropagation) e.stopPropagation(); // DOM Level 2
-   else e.cancelBubble = true; // IE 5+
-   if (e.preventDefault) e.preventDefault(); // DOM Level 2
-   else e.returnValue = false; // IE 5+
-
+   SocialCalc.StopPropagation(e);
    if (document.removeEventListener) { // DOM Level 2
       document.removeEventListener("mouseup", SocialCalc.ButtonMouseUp, true);
       }
@@ -6106,137 +6583,6 @@ SocialCalc.ProcessKeyPress = function(e) {
 
    }
 
-/* 
- *
- * OLD ProcessKeyDown and ProcessKeyPress -- replaced for handling newer browsers, including Safari 3.1 and Opera 9.5
- *
-
-SocialCalc.ProcessKeyDown = function(e) {
-
-   var kt = SocialCalc.keyboardTables;
-
-   var ch="";
-   var status=true;
-
-   if (SocialCalc.Keyboard.passThru) return; // ignore
-
-   e = e || window.event;
-
-   if (e.which==undefined) { // IE
-      ch = kt.specialKeysIE[e.keyCode];
-      if (!ch) {
-         if (e.ctrlKey) {
-            ch=kt.controlKeysIE[e.keyCode];
-            }
-         if (!ch)
-            return true;
-         }
-
-      status = SocialCalc.ProcessKey(ch, e);
-
-      if (!status) {
-         if (e.preventDefault) e.preventDefault();
-            e.returnValue = false;
-         }
-      }
-
-   else { // don't do anything for other browsers - wait for keyPress
-      ; // special key repeats are done as keypress in those browsers
-      }
-
-   return status;
-
-   }
-
-SocialCalc.ProcessKeyPress = function(e) {
-
-   var kt = SocialCalc.keyboardTables;
-
-   var ch="";
-
-   if (SocialCalc.Keyboard.passThru) return; // ignore
-
-   e = e || window.event;
-
-   if (e.which==undefined) { // IE
-      // Note: Esc and Enter will come through here, too, if not stopped at KeyDown
-      ch=String.fromCharCode(e.keyCode); // convert to a character (special chars handled at ev1)
-      }
-
-   else { // not IE
-      if (e.charCode==undefined) { // Opera
-         if (e.which!=0) { // character
-            if (e.which<32) { // special char
-               ch = kt.specialKeysOpera[e.keyCode];
-               if (!ch)
-                  return true;
-               }
-            else {
-               if (e.ctrlKey) {
-                  ch=kt.controlKeysOpera[e.keyCode];
-                  }
-               else {
-                  ch = String.fromCharCode(e.which);
-                  }
-               }
-            }
-         else { // special char
-            ch = kt.specialKeysOpera[e.keyCode];
-            if (!ch)
-               return true;
-            }
-         }
-
-      else if (e.keyCode==0 && e.charCode==0) { // OLPC Fn key or something
-         return; // ignore
-         }
-
-      else if (e.keyCode==e.charCode) { // Safari
-         ch = kt.specialKeysSafari[e.keyCode];
-         if (!ch) {
-            if (kt.ignoreKeysSafari[e.keyCode]) // pass this through
-               return true;
-            if (e.metaKey) {
-               ch=kt.controlKeysSafari[e.keyCode];
-               }
-            else {
-               ch = String.fromCharCode(e.which);
-               }
-            }
-         }
-
-      else { // Firefox
-         ch = kt.specialKeysFirefox[e.keyCode];
-         if (!ch) {
-            if (kt.ignoreKeysFirefox[e.keyCode]) // pass this through
-               return true;
-            if (e.which) { // normal char
-               if (e.ctrlKey || e.metaKey) {
-                  ch = kt.controlKeysFirefox[e.which];
-                  }
-               else {
-                  ch = String.fromCharCode(e.which);
-                  }
-               }
-            else { // usually a special char
-               return true; // old Firefox gives extra, empty keyPress for "/" - ignore
-               }
-            }
-         }
-      }
-
-   var status = SocialCalc.ProcessKey(ch, e);
-
-   if (!status) {
-      if (e.preventDefault) e.preventDefault();
-      e.returnValue = false;
-      }
-
-   return status;
-
-   }
-*/
-
 //
 // status = SocialCalc.ProcessKey(ch, e)
 //
@@ -6244,13 +6590,9 @@ SocialCalc.ProcessKeyPress = function(e) {
 //
 
 SocialCalc.ProcessKey = function (ch, e) {
-
    var ft = SocialCalc.Keyboard.focusTable;
-
    if (!ft) return true; // we're not handling it -- let browser do default
-
    return ft.EditorProcessKey(ch, e);
-
    }
 
 
