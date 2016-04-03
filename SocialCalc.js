@@ -25747,9 +25747,9 @@ if('undefined' === typeof window) {
   }
 }
 
-if (typeof global != 'undefined') var window = global;
+if (typeof window === 'undefined' && typeof global != 'undefined') window = global;
 if (typeof SocialCalc != 'undefined' && typeof module != 'undefined') module.exports = SocialCalc;
-if (typeof document == 'undefined') var document = SocialCalc.document = {};
+if (typeof document == 'undefined') var document = window.document || {};
 
 // Compatibility with webworker-threads
 if (typeof self !== 'undefined' && self.thread) {
