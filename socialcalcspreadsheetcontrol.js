@@ -983,14 +983,8 @@ SocialCalc.InitializeSpreadsheetControl = function(spreadsheet, node, height, wi
 
    // create the tabbed UI at the top
 
-   html = '<div><div style="'+spreadsheet.toolbarbackground+'padding:12px 10px 10px 4px;">';
-
-   for (i=0; i<tabs.length; i++) {
-      html += tabs[i].html;
-      }
-
-   html += '</div>'+
-      '<div style="'+spreadsheet.tabbackground+'margin:0px 0px 8px 0px;">'+
+   html = '<div>'
+   html += '<div style="'+spreadsheet.tabbackground+'margin:0px 0px 8px 0px;">'+
       '<table cellpadding="0" cellspacing="0"><tr>';
 
    for (i=0; i<tabs.length; i++) {
@@ -999,7 +993,15 @@ SocialCalc.InitializeSpreadsheetControl = function(spreadsheet, node, height, wi
          '" onclick="%s.SetTab(this);">' + SCLoc(tabs[i].text) + '</td>';
       }
 
-   html += ' </tr></table></div></div>';
+   html += ' </tr></table></div>'
+   html += '<div style="'+spreadsheet.toolbarbackground+'padding:12px 10px 10px 4px;">';
+
+   for (i=0; i<tabs.length; i++) {
+      html += tabs[i].html;
+      }
+
+   html += '</div>'
+   html += '</div>';
 
    spreadsheet.currentTab = 0; // this is where we started
 

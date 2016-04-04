@@ -354,7 +354,7 @@ SocialCalc.Constants = {
 
    //*** SocialCalc.SpreadsheetControl
 
-   SCToolbarbackground: "background-color:#404040;",
+   SCToolbarbackground: "background-color:#ffffff;",
    SCTabbackground: "background-color:#CCC;",
    SCTabselectedCSS: "font-size:small;padding:6px 30px 6px 8px;color:#FFF;background-color:#404040;cursor:default;border-right:1px solid #CCC;",
    SCTabplainCSS: "font-size:small;padding:6px 30px 6px 8px;color:#FFF;background-color:#808080;cursor:default;border-right:1px solid #CCC;",
@@ -415,9 +415,9 @@ SocialCalc.Constants = {
 
    //*** SocialCalc.InitializeSpreadsheetControl
 
-   ISCButtonBorderNormal: "#404040",
-   ISCButtonBorderHover: "#999",
-   ISCButtonBorderDown: "#FFF",
+   ISCButtonBorderNormal: "none",
+   ISCButtonBorderHover: "none",
+   ISCButtonBorderDown: "#none",
    ISCButtonDownBackground: "#888",
 
    //*** SocialCalc.SettingsControls.PopupListInitialize
