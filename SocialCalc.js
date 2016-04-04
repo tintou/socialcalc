@@ -358,7 +358,7 @@ SocialCalc.Constants = {
    SCTabbackground: "background-color:#CCC;",
    SCTabselectedCSS: "font-size:small;padding:6px 30px 6px 8px;color:#FFF;background-color:#404040;cursor:default;border-right:1px solid #CCC;",
    SCTabplainCSS: "font-size:small;padding:6px 30px 6px 8px;color:#FFF;background-color:#808080;cursor:default;border-right:1px solid #CCC;",
-   SCToolbartext: "font-size:x-small;font-weight:bold;color:#FFF",
+   SCToolbartext: "font-size:x-small;font-weight:bold;color:#888",
 
    SCFormulabarheight: 30, // in pixels, will contain a text input box
 
@@ -21398,7 +21398,7 @@ SocialCalc.SpreadsheetControl = function(idPrefix) {
 
    this.tabnums.edit = this.tabs.length;
    this.tabs.push({name: "edit", text: "Edit", html:
-      ' <div id="%id.edittools" style="padding:10px 0px 0px 0px;">'+
+      ' <div id="%id.edittools">'+
 '&nbsp;<img id="%id.button_undo" src="%img.undo.png" style="vertical-align:bottom;">'+
 ' <img id="%id.button_redo" src="%img.redo.png" style="vertical-align:bottom;">'+
 ' &nbsp;<img src="%img.divider1.png" style="vertical-align:bottom;">&nbsp; '+
@@ -22125,7 +22125,7 @@ SocialCalc.InitializeSpreadsheetControl = function(spreadsheet, node, height, wi
    // create the tabbed UI at the top
 
    html = '<div>'
-   html += '<div style="'+spreadsheet.tabbackground+'margin:0px 0px 8px 0px;">'+
+   html += '<div style="'+spreadsheet.tabbackground+'">'+
       '<table cellpadding="0" cellspacing="0"><tr>';
 
    for (i=0; i<tabs.length; i++) {
