@@ -22123,7 +22123,7 @@ SocialCalc.InitializeSpreadsheetControl = function(spreadsheet, node, height, wi
 
    // create the tabbed UI at the top
 
-   html = '<div><div style="'+spreadsheet.toolbarbackground+'padding:12px 10px 10px 4px;height:40px;">';
+   html = '<div><div style="'+spreadsheet.toolbarbackground+'padding:12px 10px 10px 4px;">';
 
    for (i=0; i<tabs.length; i++) {
       html += tabs[i].html;
@@ -22205,7 +22205,7 @@ spreadsheet.Buttons = {
    // create formula bar
 
    spreadsheet.formulabarDiv = document.createElement("div");
-   spreadsheet.formulabarDiv.style.height = spreadsheet.formulabarheight + "px";
+   //spreadsheet.formulabarDiv.style.height = spreadsheet.formulabarheight + "px"; // Allow line wrapping
    spreadsheet.formulabarDiv.innerHTML = '<input type="text" size="60" value="">&nbsp;'; //'<textarea rows="4" cols="60" style="z-index:5;background-color:white;position:relative;"></textarea>&nbsp;';
    spreadsheet.spreadsheetDiv.appendChild(spreadsheet.formulabarDiv);
    var inputbox = new SocialCalc.InputBox(spreadsheet.formulabarDiv.firstChild, spreadsheet.editor);
@@ -25749,7 +25749,7 @@ if('undefined' === typeof window) {
 
 if (typeof window === 'undefined' && typeof global != 'undefined') window = global;
 if (typeof SocialCalc != 'undefined' && typeof module != 'undefined') module.exports = SocialCalc;
-if (typeof document == 'undefined') var document = window.document || {};
+if (typeof document == 'undefined') document = window.document || {};
 
 // Compatibility with webworker-threads
 if (typeof self !== 'undefined' && self.thread) {
