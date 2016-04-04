@@ -415,9 +415,10 @@ SocialCalc.Constants = {
 
    //*** SocialCalc.InitializeSpreadsheetControl
 
+   ISCButtonNormalBackground: "transparent",
    ISCButtonBorderNormal: "none",
    ISCButtonBorderHover: "none",
-   ISCButtonBorderDown: "#none",
+   ISCButtonBorderDown: "none",
    ISCButtonDownBackground: "#888",
 
    //*** SocialCalc.SettingsControls.PopupListInitialize
