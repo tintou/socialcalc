@@ -8,5 +8,5 @@ SOCIALCALC_FILES=\
         socialcalcspreadsheetcontrol.js \
         socialcalcviewer.js
 
-SocialCalc.js: $(SOCIALCALC_FILES) exports.js
-	cat $(SOCIALCALC_FILES) exports.js > $@
+SocialCalc.js: module-wrapper-top.js $(SOCIALCALC_FILES) module-wrapper-bottom.js
+	cat module-wrapper-top.js $(SOCIALCALC_FILES) module-wrapper-bottom.js > $@

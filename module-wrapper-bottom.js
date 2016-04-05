@@ -1,4 +1,4 @@
-if('undefined' === typeof window) {
+if('undefined' === typeof document) {
   // We don't really need a DOM-based presentation layer on the server
   SocialCalc.GetEditorCellElement = function () {};
   SocialCalc.ReplaceCell = function () {};
@@ -12,10 +12,6 @@ if('undefined' === typeof window) {
   }
 }
 
-if (typeof window === 'undefined' && typeof global != 'undefined') window = global;
-if (typeof SocialCalc != 'undefined' && typeof module != 'undefined') module.exports = SocialCalc;
-if (typeof document == 'undefined') document = window.document || {};
-
 // Compatibility with webworker-threads
 if (typeof self !== 'undefined' && self.thread) {
     window.setTimeout = function (cb, ms) {
@@ -23,3 +19,7 @@ if (typeof self !== 'undefined' && self.thread) {
     };
     window.clearTimeout = function () {};
 }
+
+    // Just return a value to define the module export.
+    return SocialCalc;
+}));
