@@ -2598,6 +2598,34 @@ SocialCalc.ExecuteSheetCommand = function(sheet, cmd, saveundo) {
                }
             }
 
+         // Expand merged cells if the new row/col is in between
+
+         var tempRenderContext = new SocialCalc.RenderContext(sheet)
+         tempRenderContext.CalculateCellSkipData()
+
+         var cellsToExpand = {} // Keep track of all merge spans we've expanded
+                                // so we don't expand one twice
+         for (var skipCell in tempRenderContext.cellskip) {
+             var skipCellCR = SocialCalc.coordToCr(skipCell)
+               , mergerCellCoords = tempRenderContext.cellskip[skipCell]
+             // for insertcol we check if the newly inserted col has
+             // has any spans. This can only mean, that those cells
+             // are part of a row span
+             if (cmd1 === "insertcol" && skipCellCR.col === newcolstart) {
+                if (!cellsToExpand[mergerCellCoords]) {
+                    sheet.GetAssuredCell(mergerCellCoords).colspan += coloffset
+                    }
+                cellsToExpand[mergerCellCoords] = true
+                }
+             // for insertrow it's the same method
+             if (cmd1 === "insertrow" && skipCellCR.row === newrowstart) {
+                if (!cellsToExpand[mergerCellCoords]) {
+                    sheet.GetAssuredCell(mergerCellCoords).rowspan += rowoffset
+                    }
+                cellsToExpand[mergerCellCoords] = true
+                }
+            }
+
          attribs.lastcol += coloffset;
          attribs.lastrow += rowoffset;
          attribs.needsrecalc = "yes";
@@ -2727,6 +2755,33 @@ SocialCalc.ExecuteSheetCommand = function(sheet, cmd, saveundo) {
                      }
                   }
                }
+            }
+
+         // Shrink merged cells if the new row/col was in between
+
+         var tempRenderContext = new SocialCalc.RenderContext(sheet)
+         tempRenderContext.CalculateCellSkipData()
+
+         var cellsToShrink = {} // Keep track of shrinked cells, so we don't do it twice
+         for (var skipCell in tempRenderContext.cellskip) {
+             var skipCellCR = SocialCalc.coordToCr(skipCell)
+               , mergerCellCoords = tempRenderContext.cellskip[skipCell]
+               , mergerCellCR = tempRenderContext.coordToCR[mergerCellCoords]
+             // for deletecol we check if the removed col any spans that
+             // are from younger cols and shrink those
+             if (cmd1 === "deletecol" && skipCellCR.col === colstart+coloffset && mergerCellCR.col < skipCellCR.col) {
+                if (!cellsToShrink[mergerCellCoords]) {
+                    sheet.GetAssuredCell(mergerCellCoords).colspan += coloffset
+                    }
+                cellsToShrink[mergerCellCoords] = true
+                }
+             // for insertrow it's the same method
+             if (cmd1 === "deleterow" && skipCellCR.row === rowstart+rowoffset && mergerCellCR.row < skipCellCR.row) {
+                if (!cellsToShrink[mergerCellCoords]) {
+                    sheet.GetAssuredCell(mergerCellCoords).rowspan += rowoffset
+                    }
+                cellsToShrink[mergerCellCoords] = true
+                }
             }
 
          if (saveundo) {
