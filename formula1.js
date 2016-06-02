@@ -47,7 +47,7 @@ SocialCalc.Formula = {};
    SocialCalc.Formula.CharClass = {num: 1, numstart: 2, op: 3, eof: 4, alpha: 5, incoord: 6, error: 7, quote: 8, space: 9, specialstart: 10};
  
    SocialCalc.Formula.CharClassTable = {
-      " ": 9, "!": 3, '"': 8, "#": 10, "$":6, "%":3, "&":3, "(": 3, ")": 3, "*": 3, "+": 3, ",": 3, "-": 3, ".": 2, "/": 3,
+      " ": 9, "!": 3, '"': 8, "'": 8, "#": 10, "$":6, "%":3, "&":3, "(": 3, ")": 3, "*": 3, "+": 3, ",": 3, "-": 3, ".": 2, "/": 3,
        "0": 1, "1": 1, "2": 1, "3": 1, "4": 1, "5": 1, "6": 1, "7": 1, "8": 1, "9": 1,
        ":": 3, "<": 3, "=": 3, ">": 3,
        "A": 5, "B": 5, "C": 5, "D": 5, "E": 5, "F": 5, "G": 5, "H": 5, "I": 5, "J": 5, "K": 5, "L": 5, "M": 5, "N": 5,
@@ -59,7 +59,9 @@ SocialCalc.Formula = {};
 
    SocialCalc.Formula.UpperCaseTable = {
        "a": "A", "b": "B", "c": "C", "d": "D", "e": "E", "f": "F", "g": "G", "h": "H", "i": "I", "j": "J", "k": "K", "l": "L", "m": "M",
-       "n": "N", "o": "O", "p": "P", "q": "Q", "r": "R", "s": "S", "t": "T", "u": "U", "v": "V", "w": "W", "x": "X", "y": "Y", "z": "Z"
+       "n": "N", "o": "O", "p": "P", "q": "Q", "r": "R", "s": "S", "t": "T", "u": "U", "v": "V", "w": "W", "x": "X", "y": "Y", "z": "Z",
+       "A": "A", "B": "B", "C": "C", "D": "D", "E": "E", "F": "F", "G": "G", "H": "H", "I": "I", "J": "J", "K": "K", "L": "L", "M": "M",
+       "N": "N", "O": "O", "P": "P", "Q": "Q", "R": "R", "S": "S", "T": "T", "U": "U", "V": "V", "W": "W", "X": "X", "Y": "Y", "Z": "Z"
        }
 
    SocialCalc.Formula.SpecialConstants = { // names that turn into constants for name lookup
@@ -146,7 +148,7 @@ SocialCalc.Formula = {};
 
 SocialCalc.Formula.ParseFormulaIntoTokens = function(line) {
 
-   var i, ch, chclass, haddecimal, last_token, last_token_type, last_token_text, t;
+   var i, ch, cclass, haddecimal, last_token, last_token_type, last_token_text, t;
 
    var scf = SocialCalc.Formula;
    var scc = SocialCalc.Constants;
@@ -297,7 +299,7 @@ SocialCalc.Formula.ParseFormulaIntoTokens = function(line) {
          }
       else if (state == parsestate.stringquote) { // note else if here
          if (cclass == charclass.quote) {
-            str +='"';
+            str += ch;
             state = parsestate.string; // double quote: add one then continue getting string
             }
          else { // something else -- end of string
@@ -575,6 +577,15 @@ SocialCalc.Formula.ConvertInfixToPolish = function(parseinfo) {
    }
 
 
+// DebugLog
+// display logged objects in the audit tab of the spreadsheet control
+if(typeof SocialCalc.debug_log === 'undefined') SocialCalc.debug_log = [];
+
+SocialCalc.DebugLog = function(logObject) {	
+	SocialCalc.debug_log.push(logObject);
+}
+
+
 //
 // result = SocialCalc.Formula.EvaluatePolish(parseinfo, revpolish, sheet, allowrangereturn)
 //
@@ -803,10 +814,16 @@ SocialCalc.Formula.EvaluatePolish = function(parseinfo, revpolish, sheet, allowr
       // function or name
 
       else if (ttype == tokentype.name) {
-         errortext = scf.CalculateFunction(ttext, operand, sheet);
+	  
+//         errortext = scf.CalculateFunction(ttext, operand, sheet);
+         errortext = scf.CalculateFunction(ttext, operand, sheet, parseinfo.coord); // eddy also pass the cell id
+		 
          if (errortext) break;
+		 
+		 
          }
 
+		 
       else {
          errortext = scc.s_InternalError+"Unknown token "+ttype+" ("+ttext+"). ";
          break;
@@ -1133,6 +1150,32 @@ SocialCalc.Formula.OperandValueAndType = function(sheet, operand) {
 
 
 SocialCalc.Formula.OperandAsCoord = function(sheet, operand) {
+	return SocialCalc.Formula.OperandAsType(sheet, operand, "coord");
+}
+
+
+/*
+#
+# operandinfo = SocialCalc.Formula.OperandAsRange(sheet, operand)
+#
+# Gets top of stack and pops it.
+# Returns coord value. All others are treated as an error.
+#
+*/
+
+SocialCalc.Formula.OperandAsRange = function(sheet, operand) {
+	return SocialCalc.Formula.OperandAsType(sheet, operand, "range");
+}
+
+/*
+#
+# operandinfo = SocialCalc.Formula.OperandAsType(sheet, operand, operandtype)
+#
+# Gets top of stack and pops it.
+# Returns operandtype value. All others are treated as an error.
+#
+*/
+SocialCalc.Formula.OperandAsType = function(sheet, operand, operandtype) {
 
    var scf = SocialCalc.Formula;
 
@@ -1146,7 +1189,7 @@ SocialCalc.Formula.OperandAsCoord = function(sheet, operand) {
    if (result.type == "name") {
       result = SocialCalc.Formula.LookupName(sheet, result.value);
       }
-   if (result.type == "coord") { // value is a coord reference
+   if (result.type == operandtype) { // value is a coord reference
       return result;
       }
    else {
@@ -1951,6 +1994,58 @@ SocialCalc.Formula.FunctionList["VARP"] = [SocialCalc.Formula.SeriesFunctions, -
 
 /*
 #
+# SUMPRODUCT(range1, range2, ...)
+#
+*/
+
+SocialCalc.Formula.SumProductFunction = function(fname, operand, foperand, sheet) {
+  
+   var range, products = [], sum = 0;
+   var scf = SocialCalc.Formula;
+   var ncols = 0, nrows = 0;
+
+   var PushOperand = function(t, v) {operand.push({type: t, value: v});};
+
+   while (foperand.length > 0) {
+      range = scf.TopOfStackValueAndType(sheet, foperand);
+      if (range.type != "range") {
+         PushOperand("e#VALUE!", 0);
+         return;
+         }
+      rangeinfo = scf.DecodeRangeParts(sheet, range.value);
+      if (!ncols) ncols = rangeinfo.ncols;
+      else if (ncols != rangeinfo.ncols) {
+         PushOperand("e#VALUE!", 0);
+         return;
+         }
+      if (!nrows) nrows = rangeinfo.nrows;
+      else if (nrows != rangeinfo.nrows) {
+         PushOperand("e#VALUE!", 0);
+         return;
+         }
+      for (i=0; i<rangeinfo.ncols; i++) {
+         for (j=0; j<rangeinfo.nrows; j++) {
+            k = i * rangeinfo.nrows + j;
+            cellcr = SocialCalc.crToCoord(rangeinfo.col1num + i, rangeinfo.row1num + j);
+            cell = rangeinfo.sheetdata.GetAssuredCell(cellcr);
+            value = cell.valuetype == "n" ? cell.datavalue : 0;
+            products[k] = ((typeof products[k] !== 'undefined')? products[k] : 1) * value;
+            }
+         }
+      }
+   for (i=0; i<products.length; i++) {
+      sum += products[i];
+      }
+   PushOperand("n", sum);
+
+   return;
+
+   }
+
+SocialCalc.Formula.FunctionList["SUMPRODUCT"] = [SocialCalc.Formula.SumProductFunction, -1, "rangen", "", "stat"];
+
+/*
+#
 # DAVERAGE(databaserange, fieldname, criteriarange)
 # DCOUNT(databaserange, fieldname, criteriarange)
 # DCOUNTA(databaserange, fieldname, criteriarange)
@@ -1990,6 +2085,7 @@ SocialCalc.Formula.DSeriesFunctions = function(fname, operand, foperand, sheet) 
    var count = 0;
    var counta = 0;
    var countblank = 0;
+   var countmatches = 0;   
    var product = 1;
    var maxval;
    var minval;
@@ -2037,7 +2133,7 @@ CRITERIAROW:
             if (typeof criteria == "string" && criteria.length == 0) continue; // blank items are OK
             testcol = criteriafieldnums[k];
             testcr = SocialCalc.crToCoord(testcol, dbinfo.row1num + i); // cell to check
-            cell = criteriainfo.sheetdata.GetAssuredCell(testcr);
+            cell = dbinfo.sheetdata.GetAssuredCell(testcr); // get cell to check from dbinfo sheet
             if (!scf.TestCriteria(cell.datavalue, cell.valuetype || "b", criteria)) {
                continue CRITERIAROW; // does not meet criteria - check next row
                }
@@ -2055,6 +2151,7 @@ CRITERIAROW:
       value1.value = cell.datavalue;
       value1.type = cell.valuetype;
       t = value1.type.charAt(0);
+      countmatches += 1;
       if (t == "n") count += 1;
       if (t != "b") counta += 1;
       if (t == "b") countblank += 1;
@@ -2155,10 +2252,10 @@ CRITERIAROW:
          break;
 
       case "DGET":
-         if (count == 1) {
-            PushOperand(resulttypesum, sum);
+         if (countmatches == 1) {
+            PushOperand(value1.type, value1.value);
             }
-         else if (count == 0) {
+         else if (countmatches == 0) {
             PushOperand("e#VALUE!", 0);
             }
          else {
@@ -2171,6 +2268,12 @@ CRITERIAROW:
    return;
 
    }
+
+//*********************
+//
+// Docs see - Function Handling - ~line 1560
+// 
+//*********************
 
 SocialCalc.Formula.FunctionList["DAVERAGE"] = [SocialCalc.Formula.DSeriesFunctions, 3, "dfunc", "", "stat"];
 SocialCalc.Formula.FunctionList["DCOUNT"] = [SocialCalc.Formula.DSeriesFunctions, 3, "dfunc", "", "stat"];
@@ -2666,16 +2769,26 @@ SocialCalc.Formula.IfFunction = function(fname, operand, foperand, sheet) {
       return;
       }
 
-   if (!cond.value) foperand.pop();
-   operand.push(foperand.pop());
-   if (cond.value) foperand.pop();
+   var op1, op2;
 
-   return null;
+   op1 = foperand.pop();
+   if (foperand.length == 1) {
+      op2 = foperand.pop();
+      }
+   else if (foperand.length == 0) {
+      op2 = {type: "n", value: 0};
+      }
+   else {
+      scf.FunctionArgsError(fname, operand);
+      return;
+   }
+
+   operand.push(cond.value ? op1 : op2);
 
    }
 
 // Add to function list
-SocialCalc.Formula.FunctionList["IF"] = [SocialCalc.Formula.IfFunction, 3, "iffunc", "", "test"];
+SocialCalc.Formula.FunctionList["IF"] = [SocialCalc.Formula.IfFunction, -2, "iffunc", "", "test"];
 
 /*
 #
@@ -3692,6 +3805,71 @@ SocialCalc.Formula.FunctionList["ROUND"] = [SocialCalc.Formula.RoundFunction, -1
 
 /*
 #
+# CEILING(value, [significance])
+# FLOOR(value, [significance])
+#
+*/
+
+SocialCalc.Formula.CeilingFloorFunctions = function(fname, operand, foperand, sheet) {
+
+   var scf = SocialCalc.Formula;
+   var val, sig, t;
+
+   var PushOperand = function(t, v) {operand.push({type: t, value: v});};
+
+   val = scf.OperandValueAndType(sheet, foperand);
+   t = val.type.charAt(0);
+   if (t != "n") {
+      PushOperand("e#VALUE!", 0);
+      return;
+      }
+   if (val.value == 0) {
+      PushOperand("n", 0);
+      return;
+      }
+
+   if (foperand.length == 1) {
+      sig = scf.OperandValueAndType(sheet, foperand);
+      t = val.type.charAt(0);
+      if (t != "n") {
+         PushOperand("e#VALUE!", 0);
+         return;
+         }
+      }
+   else if (foperand.length == 0) {
+      sig = {type: "n", value: val.value > 0 ? 1 : -1};
+      }
+   else {
+      PushOperand("e#VALUE!", 0);
+      return;
+      }
+   if (sig.value == 0) {
+      PushOperand("n", 0);
+      return;
+      }
+   if (sig.value * val.value < 0) {
+      PushOperand("e#NUM!", 0);
+      return;
+      }
+
+   switch (fname) {
+      case "CEILING":
+         PushOperand("n", Math.ceil(val.value / sig.value) * sig.value);
+         break;
+      case "FLOOR":
+         PushOperand("n", Math.floor(val.value / sig.value) * sig.value);
+         break;
+      }
+
+   return;
+
+   }
+
+SocialCalc.Formula.FunctionList["CEILING"] = [SocialCalc.Formula.CeilingFloorFunctions, -1, "vsig", "", "math"];
+SocialCalc.Formula.FunctionList["FLOOR"] = [SocialCalc.Formula.CeilingFloorFunctions, -1, "vsig", "", "math"];
+
+/*
+#
 # AND(v1,c1:c2,...)
 # OR(v1,c1:c2,...)
 #
@@ -4630,15 +4808,30 @@ SocialCalc.Formula.TestCriteria = function(value, type, criteria) {
       basestring = criteria.substring(1);
       }
    else {
-      comparitor = criteria.substring(0,2);
-      if (comparitor == "<=" || comparitor == "<>" || comparitor == ">=") {
-         basestring = criteria.substring(2);
+      // check for '*' or '?' in search string - wildcard
+      if (criteria.search(/([^~]\*|^\*)/) != -1 || criteria.search(/([^~]\?|^\?)/) != -1) {
+         comparitor = "regex";
+         if (criteria == "*") {
+            // "*" means cell contains 'anything'
+            basestring = ".+";
+         } else {
+             // convert Excel syntax to regex syntax. * -> .*    ? -> .?    ~* -> \*    ~? -> \?
+             // there are no negative lookbehinds in Javascript. Reverse the string and do negative lookaheads on ~? and ~*
+             basestring = criteria.split("").reverse().join("");
+             basestring = basestring.replace(/\?(?=[^~])|\?$/g, "?.").replace(/\?~/g, "?\\").replace(/\*(?=[^~])|\*$/g, "*.").replace(/\*~/, "*\\");
+             basestring = basestring.split("").reverse().join("");
          }
-      else {
-         comparitor = "none";
-         basestring = criteria;
-         }
+         basestring = "^" + basestring + "$";
+      } else {
+          comparitor = criteria.substring(0,2);
+          if (comparitor == "<=" || comparitor == "<>" || comparitor == ">=") {
+             basestring = criteria.substring(2);
+          } else {
+             comparitor = "none";
+             basestring = criteria;
+          }
       }
+   }
 
    basevalue = SocialCalc.DetermineValueType(basestring); // get type of value being compared
    if (!basevalue.type) { // no criteria base value given
@@ -4746,10 +4939,17 @@ SocialCalc.Formula.TestCriteria = function(value, type, criteria) {
          case "<>":
             cond = value != basevalue.value;
             break;
+
+         case "regex":
+            try {
+              cond = value.search(new RegExp(basevalue.value)) != -1;
+            } catch(e) {
+              cond = false; // regex invalid (e.g., error value) is always false
+            }
+            break;
          }
       }
 
    return cond;
 
    }
-
