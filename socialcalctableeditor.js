@@ -422,7 +422,7 @@ SocialCalc.TableEditor.prototype.EditorSaveEdit = function(text) {return SocialC
 SocialCalc.TableEditor.prototype.EditorApplySetCommandsToRange = function(cmdline, type) {return SocialCalc.EditorApplySetCommandsToRange(this, cmdline, type);};
 
 SocialCalc.TableEditor.prototype.MoveECellWithKey = function(ch) {return SocialCalc.MoveECellWithKey(this, ch);};
-SocialCalc.TableEditor.prototype.MoveECell = function(newcell) {return SocialCalc.MoveECell(this, newcell);};
+SocialCalc.TableEditor.prototype.MoveECell = function(newcell) { if (SocialCalc._app) return "A1"; return SocialCalc.MoveECell(this, newcell);};
 SocialCalc.TableEditor.prototype.ReplaceCell = function(cell, row, col) {SocialCalc.ReplaceCell(this, cell, row, col);};
 SocialCalc.TableEditor.prototype.UpdateCellCSS = function(cell, row, col) {SocialCalc.UpdateCellCSS(this, cell, row, col);};
 SocialCalc.TableEditor.prototype.SetECellHeaders = function(selected) {SocialCalc.SetECellHeaders(this, selected);};
@@ -435,7 +435,12 @@ SocialCalc.TableEditor.prototype.Range2Remove = function() {SocialCalc.Range2Rem
 
 SocialCalc.TableEditor.prototype.FitToEditTable = function() {SocialCalc.FitToEditTable(this);};
 SocialCalc.TableEditor.prototype.CalculateEditorPositions = function() {SocialCalc.CalculateEditorPositions(this);};
-SocialCalc.TableEditor.prototype.ScheduleRender = function() {SocialCalc.ScheduleRender(this);};
+SocialCalc.TableEditor.prototype.ScheduleRender = function() {this.ScheduleRender(true);};
+SocialCalc.TableEditor.prototype.ScheduleRender = function(renderwidgets) {    
+  // App widgets need focus - so only render widgets when needed, rather than the default of rendering everything. 
+  if(SocialCalc._app && renderwidgets == true) this.context.sheetobj.widgetsClean = false;  
+  SocialCalc.ScheduleRender(this);
+  };
 SocialCalc.TableEditor.prototype.DoRenderStep = function() {SocialCalc.DoRenderStep(this);};
 SocialCalc.TableEditor.prototype.SchedulePositionCalculations = function() {SocialCalc.SchedulePositionCalculations(this);};
 SocialCalc.TableEditor.prototype.DoPositionCalculations = function() {SocialCalc.DoPositionCalculations(this);};
@@ -756,8 +761,28 @@ SocialCalc.EditorRenderSheet = function(editor) {
 
    editor.EditorMouseUnregister();
 
-   editor.fullgrid = editor.context.RenderSheet(editor.fullgrid);
-
+   var sheetobj = editor.context.sheetobj;
+   // App widgets need to keep focus -  only render widgets if needed 
+   if(sheetobj.reRenderCellList != null && SocialCalc._app && sheetobj.widgetsClean === true) {
+     // re-render each individual cells - but not widget with focus 
+     for(var index in sheetobj.reRenderCellList) {
+       var coord = sheetobj.reRenderCellList[index];
+       var valuetype = sheetobj.cells[coord].valuetype;
+       if(valuetype.charAt(1) != "i" || valuetype !=  sheetobj.cells[coord].prevvaluetype) { // skip widgets - but paint when added/replaced
+         cr = SocialCalc.coordToCr(coord);
+         cell = SocialCalc.GetEditorCellElement(editor, cr.row, cr.col);
+         if(cell!=null) editor.ReplaceCell(cell, cr.row, cr.col);
+       }
+     }
+     sheetobj.reRenderCellList = [];
+   } else {
+      editor.fullgrid = editor.context.RenderSheet(editor.fullgrid);
+      if (sheetobj.reRenderCellList != null && SocialCalc._app) {
+        sheetobj.widgetsClean = true; // widgets have been rendered
+        sheetobj.reRenderCellList = [];        
+      }
+   }
+   
    if (editor.ecell) editor.SetECellHeaders("selected");
 
    SocialCalc.AssignID(editor, editor.fullgrid, "fullgrid"); // give it an id
@@ -794,10 +819,12 @@ SocialCalc.EditorScheduleSheetCommands = function(editor, cmdstr, saveundo, igno
          break;
 
       case "undo":
+         if(SocialCalc._app ) editor.context.sheetobj.widgetsClean = false;     // force app widgets to render     
          editor.SheetUndo();
          break;
 
       case "redo":
+         if(SocialCalc._app ) editor.context.sheetobj.widgetsClean = false;     // force app widgets to render
          editor.SheetRedo();
          break;
          
@@ -855,10 +882,12 @@ SocialCalc.EditorSheetStatusCallback = function(recalcdata, status, arg, editor)
             }
 
          if (sheetobj.celldisplayneeded && !sheetobj.renderneeded) {
-            cr = SocialCalc.coordToCr(sheetobj.celldisplayneeded);
-            cell = SocialCalc.GetEditorCellElement(editor, cr.row, cr.col);
-            editor.ReplaceCell(cell, cr.row, cr.col);
-            }
+             if (sheetobj.cells[sheetobj.celldisplayneeded] && sheetobj.cells[sheetobj.celldisplayneeded].valuetype != "e#N/A") {
+                cr = SocialCalc.coordToCr(sheetobj.celldisplayneeded);
+                cell = SocialCalc.GetEditorCellElement(editor, cr.row, cr.col);
+                editor.ReplaceCell(cell, cr.row, cr.col); // if no value set, wait for recalc and render . 
+                }
+             }
          if (editor.deferredCommands.length) {
             dcmd = editor.deferredCommands.shift();
             editor.EditorScheduleSheetCommands(dcmd.cmdstr, dcmd.saveundo, true);
@@ -876,7 +905,7 @@ SocialCalc.EditorSheetStatusCallback = function(recalcdata, status, arg, editor)
             if (sheetobj.renderneeded) {
                editor.FitToEditTable();
                sheetobj.renderneeded = false;
-               editor.ScheduleRender();
+               editor.ScheduleRender(false);
                }
             else {
                editor.SchedulePositionCalculations(); // just in case command changed positions
@@ -926,7 +955,7 @@ SocialCalc.EditorSheetStatusCallback = function(recalcdata, status, arg, editor)
 
       case "calcfinished":
          signalstatus(status);
-         editor.ScheduleRender();
+         editor.ScheduleRender(false);                        
          return;
 
       case "schedrender":
@@ -2082,6 +2111,7 @@ SocialCalc.EditorProcessKey = function(editor, ch, e) {
          if (ch=="[f2]") {
             if (editor.noEdit || editor.ECellReadonly()) return true;
             SocialCalc.EditorOpenCellEdit(editor);
+            editor.state="inputboxdirect"; // arrow keys move left and right, rather than select cells
             return false;
             }
 
@@ -2163,7 +2193,10 @@ SocialCalc.EditorProcessKey = function(editor, ch, e) {
             editor.inputBox.ShowInputBox(true); // make sure it's moved back if necessary
             return false;
             }
-         if (ch=="[f2]") return false;
+         if (ch=="[f2]") {
+           editor.state = "inputboxdirect"; 
+           return false;
+           }
          if (range.hasrange) {
             editor.RangeRemove();
             }
@@ -2197,7 +2230,10 @@ SocialCalc.EditorProcessKey = function(editor, ch, e) {
                }
             break;
             }
-         if (ch=="[f2]") return false;
+         if (ch=="[f2]") { 
+           editor.state = "input"; // arrow keys add range/coord to inputbox formula
+           return false;
+           }
          return true;
 
       case "skip-and-start":
@@ -2553,6 +2589,13 @@ SocialCalc.GridMousePosition = function(editor, clientX, clientY) {
 
 SocialCalc.GetEditorCellElement = function(editor, row, col) {
 
+  var headerColOffset = 0;
+  var headerRowOffset = 0;
+   //Adjust for row/col headers
+   if (editor.context.showRCHeaders == false) {     
+     var headerColOffset = -1;
+     var headerRowOffset = -1;
+   }
    var rowpane, colpane, c, coord;
    var rowindex = 0;
    var colindex = 0;
@@ -2568,7 +2611,7 @@ SocialCalc.GetEditorCellElement = function(editor, row, col) {
                      colindex++;
                   }
                return {
-                  element: editor.griddiv.firstChild.lastChild.childNodes[rowindex].childNodes[colindex],
+                  element: editor.griddiv.firstChild.lastChild.childNodes[rowindex +headerRowOffset].childNodes[colindex + headerColOffset],
                   rowpane: rowpane, colpane: colpane};
                }
             for (c=editor.context.colpanes[colpane].first; c<=editor.context.colpanes[colpane].last; c++) {
@@ -2713,7 +2756,7 @@ SocialCalc.MoveECell = function(editor, newcell) {
          }
       editor.UpdateCellCSS(cell, editor.ecell.row, editor.ecell.col);
       editor.SetECellHeaders(""); // set to regular col/rowname styles
-      editor.cellhandles.ShowCellHandles(false);
+      if(editor.cellhandles) editor.cellhandles.ShowCellHandles(false); // only if row/col visible 
       }
    newcell = editor.context.cellskip[newcell] || newcell;
    editor.ecell = SocialCalc.coordToCr(newcell);
@@ -2782,7 +2825,7 @@ SocialCalc.ReplaceCell = function(editor, cell, row, col) {
    var newelement, a;
    if (!cell) return;
    newelement = editor.context.RenderCell(row, col, cell.rowpane, cell.colpane, true, null);
-   if (newelement) {
+   if (newelement && cell.element) { // skip hidden cells
       // Don't use a real element and replaceChild, which seems to have focus issues with IE, Firefox, and speed issues
       cell.element.innerHTML = newelement.innerHTML;
       cell.element.style.cssText = "";
@@ -5064,7 +5107,8 @@ SocialCalc.CreateTableControl = function(control) {
 
    functions.control = control; // make sure this is there
 
-   SocialCalc.DragRegister(control.paneslider, control.vertical, !control.vertical, functions, control.editor.toplevel);
+   // Drag pane slider - every thing but app view
+   if (SocialCalc._app != true) SocialCalc.DragRegister(control.paneslider, control.vertical, !control.vertical, functions, control.editor.toplevel);
 
    control.main.appendChild(control.paneslider);
 
@@ -5154,7 +5198,9 @@ SocialCalc.CreateTableControl = function(control) {
                 MouseUp: SocialCalc.TCTDragFunctionStop,
                 Disabled: function() {return control.editor.busy;}};
    functions.control = control; // make sure this is there
-   SocialCalc.DragRegister(control.thumb, control.vertical, !control.vertical, functions, control.editor.toplevel);
+   
+   // Drag pane slider - every thing but app view
+   if (SocialCalc._app != true) SocialCalc.DragRegister(control.thumb, control.vertical, !control.vertical, functions, control.editor.toplevel);
 
    params = {normalstyle: "backgroundImage:url("+imageprefix+"thumb-"+vh+"n.gif)", name:"Thumb",
              downstyle:  "backgroundImage:url("+imageprefix+"thumb-"+vh+"d.gif)",
@@ -6460,6 +6506,7 @@ SocialCalc.ProcessKeyDown = function(e) {
    var ch="";
    var status=true;
 
+   if (SocialCalc._app) return; // // ignore in app - widgets need control
    if (SocialCalc.Keyboard.passThru) return; // ignore
 
    e = e || window.event;
@@ -6509,7 +6556,8 @@ SocialCalc.ProcessKeyPress = function(e) {
    var ch="";
 
    e = e || window.event;
-
+   if (SocialCalc._app) return; // // ignore in app - widgets need control
+   
    if (SocialCalc.Keyboard.passThru) return; // ignore
    if (kt.didProcessKey) { // already processed this key
       if (kt.repeatingKeyPress) {
