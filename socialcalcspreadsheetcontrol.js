@@ -257,7 +257,7 @@ SocialCalc.SpreadsheetControl = function(idPrefix) {
 
    this.tabnums.edit = this.tabs.length;
    this.tabs.push({name: "edit", text: "Edit", html:
-      ' <div id="%id.edittools">'+
+     ' <div id="%id.edittools" style="padding:10px 0px 0px 0px;">'+
 '&nbsp;<img id="%id.button_undo" src="%img.undo.png" style="vertical-align:bottom;">'+
 ' <img id="%id.button_redo" src="%img.redo.png" style="vertical-align:bottom;">'+
 ' &nbsp;<img src="%img.divider1.png" style="vertical-align:bottom;">&nbsp; '+
