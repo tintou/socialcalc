@@ -522,18 +522,27 @@ SocialCalc.CreateTableEditor = function(editor, width, height) {
    td = document.createElement("td");
    td.appendChild(editor.griddiv);
    tr.appendChild(td);
-   td = document.createElement("td");
-   td.appendChild(editor.verticaltablecontrol.main);
-   tr.appendChild(td);
-
+   if (SocialCalc._app != true) { // no scroll bar in app
+     // Add v scroll bar  
+     td = document.createElement("td");
+     td.appendChild(editor.verticaltablecontrol.main);
+     tr.appendChild(td);
+   }
    tr = document.createElement("tr");
    tbody.appendChild(tr);
-   td = document.createElement("td");
-   td.appendChild(editor.horizontaltablecontrol.main);
-   tr.appendChild(td);
+   if (SocialCalc._app != true) { // no scroll bar in app
+     // Add h scroll bar  
+     td = document.createElement("td");
+     td.appendChild(editor.horizontaltablecontrol.main);
+     tr.appendChild(td);
+   }
 
    td = document.createElement("td"); // logo display: Required by CPAL License for this code!
-   td.style.background="url("+editor.imageprefix+"logo.gif) no-repeat center center";
+   if (SocialCalc._app) { // in app right align Required CPAL License logo
+     td.style.background="url("+editor.imageprefix+"logo.gif) no-repeat right center";
+   } else {
+     td.style.background="url("+editor.imageprefix+"logo.gif) no-repeat center center";
+   }
    td.innerHTML = "<div style='cursor:pointer;font-size:1px;'><img src='"+editor.imageprefix+"1x1.gif' border='0' width='18' height='18'></div>";
    tr.appendChild(td);
    editor.logo = td;
@@ -602,7 +611,11 @@ SocialCalc.ResizeTableEditor = function(editor, width, height) {
    editor.toplevel.style.width = width+"px";
    editor.toplevel.style.height = height+"px";
 
-   editor.tablewidth = Math.max(0, width - scc.defaultTableControlThickness);
+   if (SocialCalc._app) {
+     editor.tablewidth = Math.max(0, width ); // no v scroll bar with app
+   } else {
+     editor.tablewidth = Math.max(0, width - scc.defaultTableControlThickness);     
+   }
    editor.tableheight = Math.max(0, height - scc.defaultTableControlThickness);
    editor.griddiv.style.width=editor.tablewidth+"px";
    editor.griddiv.style.height=editor.tableheight+"px";
@@ -1303,6 +1316,9 @@ SocialCalc.ProcessEditorMouseDown = function(e) {
 
    var mouseinfo = SocialCalc.EditorMouseInfo;
    var ele = event.target || event.srcElement; // source object is often within what we want
+   var target = ele; 
+   if (target.nodeType == 3) target = target.parentNode; // defeat Safari bug
+     
    var mobj;
 
    if (mouseinfo.ignore) return; // ignore this
@@ -1361,10 +1377,12 @@ SocialCalc.ProcessEditorMouseDown = function(e) {
    var clickedCell = editor.context.sheetobj.cells[coord];
    if(clickedCell) {
      if(clickedCell.valuetype.charAt(1) == 'i') { // IF cell contains ioWidget
-        var formula_name= clickedCell.valuetype.substring(2);	 
-	    var cell_widget=document.getElementById(formula_name+'_'+coord);
-		SocialCalc.CmdGotFocus(cell_widget); // cell widgets need to keep focus 
-		// SocialCalc.Keyboard.FocusWidget = coord;
+       var formula_name= clickedCell.valuetype.substring(2);
+       var widget_id = formula_name+'_'+coord;
+       if(target && widget_id == target.id) { // if widget was clicked (rather than cell containing widget) 
+         var cell_widget=document.getElementById(widget_id);
+         SocialCalc.CmdGotFocus(cell_widget); // cell widgets need to keep focus 
+       }
 		return; // let ioWidget keep the focus 
 		}
 	 }
@@ -3227,7 +3245,14 @@ SocialCalc.FitToEditTable = function(editor) {
    context.colpanes[colpane].last = context.sheetobj.attribs.usermaxcol || colnum;
 
    // Calculate row height data
-
+   
+   // find first visible row - Bug fix when many rows hidden - as PANEL formula hides many rows
+   var firstRow = context.rowpanes[0].first;
+   var lastRow = context.sheetobj.attribs.lastrow;
+   while(sheetobj.rowattribs.hide[firstRow] == "yes" && firstRow <lastRow) firstRow++;
+   context.rowpanes[0].first = firstRow;
+   
+   // count visible rows in pane(s)
    totalrows=context.showRCHeaders ? 1 : 0;
    for (rowpane=0; rowpane<context.rowpanes.length-1; rowpane++) { // count all panes but last one
       totalrows += context.rowpanes[rowpane].last - context.rowpanes[rowpane].first + 1;
@@ -3312,7 +3337,7 @@ SocialCalc.CalculateEditorPositions = function(editor) {
 //
 
 SocialCalc.ScheduleRender = function(editor) {
-
+   if(editor.ignoreRender == true) return; // formDataViewer is only used for "ExecuteSheetCommand" fumctions - so skip render 
    if (editor.timeout) window.clearTimeout(editor.timeout); // in case called more than once, just use latest
 
    SocialCalc.EditorSheetStatusCallback(null, "schedrender", null, editor);
