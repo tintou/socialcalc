@@ -20251,6 +20251,7 @@ SocialCalc.Formula.IoFunctions = function(fname, operand, foperand, sheet, coord
           if (spreadsheet == null) spreadsheet = window.ss
 
           var forceRender = false;
+          var lastShowDimension = 0;
           var showGridDimension =  function(sheet, lastIndex, sheetHideList, showList, getIndexOf) {
             //  --- hide all rows/col    up to sheet.attribs.lastrow/col         
             //  --- FOR each row/col -- create function to do the loop          
@@ -20264,7 +20265,7 @@ SocialCalc.Formula.IoFunctions = function(fname, operand, foperand, sheet, coord
                   sheetHideList[sheetHideIndex] ="yes";                
                   //  ------- SET repaint flag
                   forceRender = true;
-                }
+                } else {lastShowDimension = arrayIndex;}
               } else {
                 // row/col is hidden 
                 if(showList[arrayIndex] === true) { // if show 
@@ -20272,6 +20273,7 @@ SocialCalc.Formula.IoFunctions = function(fname, operand, foperand, sheet, coord
                   delete sheetHideList[sheetHideIndex];                
                   //  ------- SET repaint flag
                   forceRender = true;
+                  lastShowDimension = arrayIndex;
                 }
               }              
               
@@ -20281,13 +20283,20 @@ SocialCalc.Formula.IoFunctions = function(fname, operand, foperand, sheet, coord
           
           var getRowIndex = function(row) { return row };
           showGridDimension(sheet,  sheet.attribs.lastrow,  sheet.rowattribs.hide, showrows, getRowIndex);
+          lastShowDimension = 0;
           showGridDimension(sheet,  sheet.attribs.lastcol,  sheet.colattribs.hide, showcols, SocialCalc.rcColname );
+          // control width of html - for mobile app - as better to use native scroll rather than SocialCalc scroll bar - colpanes[length].last = usermaxcol - see FitToEditTable
+          sheet.attribs.usermaxcol = lastShowDimension;
           
           if(forceRender) {
             sheet.renderneeded = true;
             sheet.widgetsClean = false; //  force widgets to repaint - update cell reference in widget HTML    
             spreadsheet.editor.context.rowpanes[0].first = 1; // reset scroll bar to first row  
-            spreadsheet.editor.FitToEditTable();
+            spreadsheet.editor.context.CalculateColWidthData();
+            
+            spreadsheet.width = spreadsheet.editor.context.totalwidth;
+            spreadsheet.height = 2500;
+            spreadsheet.editor.ResizeTableEditor(spreadsheet.editor.context.totalwidth,2500);  // 2500 is page height constant - fix issue with mobile device - Used constant because could not see an easy way to pre-calculate height 
           }
           
         }
@@ -24252,9 +24261,10 @@ spreadsheet.Buttons = {
       
    spreadsheet.spreadsheetDiv.appendChild(spreadsheet.editorDiv);
 
-// eddy test add input 
+// form data sheet - all input formulas set values in this sheet as well as the loaded sheet
    spreadsheet.formDataViewer = new SocialCalc.SpreadsheetViewer("te_FormData-"); // should end with -
    spreadsheet.formDataViewer.InitializeSpreadsheetViewer(formDataDiv.id, 180, 0, 200);
+   spreadsheet.formDataViewer.editor.ignoreRender = true; // formDataViewer is used for ExecuteSheetCommand only - no need to render
 // end
    
    for (vname in views) {
@@ -24397,7 +24407,9 @@ SocialCalc.LocalizeSubstrings = function(str) {
 
 SocialCalc.GetSpreadsheetControlObject = function() {
 
-   var csco = SocialCalc.CurrentSpreadsheetControlObject;
+  // if in viewer mode return CurrentSpreadsheetViewerObject because CurrentSpreadsheetControlObject is null (bug fix) 
+   var csco = (SocialCalc.CurrentSpreadsheetControlObject != null) 
+   ? SocialCalc.CurrentSpreadsheetControlObject : SocialCalc.CurrentSpreadsheetViewerObject;
    if (csco) return csco;
 
 //   throw ("No current SpreadsheetControl object.");
@@ -26248,6 +26260,8 @@ SocialCalc.SpreadsheetControlClipboardLoad = function() {
    else if (document.getElementById(s.idPrefix+"clipboardformat-scsave").checked) {
       savetype = "scsave";
       }
+   // control+v ignores ignore windows clipboard - see ctrlkeyFunction(editor, charname)
+   s.editor.pastescclipboard = true;
    s.editor.EditorScheduleSheetCommands("loadclipboard "+
       SocialCalc.encodeForSave(
          SocialCalc.ConvertOtherFormatToSave(document.getElementById(s.idPrefix+"clipboardtext").value, savetype)), true, false);
