@@ -257,7 +257,7 @@ SocialCalc.SpreadsheetControl = function(idPrefix) {
 
    this.tabnums.edit = this.tabs.length;
    this.tabs.push({name: "edit", text: "Edit", html:
-      ' <div id="%id.edittools">'+
+     ' <div id="%id.edittools" style="padding:10px 0px 0px 0px;">'+
 '&nbsp;<img id="%id.button_undo" src="%img.undo.png" style="vertical-align:bottom;">'+
 ' <img id="%id.button_redo" src="%img.redo.png" style="vertical-align:bottom;">'+
 ' &nbsp;<img src="%img.divider1.png" style="vertical-align:bottom;">&nbsp; '+
@@ -1163,9 +1163,10 @@ spreadsheet.Buttons = {
       
    spreadsheet.spreadsheetDiv.appendChild(spreadsheet.editorDiv);
 
-// eddy test add input 
+// form data sheet - all input formulas set values in this sheet as well as the loaded sheet
    spreadsheet.formDataViewer = new SocialCalc.SpreadsheetViewer("te_FormData-"); // should end with -
    spreadsheet.formDataViewer.InitializeSpreadsheetViewer(formDataDiv.id, 180, 0, 200);
+   spreadsheet.formDataViewer.editor.ignoreRender = true; // formDataViewer is used for ExecuteSheetCommand only - no need to render
 // end
    
    for (vname in views) {
@@ -1308,7 +1309,9 @@ SocialCalc.LocalizeSubstrings = function(str) {
 
 SocialCalc.GetSpreadsheetControlObject = function() {
 
-   var csco = SocialCalc.CurrentSpreadsheetControlObject;
+  // if in viewer mode return CurrentSpreadsheetViewerObject because CurrentSpreadsheetControlObject is null (bug fix) 
+   var csco = (SocialCalc.CurrentSpreadsheetControlObject != null) 
+   ? SocialCalc.CurrentSpreadsheetControlObject : SocialCalc.CurrentSpreadsheetViewerObject;
    if (csco) return csco;
 
 //   throw ("No current SpreadsheetControl object.");
@@ -3159,6 +3162,8 @@ SocialCalc.SpreadsheetControlClipboardLoad = function() {
    else if (document.getElementById(s.idPrefix+"clipboardformat-scsave").checked) {
       savetype = "scsave";
       }
+   // control+v ignores ignore windows clipboard - see ctrlkeyFunction(editor, charname)
+   s.editor.pastescclipboard = true;
    s.editor.EditorScheduleSheetCommands("loadclipboard "+
       SocialCalc.encodeForSave(
          SocialCalc.ConvertOtherFormatToSave(document.getElementById(s.idPrefix+"clipboardtext").value, savetype)), true, false);

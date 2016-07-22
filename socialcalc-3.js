@@ -1780,6 +1780,7 @@ SocialCalc.ExecuteSheetCommand = function(sheet, cmd, saveundo) {
    var changes = sheet.changes;
    var cellProperties = SocialCalc.CellProperties;
    var scc = SocialCalc.Constants;
+   var cellChanged = false;
 
    var ParseRange =
       function() {
@@ -1869,6 +1870,7 @@ SocialCalc.ExecuteSheetCommand = function(sheet, cmd, saveundo) {
 
          else if (/^[a-z]{1,2}(:[a-z]{1,2})?$/i.test(what)) { // col attributes
             sheet.renderneeded = true;
+            
             what = what.toUpperCase();
             pos = what.indexOf(":");
             if (pos>=0) {
@@ -1940,6 +1942,7 @@ SocialCalc.ExecuteSheetCommand = function(sheet, cmd, saveundo) {
             }
 
          else if (/^[a-z]{1,2}\d+(:[a-z]{1,2}\d+)?$/i.test(what)) { // cell attributes
+           cellChanged = true;
             ParseRange();
             if (cr1.row!=cr2.row || cr1.col!=cr2.col || sheet.celldisplayneeded || sheet.renderneeded) { // not one cell
                sheet.renderneeded = true;
@@ -1978,6 +1981,7 @@ SocialCalc.ExecuteSheetCommand = function(sheet, cmd, saveundo) {
                      cell.datavalue = 0; // until recalc
                      delete cell.errors;
                      cell.datatype = "f";
+                     if(SocialCalc._app && cell.valuetype != "e#N/A") cell.prevvaluetype = cell.valuetype;  // repaint when widgets added/removed 
                      cell.valuetype = "e#N/A"; // until recalc
                      cell.formula = rest;
                      delete cell.displaystring;
@@ -2489,6 +2493,7 @@ SocialCalc.ExecuteSheetCommand = function(sheet, cmd, saveundo) {
       case "insertrow":
          sheet.renderneeded = true;
          sheet.changedrendervalues = true;
+         sheet.widgetsClean = false; //  force widgets to repaint - update cell reference in widget HTML 
          what = cmd.NextToken();
          rest = cmd.RestOfString();
          ParseRange();
@@ -2635,6 +2640,7 @@ SocialCalc.ExecuteSheetCommand = function(sheet, cmd, saveundo) {
       case "deleterow":
          sheet.renderneeded = true;
          sheet.changedrendervalues = true;
+         sheet.widgetsClean = false; // update cell reference in widget HTML - force widgets to repaint
          what = cmd.NextToken();
          rest = cmd.RestOfString();
          lastcol = attribs.lastcol; // save old values since ParseRange sets...
@@ -3266,7 +3272,17 @@ for (var i=0;i<sheet.changes.stack.length;i++) {
    }
 alert(cmdstr+"|"+sheet.changes.stack.length+"--"+ustack);
 */
-
+   if(SocialCalc._app) {
+     // widgets need focus. In app mode, render widgets only when required. Rather than default of render everything
+     if(cellChanged) {
+       if(sheet.renderneeded == true && attrib!="value" && attrib!="text" && attrib!="formula" && attrib!="constant" && attrib!="empty") sheet.widgetsClean = false;  // force widgets to render
+       else if(attrib=="all") sheet.widgetsClean = false;  // force widgets to render - because of undo
+       } 
+     else {
+       if(sheet.renderneeded == true) sheet.widgetsClean = false;  // force widgets to render
+       }
+     }
+   
    return errortext;
 
    }
@@ -3826,11 +3842,20 @@ SocialCalc.RecalcTimerRoutine = function() {
    coord = sheet.recalcdata.nextcalc;
    while (coord) {
       cell = sheet.cells[coord];
-	  // eddy RecalcTimerRoutine {
-	   cell.parseinfo.coord = coord;
+	  // app widgets need cell ID so store in parseinfo {
+      if (!cell.parseinfo) { // cache parsed formula
+        cell.parseinfo = scf.ParseFormulaIntoTokens(cell.formula);
+        }
+      cell.parseinfo.coord = coord;
 	  // }
       eresult = scf.evaluate_parsed_formula(cell.parseinfo, sheet, false);
       if (scf.SheetCache.waitingForLoading) { // wait until restarted
+         // schedule render to run while waiting for dependent sheet to load - schedules first render of sheet
+         if (scri.firstRenderScheduled != true) {
+           var editor = SocialCalc.GetSpreadsheetControlObject().editor;
+           editor.ScheduleRender(false);    
+           scri.firstRenderScheduled = true; // stop more renders because done first render of sheet
+         }
          recalcdata.nextcalc = coord; // start with this cell again
          recalcdata.count += count;
          do_statuscallback("calcloading", {sheetname: scf.SheetCache.waitingForLoading});
@@ -3872,6 +3897,7 @@ SocialCalc.RecalcTimerRoutine = function() {
 
    recalcdata.inrecalc = false;
 
+   sheet.reRenderCellList = sheet.recalcdata.celllist; // GUI widgets need focus - if app then only re-render non-widget cells
    delete sheet.recalcdata; // save memory and clear out for name lookup formula evaluation
 
    delete sheet.attribs.needsrecalc; // remember recalc done
@@ -5013,7 +5039,7 @@ SocialCalc.RenderCell = function(context, rownum, colnum, rowpane, colpane, noEl
       result.rowSpan=span;
       }
 
-   if (cell.displaystring==undefined) { // cache the display value
+   if (cell.displaystring==undefined || sheetobj.widgetsClean == false) { // cache the display value
       cell.displaystring = SocialCalc.FormatValueForDisplay(sheetobj, cell.datavalue, coord, (linkstyle || context.defaultlinkstyle));
       }
 	
@@ -5636,7 +5662,9 @@ SocialCalc.FormatValueForDisplay = function(sheetobj, value, cr, linkstyle) {
 
    // eddy display cell HTML {      
    if(valueinputwidget=="i" && html_display_value!=null && html_formated_value!=null) {
-	 var formula_details = SocialCalc.Formula.FunctionList[formula_name]; 
+     var parameters = sheetobj.ioParameterList[cr];
+    
+	   var formula_details = SocialCalc.Formula.FunctionList[formula_name]; 
 //	 var ecell = SocialCalc.GetSpreadsheetControlObject().editor.ecell; // check if widget has focus
 //	 SocialCalc.GetSpreadsheetControlObject().debug.push({formula_name:formula_name});
 		 if( formula_details) {
@@ -5646,7 +5674,36 @@ SocialCalc.FormatValueForDisplay = function(sheetobj, value, cr, linkstyle) {
 			 var checkedValue = (html_display_value == 0) ? "" : "checked"; // for checkbox
 			 cell_html = cell_html.replace(/<%=checked%>/g, checkedValue);
 			 cell_html = cell_html.replace(/<%=formated_value%>/g, html_formated_value);
-			 cell_html = cell_html.replace(/<%=display_value%>/g, html_display_value);
+       cell_html = cell_html.replace(/<%=display_value%>/g, html_display_value);
+       // replace widget HTML with parameter 
+       // FOR each parameter
+       var parameterValue; // set to value of param for if coord, value of cell
+       if(parameters) { 
+         // add forumla parameters to widget html
+         for(var index=0; index < parameters.length; index ++) {
+           // IF coord THEN replace with cell value
+           if(parameters[index].type == 'coord') {
+             parameterValue = sheetobj.GetAssuredCell(parameters[index].value).datavalue;
+           } else {
+             // ELSE with param value 
+             parameterValue = parameters[index].value;
+           }
+           var paramRegExp = new RegExp("<%=parameter"+index+"_value%>",'g');
+           cell_html = cell_html.replace(paramRegExp, parameterValue);
+         }
+         if(parameters.html) { // add html created in formula1.js to widget
+           for(var htmlIndex=0; htmlIndex < parameters.html.length; htmlIndex ++) {
+             var paramRegExp = new RegExp("<%=html"+htmlIndex+"_value%>",'g');
+             cell_html = cell_html.replace(paramRegExp, parameters.html[htmlIndex]);
+           }
+         }
+         if(parameters.css) { // add style(css) formula css value, if any - e.g. =textbox("")+style("margin: 8px 0;")
+           // * RegEx Unit Test **  https://regex101.com/r/oV7wU5/2
+           cell_html = cell_html.replace(/^(<\w+)(\W)/, "$1 style='"+parameters.css+ "'$2");
+         }
+
+       }
+       
 			 return cell_html.replace(/<%=cell_reference%>/g, cr);
 			 }
 		 return "error:Widget HTML missing";
