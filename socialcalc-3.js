@@ -370,7 +370,7 @@ SocialCalc.Sheet.prototype.RecalcSheet = function() {return SocialCalc.RecalcShe
 //
 // Linetypes are:
 //
-//    version:versionname - version of this format. Currently 1.4.
+//    version:versionname - version of this format. Currently 1.5.
 //
 //    cell:coord:type:value...:type:value... - Types are as follows:
 //
