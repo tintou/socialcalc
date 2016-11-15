@@ -1269,7 +1269,7 @@ SocialCalc.Sheet.prototype.RecalcSheet = function() {return SocialCalc.RecalcShe
 //
 // Linetypes are:
 //
-//    version:versionname - version of this format. Currently 1.4.
+//    version:versionname - version of this format. Currently 1.5.
 //
 //    cell:coord:type:value...:type:value... - Types are as follows:
 //
@@ -3203,7 +3203,16 @@ SocialCalc.ExecuteSheetCommand = function(sheet, cmd, saveundo) {
                   cliprange.cr1.row + ((row-cr1.row) % (cliprange.cr2.row - cliprange.cr1.row + 1)));
                basecell = clipsheet.GetAssuredCell(crbase);
                if (rest == "all" || rest == "formats") {
-                  for (attrib in cellProperties) {
+                 // get source col width
+                 // and copy to sheet 
+                 sourceCol = cliprange.cr1.col + ((col-cr1.col) % (cliprange.cr2.col - cliprange.cr1.col + 1));
+                 colWidth = clipsheet.colattribs.width[SocialCalc.rcColname( sourceCol )]
+                 if (colWidth != null) {
+                   // if source col width exists
+                   // set dest col with
+                   sheet.colattribs.width[SocialCalc.rcColname(col)] = colWidth;
+                   }
+                 for (attrib in cellProperties) {
                      if (cellProperties[attrib] == 1) continue; // copy only format attributes
                      if (typeof basecell[attrib] === undefined || cellProperties[attrib] == 3) {
                         delete cell[attrib];
