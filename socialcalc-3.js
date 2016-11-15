@@ -2304,7 +2304,35 @@ SocialCalc.ExecuteSheetCommand = function(sheet, cmd, saveundo) {
                   cliprange.cr1.row + ((row-cr1.row) % (cliprange.cr2.row - cliprange.cr1.row + 1)));
                basecell = clipsheet.GetAssuredCell(crbase);
                if (rest == "all" || rest == "formats") {
-                  for (attrib in cellProperties) {
+                 // get source width and hidden attribute
+                 // and copy to sheet 
+                 if(row == cr1.row) { // only need 1st row of cols
+                   // col attributes
+                   sourceColname = SocialCalc.rcColname(cliprange.cr1.col + ((col-cr1.col) % (cliprange.cr2.col - cliprange.cr1.col + 1)));
+                   colWidth = clipsheet.colattribs.width[ sourceColname];
+                   colHide = clipsheet.colattribs.hide[sourceColname];
+                   if (colWidth != null) {
+                     // if source col width exists
+                     // set dest col width
+                     sheet.colattribs.width[SocialCalc.rcColname(col)] = colWidth;
+                     }
+                   if (colHide != null) {
+                     // if source col is hidden
+                     // set dest col hidden
+                     sheet.colattribs.hide[SocialCalc.rcColname(col)] = colHide;
+                     }                   
+                   }
+                 if(col == cr1.col) {  // only need 1st col or rows
+                   // row attributes
+                   sourceRow = cliprange.cr1.row + ((row-cr1.row) % (cliprange.cr2.row - cliprange.cr1.row + 1));
+                   rowHide = clipsheet.rowattribs.hide[sourceRow];
+                   if (rowHide != null) {
+                     // if source row is hidden
+                     // set dest row hidden
+                     sheet.rowattribs.hide[row] = rowHide;
+                     }                   
+                 }
+                 for (attrib in cellProperties) {
                      if (cellProperties[attrib] == 1) continue; // copy only format attributes
                      if (typeof basecell[attrib] === undefined || cellProperties[attrib] == 3) {
                         delete cell[attrib];
