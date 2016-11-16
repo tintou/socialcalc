@@ -3231,6 +3231,7 @@ SocialCalc.ExecuteSheetCommand = function(sheet, cmd, saveundo) {
                      sheet.rowattribs.hide[row] = rowHide;
                      }                   
                  }
+
                  for (attrib in cellProperties) {
                      if (cellProperties[attrib] == 1) continue; // copy only format attributes
                      if (typeof basecell[attrib] === undefined || cellProperties[attrib] == 3) {
