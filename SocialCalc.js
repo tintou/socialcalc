@@ -660,6 +660,8 @@ SocialCalc.Constants = {
    s_fdef_CHOOSE: 'Returns the value specified by the index. The values may be ranges of cells. ',
    s_fdef_COLUMNS: 'Returns the number of columns in the range. ',
    s_fdef_COS: 'Trigonometric cosine function (value is in radians). ',
+   s_fdef_CONCAT: 'Join Together Text & Values to Create a Single Combined Text String. ',
+   s_fdef_CONCATENATE: 'Join Together Text & Values to Create a Single Combined Text String. ',
    s_fdef_COUNT: 'Counts the number of numeric values, not blank, text, or error. ',
    s_fdef_COUNTA: 'Counts the number of non-blank values. ',
    s_fdef_COUNTBLANK: 'Counts the number of blank values. (Note: "" is not blank.) ',
@@ -17185,6 +17187,8 @@ SocialCalc.Formula.FunctionArgString = function(fname) {
 /*
 #
 # AVERAGE(v1,c1:c2,...)
+# CONCAT(value_or_range,...)
+# CONCATENATE(value_or_range,...)
 # COUNT(v1,c1:c2,...)
 # COUNTA(v1,c1:c2,...)
 # COUNTBLANK(v1,c1:c2,...)
@@ -17213,6 +17217,8 @@ SocialCalc.Formula.SeriesFunctions = function(fname, operand, foperand, sheet) {
 
    var PushOperand = function(t, v) {operand.push({type: t, value: v});};
 
+
+   var concat = "";
    var sum = 0;
    var resulttypesum = "";
    var count = 0;
@@ -17230,6 +17236,7 @@ SocialCalc.Formula.SeriesFunctions = function(fname, operand, foperand, sheet) {
       if (t == "n") count += 1;
       if (t != "b") counta += 1;
       if (t == "b") countblank += 1;
+      if (t != "e" && t != "b") concat = concat + value1.value;
 
       if (t == "n") {
          v1 = value1.value-0; // get it as a number
@@ -17257,6 +17264,11 @@ SocialCalc.Formula.SeriesFunctions = function(fname, operand, foperand, sheet) {
    resulttypesum = resulttypesum || "n";
 
    switch (fname) {
+      case "CONCAT":
+      case "CONCATENATE":
+        PushOperand("t", concat);
+        break;
+
       case "SUM":
          PushOperand(resulttypesum, sum);
          break;
@@ -17343,6 +17355,8 @@ SocialCalc.Formula.SeriesFunctions = function(fname, operand, foperand, sheet) {
 
 // Add to function list
 SocialCalc.Formula.FunctionList["AVERAGE"] = [SocialCalc.Formula.SeriesFunctions, -1, "vn", null, "stat"];
+SocialCalc.Formula.FunctionList["CONCAT"] = [SocialCalc.Formula.SeriesFunctions, -1, "vn", null, "text"];
+SocialCalc.Formula.FunctionList["CONCATENATE"] = [SocialCalc.Formula.SeriesFunctions, -1, "vn", null, "text"];
 SocialCalc.Formula.FunctionList["COUNT"] = [SocialCalc.Formula.SeriesFunctions, -1, "vn", null, "stat"];
 SocialCalc.Formula.FunctionList["COUNTA"] = [SocialCalc.Formula.SeriesFunctions, -1, "vn", null, "stat"];
 SocialCalc.Formula.FunctionList["COUNTBLANK"] = [SocialCalc.Formula.SeriesFunctions, -1, "vn", null, "stat"];
