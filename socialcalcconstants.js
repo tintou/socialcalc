@@ -643,6 +643,8 @@ SocialCalc.Constants = {
    s_fdef_CHOOSE: 'Returns the value specified by the index. The values may be ranges of cells. ',
    s_fdef_COLUMNS: 'Returns the number of columns in the range. ',
    s_fdef_COS: 'Trigonometric cosine function (value is in radians). ',
+   s_fdef_CONCAT: 'Join Together Text & Values to Create a Single Combined Text String. ',
+   s_fdef_CONCATENATE: 'Join Together Text & Values to Create a Single Combined Text String. ',
    s_fdef_COUNT: 'Counts the number of numeric values, not blank, text, or error. ',
    s_fdef_COUNTA: 'Counts the number of non-blank values. ',
    s_fdef_COUNTBLANK: 'Counts the number of blank values. (Note: "" is not blank.) ',
