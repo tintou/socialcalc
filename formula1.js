@@ -3095,10 +3095,10 @@ SocialCalc.Formula.SumifsFunction = function(fname, operand, foperand, sheet) {
 
       var all_good = true;
       for (var i=0; i < ranges.length; i++) {
-         value1 = operand_value_and_type(sheet, ranges[i]);
+         value1 = operand_value_and_type(sheet, ranges[i]); // get next condition - note this function increases the test range index
+         if (!all_good) { continue; }  // skip test, but move to next cell in test range
          if (!scf.TestCriteria(value1.value, value1.type, criterias[i].value)) {
             all_good = false;
-            break;
             }
          }
       if (!all_good) { continue; }
