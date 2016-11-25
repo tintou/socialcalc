@@ -746,6 +746,7 @@ SocialCalc.Constants = {
    s_fdef_SUBSTITUTE: 'Returns text1 with the all occurrences of oldtext replaced by newtext. If "occurrence" is present, then only that occurrence is replaced. ',
    s_fdef_SUM: 'Adds the numeric values. The values to the sum function may be ranges in the form similar to A1:B5. ',
    s_fdef_SUMIF: 'Sums the numeric values of cells in the range that meet the criteria. The criteria may be a value ("x", 15, 1+3) or a test (>25). If range2 is present, then range1 is tested and the corresponding range2 value is summed. ',
+   s_fdef_SUMIFS: 'Sums the numeric values of cells in the sum_range that meet the multiple criteria. The criteria may be a value ("x", 15, 1+3) or a test (>25).  ',
    s_fdef_SYD: 'Depreciation by Sum of Year\'s Digits method. ',
    s_fdef_T: 'Returns the text value or else a null string. ',
    s_fdef_TAN: 'Trigonometric tangent function (value is in radians) ',
@@ -18182,7 +18183,7 @@ SocialCalc.Formula.SumifsFunction = function(fname, operand, foperand, sheet) {
 
       var all_good = true;
       for (var i=0; i < ranges.length; i++) {
-         value1 = operand_value_and_type(sheet, ranges[i]); // get next condition - note this function increases the condition index
+         value1 = operand_value_and_type(sheet, ranges[i]); // get next condition - note this function increases the test range index
          if (!all_good) { continue; }  // skip test, but move to next cell in test range
          if (!scf.TestCriteria(value1.value, value1.type, criterias[i].value)) {
             all_good = false;
@@ -18206,7 +18207,7 @@ SocialCalc.Formula.SumifsFunction = function(fname, operand, foperand, sheet) {
    }
 
 
-SocialCalc.Formula.FunctionList["SUMIFS"] = [SocialCalc.Formula.SumifsFunction, -3, "sumifs", "", "stat"];
+SocialCalc.Formula.FunctionList["SUMIFS"] = [SocialCalc.Formula.SumifsFunction, -3, "sum_range, criteria_range1, criteria1, [criteria_range2, criteria2, ... criteria_range_n, criteria_n]", "", "stat"];
 
 /*
 #

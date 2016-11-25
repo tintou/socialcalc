@@ -729,6 +729,7 @@ SocialCalc.Constants = {
    s_fdef_SUBSTITUTE: 'Returns text1 with the all occurrences of oldtext replaced by newtext. If "occurrence" is present, then only that occurrence is replaced. ',
    s_fdef_SUM: 'Adds the numeric values. The values to the sum function may be ranges in the form similar to A1:B5. ',
    s_fdef_SUMIF: 'Sums the numeric values of cells in the range that meet the criteria. The criteria may be a value ("x", 15, 1+3) or a test (>25). If range2 is present, then range1 is tested and the corresponding range2 value is summed. ',
+   s_fdef_SUMIFS: 'Sums the numeric values of cells in the sum_range that meet the multiple criteria. The criteria may be a value ("x", 15, 1+3) or a test (>25).  ',
    s_fdef_SYD: 'Depreciation by Sum of Year\'s Digits method. ',
    s_fdef_T: 'Returns the text value or else a null string. ',
    s_fdef_TAN: 'Trigonometric tangent function (value is in radians) ',

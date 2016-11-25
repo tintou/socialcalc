@@ -3119,7 +3119,7 @@ SocialCalc.Formula.SumifsFunction = function(fname, operand, foperand, sheet) {
    }
 
 
-SocialCalc.Formula.FunctionList["SUMIFS"] = [SocialCalc.Formula.SumifsFunction, -3, "sumifs", "", "stat"];
+SocialCalc.Formula.FunctionList["SUMIFS"] = [SocialCalc.Formula.SumifsFunction, -3, "sum_range, criteria_range1, criteria1, [criteria_range2, criteria2, ... criteria_range_n, criteria_n]", "", "stat"];
 
 /*
 #
