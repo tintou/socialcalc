@@ -9859,7 +9859,7 @@ SocialCalc.GridMousePosition = function(editor, clientX, clientY) {
    result.row = row;
    result.col = col;
 
-   if (editor.headposition) {
+   if (editor.headposition && SocialCalc._app != true)  {
       if (clientX < editor.headposition.left && clientX >= editor.gridposition.left) {
          result.rowheader = true;
          result.distance = editor.headposition.left - clientX;
