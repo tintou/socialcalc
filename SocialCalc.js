@@ -9893,14 +9893,16 @@ SocialCalc.GridMousePosition = function(editor, clientX, clientY) {
              result.rowtounhide = row-1;
            }
          }
-         for (rowpane=0; rowpane<editor.context.rowpanes.length; rowpane++) {
-           if (result.rowtoresize >= editor.context.rowpanes[rowpane].first &&
-             result.rowtoresize <= editor.context.rowpanes[rowpane].last) { // visible column
-             return result;
+         if(result.rowtounhide == null) {  //if unhide then ignore row select & resize 
+           for (rowpane=0; rowpane<editor.context.rowpanes.length; rowpane++) {
+             if (result.rowtoresize >= editor.context.rowpanes[rowpane].first &&
+               result.rowtoresize <= editor.context.rowpanes[rowpane].last) { // visible column
+               return result;
+             }
            }
+           result.rowselect = true;          
          }
          delete result.rowtoresize;
-         result.rowselect = true;
          return result;
          }
       else if (clientY < editor.headposition.top && clientY > editor.gridposition.top) { // > because of sizing row
@@ -9933,14 +9935,16 @@ SocialCalc.GridMousePosition = function(editor, clientX, clientY) {
                }
             }
 
-         for (colpane=0; colpane<editor.context.colpanes.length; colpane++) {
-            if (result.coltoresize >= editor.context.colpanes[colpane].first &&
-                result.coltoresize <= editor.context.colpanes[colpane].last) { // visible column
-               return result;
-               }
-            }
+         if(result.coltounhide == null) {  //if unhide then ignore col select & resize 
+           for (colpane=0; colpane<editor.context.colpanes.length; colpane++) {
+              if (result.coltoresize >= editor.context.colpanes[colpane].first &&
+                  result.coltoresize <= editor.context.colpanes[colpane].last) { // visible column
+                 return result;
+                 }
+              }
+           result.colselect = true;
+           }
          delete result.coltoresize;
-         result.colselect = true;
          return result;
          }
       else if (clientX >= editor.verticaltablecontrol.controlborder) {
