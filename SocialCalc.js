@@ -7567,6 +7567,11 @@ SocialCalc.TableEditor = function(context) {
       var ta, cell, position, cmd, sel, cliptext;
 
       switch (charname) {
+         case "[ctrl-a]":
+            editor.MoveECell("A1");
+            editor.RangeAnchor("A1");
+            editor.RangeExtend(SocialCalc.crToCoord(editor.context.sheetobj.attribs.lastcol,editor.context.sheetobj.attribs.lastrow));
+            return false;      
          case "[ctrl-c]":
          case "[ctrl-x]":
             ta = editor.pasteTextarea;
@@ -13805,6 +13810,7 @@ SocialCalc.keyboardTables = {
       },
 
    controlKeysIE: {
+      65: "[ctrl-a]",
       67: "[ctrl-c]",
       83: "[ctrl-s]",
       86: "[ctrl-v]",
@@ -13821,6 +13827,7 @@ SocialCalc.keyboardTables = {
       },
 
    controlKeysOpera: {
+      65: "[ctrl-a]",
       67: "[ctrl-c]",
       83: "[ctrl-s]",
       86: "[ctrl-v]",
@@ -13835,6 +13842,7 @@ SocialCalc.keyboardTables = {
       },
 
    controlKeysSafari: {
+      97: "[ctrl-a]",
       99: "[ctrl-c]",
       115: "[ctrl-s]",
       118: "[ctrl-v]",
@@ -13854,6 +13862,7 @@ SocialCalc.keyboardTables = {
       },
 
    controlKeysFirefox: {
+      97: "[ctrl-a]",
       99: "[ctrl-c]",
       115: "[ctrl-s]",
       118: "[ctrl-v]",
