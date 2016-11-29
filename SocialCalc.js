@@ -3188,8 +3188,8 @@ SocialCalc.ExecuteSheetCommand = function(sheet, cmd, saveundo) {
          clipsheet = new SocialCalc.Sheet(); // load clipboard contents as another sheet
          clipsheet.ParseSheetSave(SocialCalc.Clipboard.clipboard);
          cliprange = SocialCalc.ParseRange(clipsheet.copiedfrom);
-         coloffset = cr1.col - cliprange.cr1.col; // get sizes, etc.
-         rowoffset = cr1.row - cliprange.cr1.row;
+         coloffset = cliprange.cr1.col; // get sizes, etc. - offset for OffsetFormulaCoords
+         rowoffset = cliprange.cr1.row; 
          numcols = Math.max(cr2.col - cr1.col + 1, cliprange.cr2.col - cliprange.cr1.col + 1);
          numrows = Math.max(cr2.row - cr1.row + 1, cliprange.cr2.row - cliprange.cr1.row + 1);
          if (cr1.col+numcols-1 > attribs.lastcol) attribs.lastcol = cr1.col+numcols-1;
@@ -3256,7 +3256,7 @@ SocialCalc.ExecuteSheetCommand = function(sheet, cmd, saveundo) {
                   cell.datatype = basecell.datatype;            
                   cell.valuetype = basecell.valuetype;
                   if (cell.datatype == "f") { // offset relative coords, even in sheet references
-                     cell.formula = SocialCalc.OffsetFormulaCoords(basecell.formula, coloffset, rowoffset);
+                     cell.formula = SocialCalc.OffsetFormulaCoords(basecell.formula, col - coloffset, row - rowoffset);
                      }
                   else {
                      cell.formula = basecell.formula;
