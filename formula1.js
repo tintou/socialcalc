@@ -167,7 +167,8 @@ SocialCalc.Formula.ParseFormulaIntoTokens = function(line) {
    var str = "";
    var state = 0;
    var haddecimal = false;
-
+   var twochrop = "";
+   
   for (i=0; i<=line.length; i++) {
       if (i<line.length) {
          ch = line.charAt(i);
@@ -350,7 +351,8 @@ SocialCalc.Formula.ParseFormulaIntoTokens = function(line) {
                last_token_type = last_token.type;
                last_token_text = last_token.text;
                if (last_token_type == charclass.op) {
-                  if (last_token_text == '<' || last_token_text == ">") {
+                  twochrop = last_token_text + str;
+                  if (twochrop == '<=' || twochrop == ">=" || twochrop == "<>") {
                      str = last_token_text + str;
                      parseinfo.pop();
                      if (parseinfo.length>0) {
