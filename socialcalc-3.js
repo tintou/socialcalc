@@ -2078,6 +2078,21 @@ SocialCalc.ExecuteSheetCommand = function(sheet, cmd, saveundo) {
          ParseRange();
          cell=sheet.GetAssuredCell(cr1.coord);
          if (cell.readonly) break;
+
+         // check whether merged cells other than cr1 contain data and clear them
+         for (row=cr1.row; row <= cr2.row; row++) {
+            for (col=cr1.col; col <= cr2.col; col++) {
+               if (!(row == cr1.row && col == cr1.col)){ // skip top left cell
+                   quashedCellCoord = SocialCalc.crToCoord(col, row);
+                   quashedCell = sheet.GetAssuredCell(quashedCellCoord);
+                   // save quashed cell value for undo
+                   if (saveundo) changes.AddUndo("set "+quashedCellCoord+" all", sheet.CellToString(quashedCell));
+                   delete sheet.cells[quashedCellCoord]; // delete cell
+               }
+            }
+         }
+
+
          if (saveundo) changes.AddUndo("unmerge "+cr1.coord);
 
          if (cr2.col > cr1.col) cell.colspan = cr2.col - cr1.col + 1;
