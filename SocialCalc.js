@@ -2980,6 +2980,21 @@ SocialCalc.ExecuteSheetCommand = function(sheet, cmd, saveundo) {
          ParseRange();
          cell=sheet.GetAssuredCell(cr1.coord);
          if (cell.readonly) break;
+
+         // check whether merged cells other than cr1 contain data and clear them
+         for (row=cr1.row; row <= cr2.row; row++) {
+            for (col=cr1.col; col <= cr2.col; col++) {
+               if (!(row == cr1.row && col == cr1.col)){ // skip top left cell
+                   quashedCellCoord = SocialCalc.crToCoord(col, row);
+                   quashedCell = sheet.GetAssuredCell(quashedCellCoord);
+                   // save quashed cell value for undo
+                   if (saveundo) changes.AddUndo("set "+quashedCellCoord+" all", sheet.CellToString(quashedCell));
+                   delete sheet.cells[quashedCellCoord]; // delete cell
+               }
+            }
+         }
+
+
          if (saveundo) changes.AddUndo("unmerge "+cr1.coord);
 
          if (cr2.col > cr1.col) cell.colspan = cr2.col - cr1.col + 1;
@@ -7931,7 +7946,7 @@ SocialCalc.CreateTableEditor = function(editor, width, height) {
    tr.appendChild(td);
    editor.logo = td;
    AssignID(editor, editor.logo, "logo");
-   SocialCalc.TooltipRegister(td.firstChild.firstChild, "SocialCalc", null, editor.toplevel);
+   td.firstChild.firstChild.title = "SocialCalc";
 
    editor.toplevel.appendChild(editor.layouttable);
 
@@ -11692,12 +11707,6 @@ SocialCalc.CellHandlesMouseMoveOnHandle = function(e) {
             SocialCalc.CellHandlesHoverTimeout();
             return;
             }
-         if (cellhandles.tooltipstimer) {
-            window.clearTimeout(cellhandles.tooltipstimer);
-            cellhandles.tooltipstimer = null;
-            }
-         cellhandles.tooltipswhichhandle = whichhandle;
-         cellhandles.tooltipstimer = window.setTimeout(SocialCalc.CellHandlesTooltipsTimeout, 700);
          }
 
       if (cellhandles.timer) {
@@ -11821,54 +11830,7 @@ SocialCalc.CellHandlesHoverTimeout = function() {
       window.clearTimeout(cellhandles.timer);
       cellhandles.timer = null;
       }
-   if (cellhandles.tooltipstimer) {
-      window.clearTimeout(cellhandles.tooltipstimer);
-      cellhandles.tooltipstimer = null;
-      }
    editor.cellhandles.ShowCellHandles(true, false); // hide move handles
-
-}
-
-SocialCalc.CellHandlesTooltipsTimeout = function() {
-
-   editor = SocialCalc.Keyboard.focusTable; // get TableEditor doing keyboard stuff
-   if (!editor) return true; // we're not handling it -- let browser do default
-   var cellhandles = editor.cellhandles;
-   if (cellhandles.tooltipstimer) {
-      window.clearTimeout(cellhandles.tooltipstimer);
-      cellhandles.tooltipstimer = null;
-      }
-
-   var whichhandle = cellhandles.tooltipswhichhandle;
-   if (whichhandle==0) { // off of active part of palette
-      SocialCalc.CellHandlesHoverTimeout();
-      return;
-      }
-   if (whichhandle==-3) {
-      cellhandles.dragtooltip.innerHTML = scc.s_CHfillAllTooltip;
-      }
-   else if (whichhandle==3) {
-      cellhandles.dragtooltip.innerHTML = scc.s_CHfillContentsTooltip;
-      }
-   else if (whichhandle==-2) {
-      cellhandles.dragtooltip.innerHTML = scc.s_CHmovePasteAllTooltip;
-      }
-   else if (whichhandle==-4) {
-      cellhandles.dragtooltip.innerHTML = scc.s_CHmoveInsertAllTooltip;
-      }
-   else if (whichhandle==2) {
-      cellhandles.dragtooltip.innerHTML = scc.s_CHmovePasteContentsTooltip;
-      }
-   else if (whichhandle==4) {
-      cellhandles.dragtooltip.innerHTML = scc.s_CHmoveInsertContentsTooltip;
-      }
-   else {
-      cellhandles.dragtooltip.innerHTML = "&nbsp;";
-      cellhandles.dragtooltip.style.display = "none";
-      return;
-      }
-
-   cellhandles.dragtooltip.style.display = "block";
 
 }
 
@@ -11898,10 +11860,7 @@ SocialCalc.CellHandlesMouseDown = function(e) {
       window.clearTimeout(cellhandles.timer);
       cellhandles.timer = null;
       }
-   if (cellhandles.tooltipstimer) {
-      window.clearTimeout(cellhandles.tooltipstimer);
-      cellhandles.tooltipstimer = null;
-      }
+
    cellhandles.dragtooltip.innerHTML = "&nbsp;";
    cellhandles.dragtooltip.style.display = "none";
 
@@ -12466,11 +12425,6 @@ SocialCalc.CreateTableControl = function(control) {
    var AssignID = SocialCalc.AssignID;
    var setStyles = SocialCalc.setStyles;
    var scc = SocialCalc.Constants;
-   var TooltipRegister = function(element, etype, vh) {
-      if (scc["s_"+etype+"Tooltip"+vh]) {
-         SocialCalc.TooltipRegister(element, scc["s_"+etype+"Tooltip"+vh], null, control.editor.toplevel);
-         }
-      }
 
    var imageprefix = control.editor.imageprefix;
    var vh = control.vertical ? "v" : "h";
@@ -12511,7 +12465,7 @@ SocialCalc.CreateTableControl = function(control) {
    s.backgroundImage="url("+imageprefix+"paneslider-"+vh+".gif)";
    if (scc.TCpanesliderClass) control.paneslider.className = scc.TCpanesliderClass;
    AssignID(control.editor, control.paneslider, "paneslider"+vh);
-   TooltipRegister(control.paneslider, "paneslider", vh);
+   control.paneslider.title = "paneslider";
 
    functions = {MouseDown:SocialCalc.TCPSDragFunctionStart,
                     MouseMove: SocialCalc.TCPSDragFunctionMove,
@@ -13260,210 +13214,6 @@ SocialCalc.DragFunctionPosition = function(event, draginfo, dobj) {
    if (dobj.horizontal) element.style.left = (draginfo.clientX + draginfo.offsetX)+"px";
 
    }
-
-// *************************************
-//
-// Tooltip functions:
-//
-// *************************************
-
-SocialCalc.TooltipInfo = {
-
-   // There is only one of these -- no "new" is done.
-   // Only one tooltip operation can be active at a time.
-   // The registeredElements array is used to identify items.
-
-   // One item for each element with a tooltip, each an object with:
-   //    .element, .tiptext, .functionobj, .parent
-   // Currently .functionobj can only contain .offsetx and .offsety.
-   // If present they are used instead of the default ones.
-
-   registeredElements: [],
-
-   registered: false, // if true, an event handler has been registered for this functionality
-
-   // Items used during hover over an element
-
-   tooltipElement: null, // item being processed (.element is the actual element)
-   timer: null, // timer object waiting to see if holding over element
-   popupElement: null, // tooltip element being displayed
-   clientX: 0, // modifyable version to restrict movement
-   clientY: 0,
-   offsetX: SocialCalc.Constants.TooltipOffsetX, // modifyable version to allow positioning
-   offsetY: SocialCalc.Constants.TooltipOffsetY
-
-   }
-
-//
-// TooltipRegister(element, tiptext, functionobj, parent) - make element have a tooltip
-//
-
-SocialCalc.TooltipRegister = function(element, tiptext, functionobj, parent) {
-
-   var tooltipinfo = SocialCalc.TooltipInfo;
-   tooltipinfo.registeredElements.push(
-      {element: element, tiptext: tiptext, functionobj: functionobj, parent: parent}
-      );
-
-   if (tooltipinfo.registered) return; // only need to add event listener once
-
-   if (document.addEventListener) { // DOM Level 2 -- Firefox, et al
-      document.addEventListener("mousemove", SocialCalc.TooltipMouseMove, false);
-      }
-   else if (document.attachEvent) { // IE 5+
-      document.attachEvent("onmousemove", SocialCalc.TooltipMouseMove);
-      }
-   else { // don't handle this
-      throw SocialCalc.Constants.s_BrowserNotSupported;
-      }
-
-   tooltipinfo.registered = true; // remember
-
-   return;
-
-   }
-
-//
-// TooltipMouseMove(event)
-//
-
-SocialCalc.TooltipMouseMove = function(event) {
-
-   var e = event || window.event;
-
-   var tooltipinfo = SocialCalc.TooltipInfo;
-
-   tooltipinfo.clientX = e.clientX;
-   tooltipinfo.clientY = e.clientY;
-
-   var tobj = SocialCalc.LookupElement(e.target || e.srcElement, tooltipinfo.registeredElements);
-
-   if (tooltipinfo.timer) { // waiting to see if holding still: didn't hold still
-      window.clearTimeout(tooltipinfo.timer); // cancel timer
-      tooltipinfo.timer = null;
-      }
-
-   if (tooltipinfo.popupElement) { // currently displaying a tip: hide it
-      SocialCalc.TooltipHide();
-      }
-
-   tooltipinfo.tooltipElement = tobj || null;
-
-   if (!tobj || SocialCalc.ButtonInfo.buttonDown) return; // if not an object with a tip or a "button" is down, ignore
-
-   tooltipinfo.timer = window.setTimeout(SocialCalc.TooltipWaitDone, 700);
-
-   if (tooltipinfo.tooltipElement.element.addEventListener) { // Register event for mouse down which cancels tooltip stuff
-      tooltipinfo.tooltipElement.element.addEventListener("mousedown", SocialCalc.TooltipMouseDown, false);
-      }
-   else if (tooltipinfo.tooltipElement.element.attachEvent) { // IE
-      tooltipinfo.tooltipElement.element.attachEvent("onmousedown", SocialCalc.TooltipMouseDown);
-      }
-
-   return;
-
-   }
-
-//
-// TooltipMouseDown(event)
-//
-
-SocialCalc.TooltipMouseDown = function(event) {
-
-   var e = event || window.event;
-
-   var tooltipinfo = SocialCalc.TooltipInfo;
-
-   if (tooltipinfo.timer) {
-      window.clearTimeout(tooltipinfo.timer); // cancel timer
-      tooltipinfo.timer = null;
-      }
-
-   if (tooltipinfo.popupElement) { // currently displaying a tip: hide it
-      SocialCalc.TooltipHide();
-      }
-
-   if (tooltipinfo.tooltipElement) {
-      if (tooltipinfo.tooltipElement.element.removeEventListener) { // DOM Level 2 -- Firefox, et al
-         tooltipinfo.tooltipElement.element.removeEventListener("mousedown", SocialCalc.TooltipMouseDown, false);
-         }
-      else if (tooltipinfo.tooltipElement.element.attachEvent) { // IE 5+
-         tooltipinfo.tooltipElement.element.detachEvent("onmousedown", SocialCalc.TooltipMouseDown);
-         }
-      tooltipinfo.tooltipElement = null;
-      }
-
-   return;
-
-   }
-
-//
-// TooltipDisplay(tobj)
-//
-
-SocialCalc.TooltipDisplay = function(tobj) {
-
-   var tooltipinfo = SocialCalc.TooltipInfo;
-   var scc = SocialCalc.Constants;
-   var offsetX = (tobj.functionobj && ((typeof tobj.functionobj.offsetx) == "number")) ? 
-      tobj.functionobj.offsetx : tooltipinfo.offsetX;
-   var offsetY = (tobj.functionobj && ((typeof tobj.functionobj.offsety) == "number")) ? 
-      tobj.functionobj.offsety : tooltipinfo.offsetY;
-   var viewport = SocialCalc.GetViewportInfo();
-   var pos = SocialCalc.GetElementPositionWithScroll(tobj.parent);
-
-   tooltipinfo.popupElement = document.createElement("div");
-   if (scc.TDpopupElementClass) tooltipinfo.popupElement.className = scc.TDpopupElementClass;
-   SocialCalc.setStyles(tooltipinfo.popupElement, scc.TDpopupElementStyle);
-
-   tooltipinfo.popupElement.innerHTML = tobj.tiptext;
-
-   if (tooltipinfo.clientX > viewport.width/2) { // on right side of screen
-      tooltipinfo.popupElement.style.bottom = (pos.height - tooltipinfo.clientY + offsetY + pos.top)+"px";
-      tooltipinfo.popupElement.style.right = (pos.width - tooltipinfo.clientX + offsetX + pos.left)+"px";
-      }
-   else { // on left side of screen
-      tooltipinfo.popupElement.style.bottom = (pos.height - tooltipinfo.clientY + offsetY + pos.top)+"px";
-      tooltipinfo.popupElement.style.left = (tooltipinfo.clientX + offsetX - pos.left)+"px";
-      }
-
-   if (tooltipinfo.clientY < 50) { // make sure fits on screen if nothing above grid
-      tooltipinfo.popupElement.style.bottom = (pos.height - tooltipinfo.clientY + offsetY - 50 + pos.top)+"px";
-      }
-
-   tobj.parent.appendChild(tooltipinfo.popupElement);
-
-   }
-
-//
-// TooltipHide()
-//
-
-SocialCalc.TooltipHide = function() {
-
-   var tooltipinfo = SocialCalc.TooltipInfo;
-
-   if (tooltipinfo.popupElement) {
-      tooltipinfo.popupElement.parentNode.removeChild(tooltipinfo.popupElement);
-      tooltipinfo.popupElement = null;
-      }
-
-   }
-
-//
-// TooltipWaitDone()
-//
-
-SocialCalc.TooltipWaitDone = function() {
-
-   var tooltipinfo = SocialCalc.TooltipInfo;
-
-   tooltipinfo.timer = null;
-
-   SocialCalc.TooltipDisplay(tooltipinfo.tooltipElement);
-
-   }
-
 
 // *************************************
 //
@@ -24302,7 +24052,7 @@ spreadsheet.Buttons = {
       bele = document.getElementById(spreadsheet.idPrefix+button);
       if (!bele) {alert("Button "+(spreadsheet.idPrefix+button)+" missing"); continue;}
       bele.style.border = "1px solid "+scc.ISCButtonBorderNormal;
-      SocialCalc.TooltipRegister(bele, SCLoc(spreadsheet.Buttons[button].tooltip), {}, spreadsheet.spreadsheetDiv);
+      bele.title = SCLoc(spreadsheet.Buttons[button].tooltip);
       SocialCalc.ButtonRegister(spreadsheet.editor, bele,
          {normalstyle: "border:1px solid "+scc.ISCButtonBorderNormal+";background-color:"+scc.ISCButtonNormalBackground+";",
           hoverstyle: "border:1px solid "+scc.ISCButtonBorderHover+";background-color:"+scc.ISCButtonHoverBackground+";",
@@ -24325,7 +24075,7 @@ spreadsheet.Buttons = {
       bele.style.verticalAlign = "middle";
       bele.style.border = "1px solid #FFF";
       bele.style.marginLeft = "4px";
-      SocialCalc.TooltipRegister(bele, SCLoc(spreadsheet.formulabuttons[button].tooltip), {}, spreadsheet.spreadsheetDiv);
+      bele.title = SCLoc(spreadsheet.formulabuttons[button].tooltip);
       SocialCalc.ButtonRegister(spreadsheet.editor, bele,
          {normalstyle: "border:1px solid #FFF;backgroundColor:#FFF;",
           hoverstyle: "border:1px solid #CCC;backgroundColor:#FFF;",
@@ -24346,7 +24096,7 @@ spreadsheet.Buttons = {
       bele.src = (spreadsheet.imagePrefix)+spreadsheet.findbuttons[button].image;
       bele.style.verticalAlign = "middle";
       bele.style.border = "1px solid #FFF";
-      SocialCalc.TooltipRegister(bele, SCLoc(spreadsheet.findbuttons[button].tooltip), {}, spreadsheet.formulabardiv);
+      bele.title = SCLoc(spreadsheet.findbuttons[button].tooltip);
       SocialCalc.ButtonRegister(spreadsheet.editor, bele,
          {normalstyle: "border:1px solid #FFF;backgroundColor:#FFF;",
           hoverstyle: "border:1px solid #CCC;backgroundColor:#FFF;",
