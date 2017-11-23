@@ -15,6 +15,7 @@
         root.SocialCalc = factory.call(root, this);
   }
 }(this, function (window) {
+
 //
 /*
 // The module of the SocialCalc package with customizable constants, strings, etc.
@@ -899,6 +900,7 @@ SocialCalc.ConstantsSetImagePrefix = function(imagePrefix) {
    scc.defaultImagePrefix = imagePrefix;
 
    }
+
 
 //
 // The main SocialCalc code module of the SocialCalc package
@@ -2980,6 +2982,21 @@ SocialCalc.ExecuteSheetCommand = function(sheet, cmd, saveundo) {
          ParseRange();
          cell=sheet.GetAssuredCell(cr1.coord);
          if (cell.readonly) break;
+
+         // check whether merged cells other than cr1 contain data and clear them
+         for (row=cr1.row; row <= cr2.row; row++) {
+            for (col=cr1.col; col <= cr2.col; col++) {
+               if (!(row == cr1.row && col == cr1.col)){ // skip top left cell
+                   quashedCellCoord = SocialCalc.crToCoord(col, row);
+                   quashedCell = sheet.GetAssuredCell(quashedCellCoord);
+                   // save quashed cell value for undo
+                   if (saveundo) changes.AddUndo("set "+quashedCellCoord+" all", sheet.CellToString(quashedCell));
+                   delete sheet.cells[quashedCellCoord]; // delete cell
+               }
+            }
+         }
+
+
          if (saveundo) changes.AddUndo("unmerge "+cr1.coord);
 
          if (cr2.col > cr1.col) cell.colspan = cr2.col - cr1.col + 1;
@@ -7376,6 +7393,7 @@ SocialCalc.SetConvertedCell = function(sheet, cr, rawvalue) {
       }
 
    }
+
 
 //
 // SocialCalcTableEditor
@@ -14069,6 +14087,7 @@ SocialCalc.ProcessKey = function (ch, e) {
    }
 
 
+
 //
 /*
 // SocialCalc Number Formatting Library
@@ -15098,6 +15117,7 @@ SocialCalc.intFunc = function(n) {
       return Math.floor(n);
       }
    }
+
 
 //
 //
@@ -21624,6 +21644,7 @@ SocialCalc.Formula.TestCriteria = function(value, type, criteria) {
    return cond;
 
    }
+
 //
 /*
 // The module of the SocialCalc package for the optional popup menus in socialcalcspreadsheetcontrol.js
@@ -23243,6 +23264,7 @@ SocialCalc.Popup.Types.ColorChooser.CloseOK = function(e) {
    SocialCalc.Popup.Close();
 
    }
+
 
 //
 // SocialCalcSpreadsheetControl
@@ -27140,6 +27162,7 @@ SocialCalc.CtrlSEditorDone = function(idprefix, whichpart) {
 
    }
 
+
 //
 // SocialCalcViewer
 //
@@ -27853,18 +27876,19 @@ str = str.replace(/([^\n])\r([^\n])/g, "$1\r\n$2");
 
 // END OF FILE
 
+
 if('undefined' === typeof document) {
-  // We don't really need a DOM-based presentation layer on the server
-  SocialCalc.GetEditorCellElement = function () {};
-  SocialCalc.ReplaceCell = function () {};
-  SocialCalc.EditorRenderSheet = function () {};
-  SocialCalc.SpreadsheetControlSortSave = function () { return "" };
-  SocialCalc.SpreadsheetControlStatuslineCallback = function () {};
-  SocialCalc.DoPositionCalculations = function (editor) {
-      SocialCalc.EditorSheetStatusCallback(
-	  null, "doneposcalc", null, editor
-      );
-  }
+    // We don't really need a DOM-based presentation layer on the server
+    SocialCalc.GetEditorCellElement = function () {};
+    SocialCalc.ReplaceCell = function () {};
+    SocialCalc.EditorRenderSheet = function () {};
+    SocialCalc.SpreadsheetControlSortSave = function () { return ""; };
+    SocialCalc.SpreadsheetControlStatuslineCallback = function () {};
+    SocialCalc.DoPositionCalculations = function (editor) {
+        SocialCalc.EditorSheetStatusCallback(
+            null, "doneposcalc", null, editor
+        );
+    };
 }
 
 // Compatibility with webworker-threads

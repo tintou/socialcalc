@@ -18,6 +18,15 @@ socialCalcControl.InitializeSpreadsheetControl(el /*, height, width, spacebelow*
 
 This package also works in node.js. You don't need to callc `InitializeSpreadsheetControl` here, because that is just initializing the rendering.
 
+## Build from sources
+
+SocialCalc uses npm and gulp, process as followed:
+```bash
+npm install
+```
+
+That's it, the npm post installation script already calls `gulp` for you
+
 ## Licensing
 ### Common Public Attribution License (Socialtext Inc.)
 * socialcalcspreadsheetcontrol.js
