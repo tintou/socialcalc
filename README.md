@@ -20,12 +20,14 @@ This package also works in node.js. You don't need to callc `InitializeSpreadshe
 
 ## Build from sources
 
-SocialCalc uses npm and gulp, process as followed:
+SocialCalc uses npm and gulp, to get the dependencies, use:
 ```bash
 npm install
 ```
-
-That's it, the npm post installation script already calls `gulp` for you
+You can now compile the project using
+```bash
+npm build
+```
 
 ## Licensing
 ### Common Public Attribution License (Socialtext Inc.)
