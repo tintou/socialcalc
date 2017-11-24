@@ -26,7 +26,7 @@ npm install
 ```
 You can now compile the project using
 ```bash
-npm build
+npm run build
 ```
 
 ## Licensing
