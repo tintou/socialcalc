@@ -5072,7 +5072,7 @@ SocialCalc.CreateTableControl = function(control) {
    s.backgroundImage="url("+imageprefix+"paneslider-"+vh+".gif)";
    if (scc.TCpanesliderClass) control.paneslider.className = scc.TCpanesliderClass;
    AssignID(control.editor, control.paneslider, "paneslider"+vh);
-   control.paneslider.title = SCLoc(vertical ? "Drag to lock pane horizontally" : "Drag to lock pane vertically");
+   control.paneslider.title = SCLoc(control.vertical ? "Drag to lock pane horizontally" : "Drag to lock pane vertically");
 
    functions = {MouseDown:SocialCalc.TCPSDragFunctionStart,
                     MouseMove: SocialCalc.TCPSDragFunctionMove,
