@@ -15,6 +15,7 @@
         root.SocialCalc = factory.call(root, this);
   }
 }(this, function (window) {
+
 //
 /*
 // The module of the SocialCalc package with customizable constants, strings, etc.
@@ -899,6 +900,7 @@ SocialCalc.ConstantsSetImagePrefix = function(imagePrefix) {
    scc.defaultImagePrefix = imagePrefix;
 
    }
+
 
 //
 // The main SocialCalc code module of the SocialCalc package
@@ -7392,6 +7394,7 @@ SocialCalc.SetConvertedCell = function(sheet, cr, rawvalue) {
 
    }
 
+
 //
 // SocialCalcTableEditor
 //
@@ -13820,6 +13823,7 @@ SocialCalc.ProcessKey = function (ch, e) {
    }
 
 
+
 //
 /*
 // SocialCalc Number Formatting Library
@@ -14849,6 +14853,7 @@ SocialCalc.intFunc = function(n) {
       return Math.floor(n);
       }
    }
+
 
 //
 //
@@ -21375,6 +21380,7 @@ SocialCalc.Formula.TestCriteria = function(value, type, criteria) {
    return cond;
 
    }
+
 //
 /*
 // The module of the SocialCalc package for the optional popup menus in socialcalcspreadsheetcontrol.js
@@ -22994,6 +23000,7 @@ SocialCalc.Popup.Types.ColorChooser.CloseOK = function(e) {
    SocialCalc.Popup.Close();
 
    }
+
 
 //
 // SocialCalcSpreadsheetControl
@@ -26891,6 +26898,7 @@ SocialCalc.CtrlSEditorDone = function(idprefix, whichpart) {
 
    }
 
+
 //
 // SocialCalcViewer
 //
@@ -27604,18 +27612,19 @@ str = str.replace(/([^\n])\r([^\n])/g, "$1\r\n$2");
 
 // END OF FILE
 
+
 if('undefined' === typeof document) {
-  // We don't really need a DOM-based presentation layer on the server
-  SocialCalc.GetEditorCellElement = function () {};
-  SocialCalc.ReplaceCell = function () {};
-  SocialCalc.EditorRenderSheet = function () {};
-  SocialCalc.SpreadsheetControlSortSave = function () { return "" };
-  SocialCalc.SpreadsheetControlStatuslineCallback = function () {};
-  SocialCalc.DoPositionCalculations = function (editor) {
-      SocialCalc.EditorSheetStatusCallback(
-	  null, "doneposcalc", null, editor
-      );
-  }
+    // We don't really need a DOM-based presentation layer on the server
+    SocialCalc.GetEditorCellElement = function () {};
+    SocialCalc.ReplaceCell = function () {};
+    SocialCalc.EditorRenderSheet = function () {};
+    SocialCalc.SpreadsheetControlSortSave = function () { return ""; };
+    SocialCalc.SpreadsheetControlStatuslineCallback = function () {};
+    SocialCalc.DoPositionCalculations = function (editor) {
+        SocialCalc.EditorSheetStatusCallback(
+            null, "doneposcalc", null, editor
+        );
+    };
 }
 
 // Compatibility with webworker-threads
