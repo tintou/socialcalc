@@ -8,7 +8,7 @@ See it in action at [ethercalc.net](http://ethercalc.net)!
 * jQuery (only on the client-side)
 
 ## Usage
-You can `require('socialcalc')` or include `node_modules/socialcalc/SocialCalc.js` on your web page using a script tag.
+You can `require('socialcalc')` or include `node_modules/socialcalc/dist/SocialCalc.js` on your web page using a script tag.
 
 In order to create an editor instance use:
 ```js
