@@ -88,7 +88,7 @@ SocialCalc.Popup.Create = function(type, id, attribs) {
 
    SocialCalc.Popup.imagePrefix = SocialCalc.Constants.defaultImagePrefix; // image prefix
 
-   }
+   };
 
 
 //
@@ -116,7 +116,7 @@ SocialCalc.Popup.SetValue = function(id, value) {
          }
       }
 
-   }
+   };
 
 
 //
@@ -144,7 +144,7 @@ SocialCalc.Popup.SetDisabled = function(id, disabled) {
       pt.SetDisabled(type, id, disabled);
       }
 
-   }
+   };
 
 
 //
@@ -170,7 +170,7 @@ SocialCalc.Popup.GetValue = function(id) {
 
    return null;
 
-   }
+   };
 
 
 //
@@ -194,7 +194,7 @@ SocialCalc.Popup.Initialize = function(id, data) {
       pt.Initialize(type, id, data);
       }
 
-   }
+   };
 
 
 //
@@ -211,7 +211,7 @@ SocialCalc.Popup.Reset = function(type) {
 
    if (spt[type].Reset) spt[type].Reset(type);
 
-   }
+   };
 
 
 //
@@ -248,7 +248,7 @@ SocialCalc.Popup.CClick = function(id) {
 
    sp.Current.id = id;
 
-   }
+   };
 
 
 //
@@ -267,7 +267,7 @@ SocialCalc.Popup.Close = function() {
 
    sp.CClick(sp.Current.id);
 
-   }
+   };
 
 //
 // SocialCalc.Popup.Cancel()
@@ -291,7 +291,7 @@ SocialCalc.Popup.Cancel = function() {
 
    sp.Current.id = null;
 
-   }
+   };
 
 //
 // ele = SocialCalc.Popup.CreatePopupDiv(id, attribs)
@@ -343,7 +343,7 @@ SocialCalc.Popup.CreatePopupDiv = function(id, attribs) {
 
    return main;
 
-   }
+   };
 
 //
 // SocialCalc.Popup.EnsurePosition(id, container)
@@ -359,7 +359,7 @@ SocialCalc.Popup.EnsurePosition = function(id, container) {
    var spcdata = spc[id].data;
 
    var main = spcdata.mainele.firstChild;
-   if (!main) {alert("No main popup element firstChild.");return};
+   if (!main) {alert("No main popup element firstChild.");return;}
    var popup = spcdata.popupele;
 
    function GetLayoutValues(ele) {
@@ -433,7 +433,7 @@ SocialCalc.Popup.EnsurePosition = function(id, container) {
       }
 //addmsg("Popup layout "+t);
 
-}
+};
 
 //
 // ele = SocialCalc.Popup.DestroyPopupDiv(ele, dragregistered)
@@ -453,7 +453,7 @@ SocialCalc.Popup.DestroyPopupDiv = function(ele, dragregistered) {
       ele.parentNode.removeChild(ele);
       }
 
-   }
+   };
 
 //
 // Color Utility Functions
@@ -473,7 +473,7 @@ SocialCalc.Popup.RGBToHex = function(val) {
    else {
       return "000000";
       }
-   }
+   };
 
 SocialCalc.Popup.HexDigits="0123456789ABCDEF";
 
@@ -482,7 +482,7 @@ SocialCalc.Popup.ToHex = function(num) {
    var first=Math.floor(num / 16);
    var second=num % 16;
    return sp.HexDigits.charAt(first)+sp.HexDigits.charAt(second);
-   }
+   };
 
 SocialCalc.Popup.FromHex = function(str) {
 
@@ -490,7 +490,7 @@ SocialCalc.Popup.FromHex = function(str) {
    var first = sp.HexDigits.indexOf(str.charAt(0).toUpperCase());
    var second = sp.HexDigits.indexOf(str.charAt(1).toUpperCase());
    return ((first>=0)?first:0)*16+((second>=0)?second:0);
-   }
+   };
 
 SocialCalc.Popup.HexToRGB = function(val) {
 
@@ -498,11 +498,11 @@ SocialCalc.Popup.HexToRGB = function(val) {
 
    return "rgb("+sp.FromHex(val.substring(1,3))+","+sp.FromHex(val.substring(3,5))+","+sp.FromHex(val.substring(5,7))+")";
 
-   }
+   };
 
 SocialCalc.Popup.makeRGB = function(r, g, b) {
    return "rgb("+(r>0?r:0)+","+(g>0?g:0)+","+(b>0?b:0)+")";
-   }
+   };
 
 SocialCalc.Popup.splitRGB = function(rgb) {
    var parts = rgb.match(/(\d+)\D+(\d+)\D+(\d+)\D/);
@@ -512,7 +512,7 @@ SocialCalc.Popup.splitRGB = function(rgb) {
    else {
       return {r: parts[1]-0, g: parts[2]-0, b: parts[3]-0};
       }
-   }
+   };
 
 // * * * * * * * * * * * * * * * *
 //
@@ -576,7 +576,7 @@ SocialCalc.Popup.Types.List.Create = function(type, id, attribs) {
 
    spcdata.options = []; // set to nothing - use Initialize to fill
 
-   }
+   };
 
 SocialCalc.Popup.Types.List.SetValue = function(type, id, value) {
 
@@ -611,7 +611,7 @@ SocialCalc.Popup.Types.List.SetValue = function(type, id, value) {
       spcdata.mainele.firstChild.value = spcdata.display;
       }
 
-   }
+   };
 
 
 SocialCalc.Popup.Types.List.SetDisabled = function(type, id, disabled) {
@@ -629,7 +629,7 @@ SocialCalc.Popup.Types.List.SetDisabled = function(type, id, disabled) {
       spcdata.mainele.firstChild.disabled = disabled;
       }
 
-   }
+   };
 
 
 SocialCalc.Popup.Types.List.GetValue = function(type, id) {
@@ -641,7 +641,7 @@ SocialCalc.Popup.Types.List.GetValue = function(type, id) {
 
    return spcdata.value;
 
-   }
+   };
 
 
 // data is: {value: initial value, attribs: {attribs stuff}, options: [{o: option-name, v: value-to-return, a: optional-attribs}, ...]}
@@ -665,7 +665,7 @@ SocialCalc.Popup.Types.List.Initialize = function(type, id, data) {
       sp.SetValue(id, data.value);
       }
 
-   }
+   };
 
 
 SocialCalc.Popup.Types.List.Reset = function(type) {
@@ -679,7 +679,7 @@ SocialCalc.Popup.Types.List.Reset = function(type) {
       sp.Current.id = null;
       }
 
-   }
+   };
 
 
 SocialCalc.Popup.Types.List.Show = function(type, id) {
@@ -689,7 +689,7 @@ SocialCalc.Popup.Types.List.Show = function(type, id) {
    var sp = SocialCalc.Popup;
    var spt = sp.Types;
    var spc = sp.Controls;
-   var spcdata = spc[id].data
+   var spcdata = spc[id].data;
 
    var str = "";
 
@@ -726,7 +726,7 @@ SocialCalc.Popup.Types.List.Show = function(type, id) {
       SocialCalc.Popup.EnsurePosition(id, spcdata.attribs.ensureWithin);
       }
 
-   }
+   };
 
 
 SocialCalc.Popup.Types.List.MakeList = function(type, id) {
@@ -736,7 +736,7 @@ SocialCalc.Popup.Types.List.MakeList = function(type, id) {
    var sp = SocialCalc.Popup;
    var spt = sp.Types;
    var spc = sp.Controls;
-   var spcdata = spc[id].data
+   var spcdata = spc[id].data;
 
    var str = '<table cellspacing="0" cellpadding="0"><tr>';
    var td = '<td style="vertical-align:top;">';
@@ -771,7 +771,7 @@ SocialCalc.Popup.Types.List.MakeList = function(type, id) {
 
    return str;
 
-   }
+   };
 
 
 SocialCalc.Popup.Types.List.MakeCustom = function(type, id) {
@@ -801,7 +801,7 @@ SocialCalc.Popup.Types.List.MakeCustom = function(type, id) {
 
    return str;
 
-   }
+   };
 
 
 SocialCalc.Popup.Types.List.ItemClicked = function(id, num) {
@@ -838,7 +838,7 @@ SocialCalc.Popup.Types.List.ItemClicked = function(id, num) {
 
    SocialCalc.Popup.Close();
    
-   }
+   };
 
 
 SocialCalc.Popup.Types.List.CustomToList = function(id) {
@@ -861,7 +861,7 @@ SocialCalc.Popup.Types.List.CustomToList = function(id) {
    if (spcdata.attribs.ensureWithin) {
       SocialCalc.Popup.EnsurePosition(id, spcdata.attribs.ensureWithin);
       }
-   }
+   };
 
 
 SocialCalc.Popup.Types.List.CustomOK = function(id) {
@@ -876,7 +876,7 @@ SocialCalc.Popup.Types.List.CustomOK = function(id) {
 
    SocialCalc.Popup.Close();
    
-   }
+   };
 
 
 SocialCalc.Popup.Types.List.MouseMove = function(id, ele) {
@@ -901,7 +901,7 @@ SocialCalc.Popup.Types.List.MouseMove = function(id, ele) {
 
    ele.style.backgroundColor = "#DDF";
    
-   }
+   };
 
 SocialCalc.Popup.Types.List.Hide = function(type, id) {
 
@@ -917,13 +917,13 @@ SocialCalc.Popup.Types.List.Hide = function(type, id) {
       spcdata.mainele.firstChild.disabled = false;
       }
 
-   }
+   };
 
 SocialCalc.Popup.Types.List.Cancel = function(type, id) {
 
    SocialCalc.Popup.Types.List.Hide(type, id);
 
-   }
+   };
 
 
 //
@@ -983,7 +983,7 @@ SocialCalc.Popup.Types.ColorChooser.Create = function(type, id, attribs) {
                    (spca.sampleWidth || '15px')+';height:'+(spca.sampleHeight || '15px')+
                    ';" onclick="SocialCalc.Popup.Types.ColorChooser.ControlClicked(\''+id+'\');">&nbsp;</div>';
 
-   }
+   };
 
 SocialCalc.Popup.Types.ColorChooser.SetValue = function(type, id, value) {
 
@@ -1024,7 +1024,7 @@ SocialCalc.Popup.Types.ColorChooser.SetValue = function(type, id, value) {
       spcdata.mainele.firstChild.style.backgroundImage = img;
       }
 
-   }
+   };
 
 
 SocialCalc.Popup.Types.ColorChooser.SetDisabled = function(type, id, disabled) {
@@ -1058,7 +1058,7 @@ SocialCalc.Popup.Types.ColorChooser.SetDisabled = function(type, id, disabled) {
          }
       }
 
-   }
+   };
 
 
 SocialCalc.Popup.Types.ColorChooser.GetValue = function(type, id) {
@@ -1070,7 +1070,7 @@ SocialCalc.Popup.Types.ColorChooser.GetValue = function(type, id) {
 
    return spcdata.value;
 
-   }
+   };
 
 
 SocialCalc.Popup.Types.ColorChooser.Initialize = function(type, id, data) {
@@ -1090,7 +1090,7 @@ SocialCalc.Popup.Types.ColorChooser.Initialize = function(type, id, data) {
       sp.SetValue(id, data.value);
       }
 
-   }
+   };
 
 
 SocialCalc.Popup.Types.ColorChooser.Reset = function(type) {
@@ -1104,7 +1104,7 @@ SocialCalc.Popup.Types.ColorChooser.Reset = function(type) {
       sp.Current.id = null;
       }
 
-   }
+   };
 
 
 SocialCalc.Popup.Types.ColorChooser.Show = function(type, id) {
@@ -1114,7 +1114,7 @@ SocialCalc.Popup.Types.ColorChooser.Show = function(type, id) {
    var sp = SocialCalc.Popup;
    var spt = sp.Types;
    var spc = sp.Controls;
-   var spcdata = spc[id].data
+   var spcdata = spc[id].data;
 
    var str = "";
 
@@ -1149,7 +1149,7 @@ SocialCalc.Popup.Types.ColorChooser.Show = function(type, id) {
       SocialCalc.Popup.EnsurePosition(id, spcdata.attribs.ensureWithin);
       }
 
-   }
+   };
 
 
 SocialCalc.Popup.Types.ColorChooser.MakeCustom = function(type, id) {
@@ -1175,7 +1175,7 @@ SocialCalc.Popup.Types.ColorChooser.MakeCustom = function(type, id) {
 
    return str;
 
-   }
+   };
 
 
 SocialCalc.Popup.Types.ColorChooser.ItemClicked = function(id, num) {
@@ -1188,7 +1188,7 @@ SocialCalc.Popup.Types.ColorChooser.ItemClicked = function(id, num) {
 
    SocialCalc.Popup.Close();
    
-   }
+   };
 
 
 SocialCalc.Popup.Types.ColorChooser.CustomToList = function(id) {
@@ -1199,7 +1199,7 @@ SocialCalc.Popup.Types.ColorChooser.CustomToList = function(id) {
    var spc = sp.Controls;
    var spcdata = spc[id].data;
 
-   }
+   };
 
 
 SocialCalc.Popup.Types.ColorChooser.CustomOK = function(id) {
@@ -1214,7 +1214,7 @@ SocialCalc.Popup.Types.ColorChooser.CustomOK = function(id) {
 
    sp.Close();
    
-   }
+   };
 
 
 SocialCalc.Popup.Types.ColorChooser.Hide = function(type, id) {
@@ -1227,7 +1227,7 @@ SocialCalc.Popup.Types.ColorChooser.Hide = function(type, id) {
    sp.DestroyPopupDiv(spcdata.popupele, spcdata.dragregistered);
    spcdata.popupele = null;
 
-   }
+   };
 
 
 SocialCalc.Popup.Types.ColorChooser.Cancel = function(type, id) {
@@ -1241,7 +1241,7 @@ SocialCalc.Popup.Types.ColorChooser.Cancel = function(type, id) {
 
    SocialCalc.Popup.Types.ColorChooser.Hide(type, id);
 
-   }
+   };
 
 
 SocialCalc.Popup.Types.ColorChooser.CreateGrid = function (type, id) {
@@ -1314,13 +1314,13 @@ SocialCalc.Popup.Types.ColorChooser.CreateGrid = function (type, id) {
 
    return mainele;
 
-   }
+   };
 
 SocialCalc.Popup.Types.ColorChooser.gridToG = function(grid, row, col) {
 
    return grid[row+","+col];
 
-   }
+   };
 
 SocialCalc.Popup.Types.ColorChooser.DetermineColors = function(id) {
 
@@ -1370,7 +1370,7 @@ SocialCalc.Popup.Types.ColorChooser.DetermineColors = function(id) {
       sptc.gridToG(grid,row,col).rgb = "rgb("+steps[x.charAt(0)-0]+","+steps[x.charAt(1)-0]+","+steps[x.charAt(2)-0]+")";
       }
 
-   }
+   };
 
 SocialCalc.Popup.Types.ColorChooser.SetColors = function(id) {
 
@@ -1417,7 +1417,7 @@ SocialCalc.Popup.Types.ColorChooser.SetColors = function(id) {
       grid.msg.title = sp.RGBToHex(spcdata.value);
       }
 
-   }
+   };
 
 SocialCalc.Popup.Types.ColorChooser.GridMouseDown = function(e) {
 
@@ -1453,7 +1453,7 @@ SocialCalc.Popup.Types.ColorChooser.GridMouseDown = function(e) {
    var clientY = event.clientY - pos.top;
    var gpos = SocialCalc.GetElementPositionWithScroll(grid.table);
    gpos.left -= pos.left;
-   gpos.top -= pos.top
+   gpos.top -= pos.top;
    var row = Math.floor((clientY-gpos.top-2)/10); // -2 is to split the diff btw IE & FF
    row = row < 0 ? 0 : row;
    var col = Math.floor((clientX-gpos.left)/20);
@@ -1481,7 +1481,7 @@ SocialCalc.Popup.Types.ColorChooser.GridMouseDown = function(e) {
    sptc.DetermineColors(id);
    sptc.SetColors(id);
 
-   }
+   };
 
 
 SocialCalc.Popup.Types.ColorChooser.ControlClicked = function(id) {
@@ -1499,7 +1499,7 @@ SocialCalc.Popup.Types.ColorChooser.ControlClicked = function(id) {
 
    sptc.CloseOK();
 
-   }
+   };
 
 SocialCalc.Popup.Types.ColorChooser.DefaultClicked = function(e) {
 
@@ -1520,7 +1520,7 @@ SocialCalc.Popup.Types.ColorChooser.DefaultClicked = function(e) {
 
    SocialCalc.Popup.Close();
 
-   }
+   };
 
 SocialCalc.Popup.Types.ColorChooser.CustomClicked = function(e) {
 
@@ -1552,7 +1552,7 @@ SocialCalc.Popup.Types.ColorChooser.CustomClicked = function(e) {
       SocialCalc.Popup.EnsurePosition(id, spcdata.attribs.ensureWithin);
       }
 
-   }
+   };
 
 
 
@@ -1581,7 +1581,7 @@ SocialCalc.Popup.Types.ColorChooser.CustomToGrid = function(id) {
    if (spcdata.attribs.ensureWithin) {
       SocialCalc.Popup.EnsurePosition(id, spcdata.attribs.ensureWithin);
       }
-   }
+   };
 
 
 SocialCalc.Popup.Types.ColorChooser.CustomOK = function(id) {
@@ -1596,7 +1596,7 @@ SocialCalc.Popup.Types.ColorChooser.CustomOK = function(id) {
 
    SocialCalc.Popup.Close();
    
-   }
+   };
 
 SocialCalc.Popup.Types.ColorChooser.CloseOK = function(e) {
 
@@ -1616,5 +1616,5 @@ SocialCalc.Popup.Types.ColorChooser.CloseOK = function(e) {
 
    SocialCalc.Popup.Close();
 
-   }
+   };
 

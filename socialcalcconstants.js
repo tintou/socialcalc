@@ -866,7 +866,7 @@ SocialCalc.ConstantsSetClasses = function(prefix) {
          scc[item+"Style"] = defaults[item].style;
          }
       }
-   }
+   };
 
 // Set the image prefix on all images.
 
@@ -881,5 +881,5 @@ SocialCalc.ConstantsSetImagePrefix = function(imagePrefix) {
       }
    scc.defaultImagePrefix = imagePrefix;
 
-   }
+   };
 

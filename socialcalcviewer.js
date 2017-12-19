@@ -184,7 +184,7 @@ SocialCalc.SpreadsheetViewer = function(idPrefix) {
 
    return;
 
-   }
+   };
 
 // Methods:
 
@@ -284,7 +284,7 @@ SocialCalc.InitializeSpreadsheetViewer = function(spreadsheet, node, height, wid
 
    return;
 
-   }
+   };
 
 SocialCalc.SpreadsheetViewerLoadSave = function(spreadsheet, savestr) {
 
@@ -324,7 +324,7 @@ SocialCalc.SpreadsheetViewerLoadSave = function(spreadsheet, savestr) {
    else {
       spreadsheet.editor.EditorScheduleSheetCommands("recalc");
       }
-   }
+   };
 
 //
 // SocialCalc.SpreadsheetViewerDoRepeatingMacro
@@ -344,7 +344,7 @@ SocialCalc.SpreadsheetViewerDoRepeatingMacro = function() {
 
    editor.EditorScheduleSheetCommands(spreadsheet.repeatingMacroCommands);
 
-}
+};
 
 SocialCalc.SpreadsheetViewerRepeatMacroCommand = function(name, data, sheet, cmd, saveundo) {
 
@@ -357,7 +357,7 @@ SocialCalc.SpreadsheetViewerRepeatMacroCommand = function(name, data, sheet, cmd
 
    spreadsheet.repeatingMacroTimer = window.setTimeout(SocialCalc.SpreadsheetViewerDoRepeatingMacro, spreadsheet.repeatingMacroInterval * 1000);
 
-}
+};
 
 SocialCalc.SpreadsheetViewerStopRepeatingMacro = function() {
 
@@ -367,7 +367,7 @@ SocialCalc.SpreadsheetViewerStopRepeatingMacro = function() {
       window.clearTimeout(spreadsheet.repeatingMacroTimer);
       spreadsheet.repeatingMacroTimer = null;
       }
-}
+};
 
 //
 // SocialCalc.SpreadsheetViewerDoButtonCmd(e, buttoninfo, bobj)
@@ -395,7 +395,7 @@ SocialCalc.SpreadsheetViewerDoButtonCmd = function(e, buttoninfo, bobj) {
    if (obj && obj.blur) obj.blur();
    SocialCalc.KeyboardFocus();   
 
-   }
+   };
 
 
 //
@@ -417,7 +417,7 @@ SocialCalc.LocalizeString = function(str) {
       SocialCalc.LocalizeStringList[str] = cstr;
       }
    return cstr;
-   }
+   };
 
 SocialCalc.LocalizeStringList = {}; // a list of strings to localize accumulated by the routine
 
@@ -454,7 +454,7 @@ SocialCalc.LocalizeSubstrings = function(str) {
          }
       });
 
-   }
+   };
 
 //
 // obj = GetSpreadsheetViewerObject()
@@ -469,7 +469,7 @@ SocialCalc.GetSpreadsheetViewerObject = function() {
 
    throw ("No current SpreadsheetViewer object.");
 
-   }
+   };
 
 
 //
@@ -486,7 +486,7 @@ SocialCalc.DoOnResize = function(spreadsheet) {
    var needresize = spreadsheet.SizeSSDiv();
    if (!needresize) return;
 
-   for (vname in views) {
+   for (var vname in views) {
       v = views[vname].element;
       v.style.width = spreadsheet.width + "px";
       v.style.height = (spreadsheet.height-spreadsheet.nonviewheight) + "px";
@@ -495,7 +495,7 @@ SocialCalc.DoOnResize = function(spreadsheet) {
    if(SocialCalc._app) return; // app has no scroll bars and keep normal HTML style page scroll - for mobile
    spreadsheet.editor.ResizeTableEditor(spreadsheet.width, spreadsheet.height-spreadsheet.nonviewheight);
 
-   }
+   };
 
 
 //
@@ -554,7 +554,7 @@ SocialCalc.SizeSSDiv = function(spreadsheet) {
 
    return resized;
 
-   }
+   };
 
 
 //
@@ -587,7 +587,7 @@ SocialCalc.SpreadsheetViewerStatuslineCallback = function(editor, status, arg, p
          break;
       }
 
-   }
+   };
 
 
 //
@@ -600,7 +600,7 @@ SocialCalc.CmdGotFocus = function(obj) {
 
    SocialCalc.Keyboard.passThru = obj;
 
-   }
+   };
 
 
 //
@@ -625,7 +625,7 @@ SocialCalc.SpreadsheetViewerCreateSheetHTML = function(spreadsheet) {
    delete div;
    return result;
 
-   }
+   };
 
 
 ///////////////////////
@@ -706,7 +706,7 @@ str = str.replace(/([^\n])\r([^\n])/g, "$1\r\n$2");
 
    return parts;
 
-   }
+   };
 
 
 // END OF FILE

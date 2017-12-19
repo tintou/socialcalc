@@ -64,7 +64,7 @@ SocialCalc.TriggerIoAction = {}; // eddy
        "n": "N", "o": "O", "p": "P", "q": "Q", "r": "R", "s": "S", "t": "T", "u": "U", "v": "V", "w": "W", "x": "X", "y": "Y", "z": "Z",
        "A": "A", "B": "B", "C": "C", "D": "D", "E": "E", "F": "F", "G": "G", "H": "H", "I": "I", "J": "J", "K": "K", "L": "L", "M": "M",
        "N": "N", "O": "O", "P": "P", "Q": "Q", "R": "R", "S": "S", "T": "T", "U": "U", "V": "V", "W": "W", "X": "X", "Y": "Y", "Z": "Z"
-       }
+       };
 
    SocialCalc.Formula.SpecialConstants = { // names that turn into constants for name lookup
       "#NULL!": "0,e#NULL!", "#NUM!": "0,e#NUM!", "#DIV/0!": "0,e#DIV/0!", "#VALUE!": "0,e#VALUE!",
@@ -207,7 +207,7 @@ SocialCalc.Formula.ParseFormulaIntoTokens = function(line) {
             str += ch;
             }
          else if (ch == 'E' || ch == 'e') {
-            ;
+            
             }
          else {
             pushtoken(parseinfo, scc.s_parseerrexponent, tokentype.error, 0);
@@ -235,8 +235,8 @@ SocialCalc.Formula.ParseFormulaIntoTokens = function(line) {
          else if (cclass == charclass.incoord) {
             state = parsestate.coord;
             }
-         else if (cclass == charclass.op || cclass == charclass.numstart
-                || cclass == charclass.space || cclass == charclass.eof) {
+         else if (cclass == charclass.op || cclass == charclass.numstart ||
+                cclass == charclass.space || cclass == charclass.eof) {
             pushtoken(parseinfo, str.toUpperCase(), tokentype.name, 0);
             state = 0;
             }
@@ -278,8 +278,8 @@ SocialCalc.Formula.ParseFormulaIntoTokens = function(line) {
          if (cclass == charclass.num || cclass == charclass.alpha) {
             str += ch;
             }
-         else if (cclass == charclass.op || cclass == charclass.numstart
-                || cclass == charclass.space || cclass == charclass.eof) {
+         else if (cclass == charclass.op || cclass == charclass.numstart ||
+                cclass == charclass.space || cclass == charclass.eof) {
             pushtoken(parseinfo, str.toUpperCase(), tokentype.name, 0);
             state = 0;
             }
@@ -372,8 +372,8 @@ SocialCalc.Formula.ParseFormulaIntoTokens = function(line) {
                last_token_text = "EOF";
                }
             t = tokentype.op;
-            if ((parseinfo.length == 0)
-                || (last_token_type == charclass.op && last_token_text != ')' && last_token_text != '%')) { // Unary operator
+            if ((parseinfo.length == 0) ||
+                (last_token_type == charclass.op && last_token_text != ')' && last_token_text != '%')) { // Unary operator
                if (str == '-') { // M is unary minus
                   str = "M";
                   ch = "M";
@@ -383,7 +383,7 @@ SocialCalc.Formula.ParseFormulaIntoTokens = function(line) {
                   ch = "P";
                   }
                else if (str == ')' && last_token_text == '(') { // null arg list OK
-                  ;
+                  
                   }
                else if (str != '(') { // binary-op open-paren OK, others no
                   t = tokentype.error;
@@ -428,13 +428,13 @@ SocialCalc.Formula.ParseFormulaIntoTokens = function(line) {
 
    return parseinfo;
 
-   }
+   };
 
 SocialCalc.Formula.ParsePushToken = function(parseinfo, ttext, ttype, topcode) {
 
    parseinfo.push({text: ttext, type: ttype, opcode: topcode});
 
-   }
+   };
 
 /* *******************
 
@@ -465,7 +465,7 @@ SocialCalc.Formula.evaluate_parsed_formula = function(parseinfo, sheet, allowran
 
    return result;
 
-}
+};
 
 //
 // revpolish = SocialCalc.Formula.ConvertInfixToPolish(parseinfo)
@@ -538,8 +538,8 @@ SocialCalc.Formula.ConvertInfixToPolish = function(parseinfo) {
          if (parsestack.length && parseinfo[parsestack[parsestack.length-1]].type == tokentype.name) {
             revpolish.push(parsestack.pop());
             }
-         while (parsestack.length && parseinfo[parsestack[parsestack.length-1]].type == tokentype.op
-                && parseinfo[parsestack[parsestack.length-1]].text != '(') {
+         while (parsestack.length && parseinfo[parsestack[parsestack.length-1]].type == tokentype.op &&
+                parseinfo[parsestack[parsestack.length-1]].text != '(') {
             tprecedence = token_precedence[pii.opcode];
             tstackprecedence = token_precedence[parseinfo[parsestack[parsestack.length-1]].opcode];
             if (tprecedence >= 0 && tprecedence < tstackprecedence) {
@@ -579,7 +579,7 @@ SocialCalc.Formula.ConvertInfixToPolish = function(parseinfo) {
 
    return revpolish;
 
-   }
+   };
 
 
 // DebugLog
@@ -588,7 +588,7 @@ if(typeof SocialCalc.debug_log === 'undefined') SocialCalc.debug_log = [];
 
 SocialCalc.DebugLog = function(logObject) {	
 //	SocialCalc.debug_log.push(logObject);
-}
+};
 
 
 //
@@ -920,7 +920,7 @@ SocialCalc.Formula.EvaluatePolish = function(parseinfo, revpolish, sheet, allowr
 
    return ({value: value, type: valuetype, error: errortext});
 
-   }
+   };
 
 
 /*
@@ -968,7 +968,7 @@ SocialCalc.Formula.LookupResultType = function(type1, type2, typelookup) {
       }
    return "e#VALUE!";
 
-   }
+   };
 
 /*
 #
@@ -1003,7 +1003,7 @@ SocialCalc.Formula.TopOfStackValueAndType = function(sheet, operand) {
 
    return result;
 
-   }
+   };
 
 
 /*
@@ -1048,7 +1048,7 @@ SocialCalc.Formula.OperandAsNumber = function(sheet, operand) {
 
    return operandinfo;
 
-   }
+   };
 
 /*
 #
@@ -1067,7 +1067,7 @@ SocialCalc.Formula.OperandAsText = function(sheet, operand) {
    t = operandinfo.type.charAt(0);
 
    if (t ==  "t") { // any flavor of text returns as is
-      ;
+      
       }
    else if (t == "n") {
       operandinfo.value = SocialCalc.format_number_for_display ?
@@ -1089,7 +1089,7 @@ SocialCalc.Formula.OperandAsText = function(sheet, operand) {
 
    return operandinfo;
 
-   }
+   };
 
 /*
 #
@@ -1164,7 +1164,7 @@ SocialCalc.Formula.OperandValueAndType = function(sheet, operand) {
 
    return result;
 
-   }
+   };
 
 /*
 #
@@ -1178,7 +1178,7 @@ SocialCalc.Formula.OperandValueAndType = function(sheet, operand) {
 
 SocialCalc.Formula.OperandAsCoord = function(sheet, operand) {
 	return SocialCalc.Formula.OperandAsType(sheet, operand, "coord");
-}
+};
 
 
 /*
@@ -1192,7 +1192,7 @@ SocialCalc.Formula.OperandAsCoord = function(sheet, operand) {
 
 SocialCalc.Formula.OperandAsRange = function(sheet, operand) {
 	return SocialCalc.Formula.OperandAsType(sheet, operand, "range");
-}
+};
 
 /*
 #
@@ -1224,7 +1224,7 @@ SocialCalc.Formula.OperandAsType = function(sheet, operand, operandtype) {
       result.type = "e#REF!";
       return result;
       }
-}
+};
 
 
 /*
@@ -1282,7 +1282,7 @@ SocialCalc.Formula.OperandsAsCoordOnSheet = function(sheet, operand) {
       }
    return result;
    
-   }
+   };
 
 /*
 #
@@ -1333,7 +1333,7 @@ SocialCalc.Formula.OperandsAsRangeOnSheet = function(sheet, operand) {
    else { // bad form
       return {value: scc.s_calcerrcellrefmissing, type: "e#REF!"};
       }
-   }
+   };
 
 
 /*
@@ -1387,7 +1387,7 @@ SocialCalc.Formula.OperandAsSheetName = function(sheet, operand) {
       return result;
       }
 
-   }
+   };
 
 //
 // value = SocialCalc.Formula.LookupName(sheet, name)
@@ -1465,7 +1465,7 @@ SocialCalc.Formula.LookupName = function(sheet, name, isEnd) {
       value.error = SocialCalc.Constants.s_calcerrunknownname+' "'+name+'"';
       return value;
       }
-   }
+   };
 
 /*
 #
@@ -1514,7 +1514,7 @@ SocialCalc.Formula.StepThroughRangeDown = function(operand, rangevalue) {
             }
          }
       }
-   }
+   };
 
 /*
 #
@@ -1564,9 +1564,9 @@ SocialCalc.Formula.DecodeRangeParts = function(sheetdata, range) {
 
    rp = scf.OrderRangeParts(value1, value2);
 
-   return {sheetdata: coordsheetdata, sheetname: sheet1, col1num: rp.c1, ncols: rp.c2-rp.c1+1, row1num: rp.r1, nrows: rp.r2-rp.r1+1}
+   return {sheetdata: coordsheetdata, sheetname: sheet1, col1num: rp.c1, ncols: rp.c2-rp.c1+1, row1num: rp.r1, nrows: rp.r2-rp.r1+1};
 
-   }
+   };
 
 
 
@@ -1731,9 +1731,9 @@ SocialCalc.Formula.StoreIoEventFormula = function(function_name, coord, operand_
   
   //IF GUI widget is "Input"
   if(io_parameters == "Input" ) {
-    var formDataViewer = (SocialCalc.CurrentSpreadsheetControlObject != null) 
-          ? SocialCalc.CurrentSpreadsheetControlObject.formDataViewer 
-          : SocialCalc.CurrentSpreadsheetViewerObject.formDataViewer;
+    var formDataViewer = (SocialCalc.CurrentSpreadsheetControlObject != null) ?
+            SocialCalc.CurrentSpreadsheetControlObject.formDataViewer :
+            SocialCalc.CurrentSpreadsheetViewerObject.formDataViewer;
     
     if(formDataViewer != null && formDataViewer.loaded == true) {
       
@@ -1766,7 +1766,7 @@ SocialCalc.Formula.StoreIoEventFormula = function(function_name, coord, operand_
 
 	//SocialCalc.DebugLog({ ioEventTree: sheet.ioEventTree});
 	//SocialCalc.DebugLog({ ioParameterList: sheet.ioParameterList});
-}   
+};
    
 
 /**
@@ -1804,9 +1804,9 @@ SocialCalc.Formula.Clone =   function(destination, source) {
  */    
     
 SocialCalc.Formula.LoadFormFields =   function() {
-  var formDataViewer = (SocialCalc.CurrentSpreadsheetControlObject != null) 
-    ? SocialCalc.CurrentSpreadsheetControlObject.formDataViewer 
-    : SocialCalc.CurrentSpreadsheetViewerObject.formDataViewer;
+  var formDataViewer = (SocialCalc.CurrentSpreadsheetControlObject != null) ?
+      SocialCalc.CurrentSpreadsheetControlObject.formDataViewer :
+      SocialCalc.CurrentSpreadsheetViewerObject.formDataViewer;
 
   formDataViewer.formFields = {};
 
@@ -1833,8 +1833,8 @@ SocialCalc.Formula.LoadFormFields =   function() {
   }
   formDataViewer.formFieldsLength = col -2;
 
-}    
-   
+};
+
 /*
 #
 # errortext = SocialCalc.Formula.CalculateFunction(fname, operand, sheet)
@@ -1903,7 +1903,7 @@ SocialCalc.Formula.CalculateFunction = function(fname, operand, sheet, coord) {
 
    return errortext;
 
-}
+};
 
 //
 // SocialCalc.Formula.PushOperand(operand, t, v)
@@ -1915,7 +1915,7 @@ SocialCalc.Formula.PushOperand = function(operand, t, v) {
 
    operand.push({type: t, value: v});
 
-   }
+   };
 
 //
 // SocialCalc.Formula.CopyFunctionArgs(operand, foperand)
@@ -1938,7 +1938,7 @@ SocialCalc.Formula.CopyFunctionArgs = function(operand, foperand) {
 
    return;
 
-   }
+   };
 
 //
 // errortext = SocialCalc.Formula.FunctionArgsError(fname, operand)
@@ -1953,7 +1953,7 @@ SocialCalc.Formula.FunctionArgsError = function(fname, operand) {
 
    return errortext;
 
-   }
+   };
 
 
 //
@@ -1968,7 +1968,7 @@ SocialCalc.Formula.FunctionSpecificError = function(fname, operand, errortype, e
 
    return errortext;
 
-   }
+   };
 
 //
 // haserror = SocialCalc.Formula.CheckForErrorValue(operand, v)
@@ -1986,7 +1986,7 @@ SocialCalc.Formula.CheckForErrorValue = function(operand, v) {
       return false;
       }
 
-   }
+   };
 
 /////////////////////////
 //
@@ -2043,7 +2043,7 @@ SocialCalc.Formula.FillFunctionInfo = function() {
       scf.FunctionClasses[cname].items.sort();
       }
 
-   }
+   };
 
 //
 // str = SocialCalc.Formula.FunctionArgString(fname)
@@ -2087,7 +2087,7 @@ SocialCalc.Formula.FunctionArgString = function(fname) {
 
    return str;
 
-   }
+   };
 
 
 /////////////////////////
@@ -2260,7 +2260,7 @@ SocialCalc.Formula.SeriesFunctions = function(fname, operand, foperand, sheet) {
 
    return null;
 
-   }
+   };
 
 //*********************
 //
@@ -2332,7 +2332,7 @@ SocialCalc.Formula.SumProductFunction = function(fname, operand, foperand, sheet
 
    return;
 
-   }
+   };
 
 SocialCalc.Formula.FunctionList["SUMPRODUCT"] = [SocialCalc.Formula.SumProductFunction, -1, "rangen", "", "stat"];
 
@@ -2559,7 +2559,7 @@ CRITERIAROW:
 
    return;
 
-   }
+   };
 
 //*********************
 //
@@ -2618,7 +2618,7 @@ SocialCalc.Formula.FieldToColnum = function(sheet, col1num, ncols, row1num, fiel
       }
    return 0; // looked at all and no match
 
-   }
+   };
 
 
 /*
@@ -2753,8 +2753,8 @@ SocialCalc.Formula.LookupFunctions = function(fname, operand, foperand, sheet) {
             if (lookupvalue.value == value) { // match
                break;
                }
-            if ((rangelookup > 0 && lookupvalue.value > value)
-                || (rangelookup < 0 && lookupvalue.value < value)) { // possible match: wait and see
+            if ((rangelookup > 0 && lookupvalue.value > value) ||
+                (rangelookup < 0 && lookupvalue.value < value)) { // possible match: wait and see
                previousOK = 1;
                csave = c; // remember col and row of last OK
                rsave = r;
@@ -2770,8 +2770,8 @@ SocialCalc.Formula.LookupFunctions = function(fname, operand, foperand, sheet) {
             if (lookupvalue.value == value) { // match
                break;
                }
-            if ((rangelookup > 0 && lookupvalue.value > value)
-                || (rangelookup < 0 && lookupvalue.value < value)) { // possible match: wait and see
+            if ((rangelookup > 0 && lookupvalue.value > value) ||
+                (rangelookup < 0 && lookupvalue.value < value)) { // possible match: wait and see
                previousOK = 1;
                csave = c;
                rsave = r;
@@ -2827,7 +2827,7 @@ SocialCalc.Formula.LookupFunctions = function(fname, operand, foperand, sheet) {
 
    return;
 
-   }
+   };
 
 SocialCalc.Formula.FunctionList["HLOOKUP"] = [SocialCalc.Formula.LookupFunctions, -3, "hlookup", "", "lookup"];
 SocialCalc.Formula.FunctionList["MATCH"] = [SocialCalc.Formula.LookupFunctions, -2, "match", "", "lookup"];
@@ -2942,7 +2942,7 @@ SocialCalc.Formula.IndexFunction = function(fname, operand, foperand, sheet) {
 
    return;
 
-   }
+   };
 
 SocialCalc.Formula.FunctionList["INDEX"] = [SocialCalc.Formula.IndexFunction, -1, "index", "", "lookup"];
 
@@ -3038,7 +3038,7 @@ SocialCalc.Formula.CountifSumifFunctions = function(fname, operand, foperand, sh
 
    return;
 
-   }
+   };
 
 SocialCalc.Formula.FunctionList["COUNTIF"] = [SocialCalc.Formula.CountifSumifFunctions, 2, "rangec", "", "stat"];
 SocialCalc.Formula.FunctionList["SUMIF"] = [SocialCalc.Formula.CountifSumifFunctions, -2, "sumif", "", "stat"];
@@ -3118,7 +3118,7 @@ SocialCalc.Formula.SumifsFunction = function(fname, operand, foperand, sheet) {
    PushOperand(resulttypesum, sum);
    return;
 
-   }
+   };
 
 
 SocialCalc.Formula.FunctionList["SUMIFS"] = [SocialCalc.Formula.SumifsFunction, -3, "sum_range, criteria_range1, criteria1, [criteria_range2, criteria2, ... criteria_range_n, criteria_n]", "", "stat"];
@@ -3156,7 +3156,7 @@ SocialCalc.Formula.IfFunction = function(fname, operand, foperand, sheet) {
 
    operand.push(cond.value ? op1 : op2);
 
-   }
+   };
 
 // Add to function list
 SocialCalc.Formula.FunctionList["IF"] = [SocialCalc.Formula.IfFunction, -2, "iffunc", "", "test"];
@@ -3185,7 +3185,7 @@ SocialCalc.Formula.DateFunction = function(fname, operand, foperand, sheet) {
    scf.PushOperand(operand, resulttype, result);
    return;
 
-   }
+   };
 
 SocialCalc.Formula.FunctionList["DATE"] = [SocialCalc.Formula.DateFunction, 3, "date", "", "datetime"];
 
@@ -3211,7 +3211,7 @@ SocialCalc.Formula.TimeFunction = function(fname, operand, foperand, sheet) {
    scf.PushOperand(operand, resulttype, result);
    return;
 
-   }
+   };
 
 SocialCalc.Formula.FunctionList["TIME"] = [SocialCalc.Formula.TimeFunction, 3, "hms", "", "datetime"];
 
@@ -3274,7 +3274,7 @@ SocialCalc.Formula.DMYFunctions = function(fname, operand, foperand, sheet) {
    scf.PushOperand(operand, resulttype, result);
    return;
 
-   }
+   };
 
 SocialCalc.Formula.FunctionList["DAY"] = [SocialCalc.Formula.DMYFunctions, 1, "v", "", "datetime"];
 SocialCalc.Formula.FunctionList["MONTH"] = [SocialCalc.Formula.DMYFunctions, 1, "v", "", "datetime"];
@@ -3326,7 +3326,7 @@ SocialCalc.Formula.HMSFunctions = function(fname, operand, foperand, sheet) {
    scf.PushOperand(operand, resulttype, result);
    return;
 
-   }
+   };
 
 SocialCalc.Formula.FunctionList["HOUR"] = [SocialCalc.Formula.HMSFunctions, 1, "v", "", "datetime"];
 SocialCalc.Formula.FunctionList["MINUTE"] = [SocialCalc.Formula.HMSFunctions, 1, "v", "", "datetime"];
@@ -3411,7 +3411,7 @@ SocialCalc.Formula.ExactFunction = function(fname, operand, foperand, sheet) {
    scf.PushOperand(operand, resulttype, result);
    return;
 
-   }
+   };
 
 SocialCalc.Formula.FunctionList["EXACT"] = [SocialCalc.Formula.ExactFunction, 2, "", "", "text"];
 
@@ -3658,7 +3658,7 @@ SocialCalc.Formula.StringFunctions = function(fname, operand, foperand, sheet) {
    scf.PushOperand(operand, resulttype, result);
    return;
 
-   }
+   };
 
 SocialCalc.Formula.FunctionList["FIND"] = [SocialCalc.Formula.StringFunctions, -2, "find", "", "text"];
 SocialCalc.Formula.FunctionList["LEFT"] = [SocialCalc.Formula.StringFunctions, -2, "tc", "", "text"];
@@ -3737,7 +3737,7 @@ SocialCalc.Formula.IsFunctions = function(fname, operand, foperand, sheet) {
 
    return;
 
-   }
+   };
 
 SocialCalc.Formula.FunctionList["ISBLANK"] = [SocialCalc.Formula.IsFunctions, 1, "v", "", "test"];
 SocialCalc.Formula.FunctionList["ISERR"] = [SocialCalc.Formula.IsFunctions, 1, "v", "", "test"];
@@ -3806,7 +3806,7 @@ SocialCalc.Formula.NTVFunctions = function(fname, operand, foperand, sheet) {
 
    return;
 
-   }
+   };
 
 SocialCalc.Formula.FunctionList["N"] = [SocialCalc.Formula.NTVFunctions, 1, "v", "", "math"];
 SocialCalc.Formula.FunctionList["T"] = [SocialCalc.Formula.NTVFunctions, 1, "v", "", "text"];
@@ -3969,7 +3969,7 @@ SocialCalc.Formula.Math1Functions = function(fname, operand, foperand, sheet) {
 
    return null;
 
-   }
+   };
 
 // Add to function list
 SocialCalc.Formula.FunctionList["ABS"] = [SocialCalc.Formula.Math1Functions, 1, "v", "", "math"];
@@ -4068,7 +4068,7 @@ SocialCalc.Formula.Math2Functions = function(fname, operand, foperand, sheet) {
 
    return null;
 
-   }
+   };
 
 // Add to function list
 SocialCalc.Formula.FunctionList["ATAN2"] = [SocialCalc.Formula.Math2Functions, 2, "xy", "", "math"];
@@ -4120,7 +4120,7 @@ SocialCalc.Formula.LogFunction = function(fname, operand, foperand, sheet) {
 
    return;
 
-   }
+   };
 
 SocialCalc.Formula.FunctionList["LOG"] = [SocialCalc.Formula.LogFunction, -1, "log", "", "math"];
 
@@ -4186,7 +4186,7 @@ SocialCalc.Formula.RoundFunction = function(fname, operand, foperand, sheet) {
 
    return;
 
-   }
+   };
 
 SocialCalc.Formula.FunctionList["ROUND"] = [SocialCalc.Formula.RoundFunction, -1, "vp", "", "math"];
 
@@ -4250,7 +4250,7 @@ SocialCalc.Formula.CeilingFloorFunctions = function(fname, operand, foperand, sh
 
    return;
 
-   }
+   };
 
 SocialCalc.Formula.FunctionList["CEILING"] = [SocialCalc.Formula.CeilingFloorFunctions, -1, "vsig", "", "math"];
 SocialCalc.Formula.FunctionList["FLOOR"] = [SocialCalc.Formula.CeilingFloorFunctions, -1, "vsig", "", "math"];
@@ -4301,7 +4301,7 @@ SocialCalc.Formula.AndOrFunctions = function(fname, operand, foperand, sheet) {
 
    return;
 
-   }
+   };
 
 SocialCalc.Formula.FunctionList["AND"] = [SocialCalc.Formula.AndOrFunctions, -1, "vn", "", "test"];
 SocialCalc.Formula.FunctionList["OR"] = [SocialCalc.Formula.AndOrFunctions, -1, "vn", "", "test"];
@@ -4331,7 +4331,7 @@ SocialCalc.Formula.NotFunction = function(fname, operand, foperand, sheet) {
 
    return;
 
-   }
+   };
 
 SocialCalc.Formula.FunctionList["NOT"] = [SocialCalc.Formula.NotFunction, 1, "v", "", "test"];
 
@@ -4373,7 +4373,7 @@ SocialCalc.Formula.ChooseFunction = function(fname, operand, foperand, sheet) {
 
    return;
 
-   }
+   };
 
 SocialCalc.Formula.FunctionList["CHOOSE"] = [SocialCalc.Formula.ChooseFunction, -2, "choose", "", "lookup"];
 
@@ -4416,7 +4416,7 @@ SocialCalc.Formula.ColumnsRowsFunctions = function(fname, operand, foperand, she
 
    return;
 
-   }
+   };
 
 SocialCalc.Formula.FunctionList["COLUMNS"] = [SocialCalc.Formula.ColumnsRowsFunctions, 1, "range", "", "lookup"];
 SocialCalc.Formula.FunctionList["ROWS"] = [SocialCalc.Formula.ColumnsRowsFunctions, 1, "range", "", "lookup"];
@@ -4496,7 +4496,7 @@ SocialCalc.Formula.ZeroArgFunctions = function(fname, operand, foperand, sheet) 
 
    return null;
 
-}
+};
 
 // Add to function list
 SocialCalc.Formula.FunctionList["FALSE"] = [SocialCalc.Formula.ZeroArgFunctions, 0, "", "", "test"];
@@ -4565,7 +4565,7 @@ SocialCalc.Formula.DDBFunction = function(fname, operand, foperand, sheet) {
 
    return;
 
-   }
+   };
 
 SocialCalc.Formula.FunctionList["DDB"] = [SocialCalc.Formula.DDBFunction, -4, "ddb", "", "financial"];
 
@@ -4602,7 +4602,7 @@ SocialCalc.Formula.SLNFunction = function(fname, operand, foperand, sheet) {
 
    return;
 
-   }
+   };
 
 SocialCalc.Formula.FunctionList["SLN"] = [SocialCalc.Formula.SLNFunction, 3, "csl", "", "financial"];
 
@@ -4641,7 +4641,7 @@ SocialCalc.Formula.SYDFunction = function(fname, operand, foperand, sheet) {
 
    return;
 
-   }
+   };
 
 SocialCalc.Formula.FunctionList["SYD"] = [SocialCalc.Formula.SYDFunction, 4, "cslp", "", "financial"];
 
@@ -4830,7 +4830,7 @@ SocialCalc.Formula.InterestFunctions = function(fname, operand, foperand, sheet)
 
    return;
 
-   }
+   };
 
 SocialCalc.Formula.FunctionList["FV"] = [SocialCalc.Formula.InterestFunctions, -3, "fv", "", "financial"];
 SocialCalc.Formula.FunctionList["NPER"] = [SocialCalc.Formula.InterestFunctions, -3, "nper", "", "financial"];
@@ -4882,7 +4882,7 @@ SocialCalc.Formula.NPVFunction = function(fname, operand, foperand, sheet) {
 
    return;
 
-   }
+   };
 
 SocialCalc.Formula.FunctionList["NPV"] = [SocialCalc.Formula.NPVFunction, -2, "npv", "", "financial"];
 
@@ -4977,7 +4977,7 @@ SocialCalc.Formula.IRRFunction = function(fname, operand, foperand, sheet) {
 
    return;
 
-   }
+   };
 
 SocialCalc.Formula.FunctionList["IRR"] = [SocialCalc.Formula.IRRFunction, -1, "irr", "", "financial"];
 
@@ -5353,7 +5353,7 @@ SocialCalc.Formula.IoFunctions = function(fname, operand, foperand, sheet, coord
    scf.PushOperand(operand, resulttype, result);
    return;
 
-   }
+   };
 
 //*********************
 //
@@ -5427,7 +5427,7 @@ SocialCalc.TriggerIoAction.AddAutocomplete = function(triggerCellId) {
       SocialCalc.TriggerIoAction.AutoComplete(triggerCellId);
     }
   });  
-}
+};
 // Event triggered, e.g. button/imagebutton clicked. - call linked action formulas 
 // eddy TriggerIoAction {
 SocialCalc.TriggerIoAction.Button = function(triggerCellId) {
@@ -5586,7 +5586,7 @@ SocialCalc.TriggerIoAction.Button = function(triggerCellId) {
 
  } 
 
-}
+};
 
 
 /******************************
@@ -5654,7 +5654,7 @@ SocialCalc.TriggerIoAction.CopyFormulaToRange = function(formulaData, destcr) {
 
   return sheetCommandList;
 
-}
+};
 
 /******************************
  * CopyValueToRange
@@ -5722,7 +5722,7 @@ SocialCalc.TriggerIoAction.CopyValueToRange = function(sourceData, destcr) {
   
   return sheetCommandList;  
 
-}
+};
 //----------------------
 
 
@@ -5837,7 +5837,7 @@ SocialCalc.TriggerIoAction.Email = function(emailFormulaCellId, optionalTriggerC
 	 if(setStatusBarMessage) SocialCalc.EditorSheetStatusCallback(null, "emailing", null, spreadsheet.editor);	 
    return emailContentsList; // cron job email
 
-}
+};
 
 /*
  * creates command on form: submitform \rtimestamp\rB2value\rC2value ...
@@ -5866,28 +5866,28 @@ SocialCalc.TriggerIoAction.Submit = function(triggerCellId) {
     
     sheet.ScheduleSheetCommands('submitform \r'+formDataValues,  false);
   }
-}
+};
 
 //onChange=select tag (combobox) 
 SocialCalc.TriggerIoAction.SelectList = function(selectListCellId) {
   var getHTMLselectListCellValue = function( selectListWidget ) { return selectListWidget.value; };
   var function_name = "SELECT";
   SocialCalc.TriggerIoAction.updateInputWidgetFormula(function_name, selectListCellId, getHTMLselectListCellValue );
-}
+};
 
 //onKeyUp=AutoComplete
 SocialCalc.TriggerIoAction.AutoComplete = function(autoCompleteCellId) {
   var getHTMLAutoCompleteCellValue = function( autoCompleteWidget ) { return autoCompleteWidget.value; };
   var function_name = "AUTOCOMPLETE";
   SocialCalc.TriggerIoAction.updateInputWidgetFormula(function_name, autoCompleteCellId, getHTMLAutoCompleteCellValue );
-}
+};
 
 // onKeyUp=TextBox 
 SocialCalc.TriggerIoAction.TextBox = function(textBoxCellId) {
   var getHTMLTextBoxCellValue = function( textBoxWidget ) { return textBoxWidget.value; };
   var function_name = "TEXTBOX";
   SocialCalc.TriggerIoAction.updateInputWidgetFormula(function_name, textBoxCellId, getHTMLTextBoxCellValue );
-}
+};
 
 //onKeyUp=CheckBox 
 SocialCalc.TriggerIoAction.CheckBox = function(checkBoxCellId) {
@@ -5906,7 +5906,7 @@ SocialCalc.TriggerIoAction.RadioButton = function(radioButtonGroupName) {
   $('input[name="'+radioButtonGroupName+'"]').each(function () {
      SocialCalc.TriggerIoAction.updateInputWidgetFormula(function_name,  $(this).attr('id').replace(/RADIOBUTTON_/,''), getHTMLRadioButtonValue );
   });
-}
+};
 
 
 SocialCalc.TriggerIoAction.updateInputWidgetFormula = function(function_name, widgetCellId, getHTMLWidgetCellValue ) {
@@ -5956,7 +5956,7 @@ SocialCalc.TriggerIoAction.updateInputWidgetFormula = function(function_name, wi
  spreadsheet.editor.EditorScheduleSheetCommands(sheetCommand,  true, false);
  
  SocialCalc.TriggerIoAction.UpdateFormDataSheet(function_name, widgetCellId, inputValue);
-}
+};
 
 // On edit of Form Input widget - Update form data sheet 
 SocialCalc.TriggerIoAction.UpdateFormDataSheet = function(function_name, formCellId, inputValue) {
@@ -5970,7 +5970,7 @@ SocialCalc.TriggerIoAction.UpdateFormDataSheet = function(function_name, formCel
     var valueCoord = SocialCalc.crToCoord(formDataViewer.formFields[formFieldName], 2);
     formDataViewer.sheet.ScheduleSheetCommands("set "+valueCoord+" text t "+inputValue, false);    
   }
-}
+};
 
 
 
@@ -5979,14 +5979,14 @@ SocialCalc.TriggerIoAction.UpdateFormDataSheet = function(function_name, formCel
 // CALL getProcessedParameter  with request for values 
 SocialCalc.Formula.getStandardizedValues = function(sheet, parameterData) {
   return SocialCalc.Formula.getStandardizedParameter(sheet, parameterData, true, true);
-}  
+};
 
 
 // getStandardizedCoords(parameterData)  // gets coord(s) of range/coord
 // CALL getProcessedParameter  with request for coord info
 SocialCalc.Formula.getStandardizedCoords = function(sheet, parameterData) {
   return SocialCalc.Formula.getStandardizedParameter(sheet, parameterData, true, false);
-}  
+};
 
 /***************
  * getStandardizedList
@@ -6010,7 +6010,7 @@ SocialCalc.Formula.getStandardizedList = function(sheet, listParameter) {
    }    
   }
   return listValues;
-}
+};
 
 /**************************
  * getStandardizedParameter(parameterData, includeCellCoord, includeCellData)
@@ -6129,7 +6129,7 @@ SocialCalc.Formula.getStandardizedParameter = function(sheet, parameterData, inc
     
   //RETURN 
   return result;
-}
+};
 
 
 
@@ -6209,7 +6209,7 @@ alert("Using SocialCalc.Formula.SheetCache.loadsheet - deprecated");
 
    return null; // return not found
 
-   }
+   };
 
 //
 // newsheet = SocialCalc.Formula.AddSheetToCache(sheetname, str, live)
@@ -6236,7 +6236,7 @@ SocialCalc.Formula.AddSheetToCache = function(sheetname, str, live) {
 
    return newsheet;
 
-   }
+   };
 
 //
 // nsheet = SocialCalc.Formula.NormalizeSheetName(sheetname)
@@ -6250,7 +6250,7 @@ SocialCalc.Formula.NormalizeSheetName = function(sheetname) {
    else {
       return sheetname.toLowerCase();
       }
-   }
+   };
 
 //
 // REMOTE FUNCTION INFO
@@ -6312,7 +6312,7 @@ SocialCalc.Formula.FreshnessInfoReset = function() {
    scffi.volatile = {};
    scffi.recalc_completed = false;
 
-   }
+   };
 
 //
 // MISC ROUTINES
@@ -6330,7 +6330,7 @@ SocialCalc.Formula.PlainCoord = function(coord) {
 
    return coord.replace(/\$/g, ""); // remove any $'s
 
-   }
+   };
 
 //
 // result = SocialCalc.Formula.OrderRangeParts(coord1, coord2)
@@ -6352,7 +6352,7 @@ SocialCalc.Formula.OrderRangeParts = function(coord1, coord2) {
 
    return result;
 
-   }
+   };
 
 //
 // cond = SocialCalc.Formula.TestCriteria(value, type, criteria)
@@ -6522,4 +6522,4 @@ SocialCalc.Formula.TestCriteria = function(value, type, criteria) {
 
    return cond;
 
-   }
+   };

@@ -884,7 +884,7 @@ SocialCalc.ConstantsSetClasses = function(prefix) {
          scc[item+"Style"] = defaults[item].style;
          }
       }
-   }
+   };
 
 // Set the image prefix on all images.
 
@@ -899,7 +899,7 @@ SocialCalc.ConstantsSetImagePrefix = function(imagePrefix) {
       }
    scc.defaultImagePrefix = imagePrefix;
 
-   }
+   };
 
 
 //
@@ -1091,7 +1091,7 @@ SocialCalc.Cell = function(coord) {
    this.valuetype = "b";
    this.readonly = false;
 
-   }
+   };
 
 // The types of cell properties
 //
@@ -1155,7 +1155,7 @@ SocialCalc.Sheet = function() {
                                 // sheet.statuscallback(data, status, arg, params)
    this.statuscallbackparams = null; // parameters passed to that routine
 
-   }
+   };
 
 //
 // SocialCalc.ResetSheet(sheet)
@@ -1220,7 +1220,7 @@ SocialCalc.ResetSheet = function(sheet, reload) {
    sheet.ioEventTree ={};
    sheet.ioParameterList = {}; 
 
-   }
+   };
 
 // Methods:
 
@@ -1235,7 +1235,7 @@ SocialCalc.Sheet.prototype.LastCol = function() {
         }
     }
     return last_col;
-}
+};
 SocialCalc.Sheet.prototype.LastRow = function() { 
     var last_row = 1;
     for (var cell_id  in this.cells) {
@@ -1245,7 +1245,7 @@ SocialCalc.Sheet.prototype.LastRow = function() {
         }
     }
     return last_row;
-} 
+};
 SocialCalc.Sheet.prototype.GetAssuredCell = function(coord) {
    return this.cells[coord] || this.AddCell(new SocialCalc.Cell(coord));
    };
@@ -1379,7 +1379,6 @@ SocialCalc.ParseSheetSave = function(savedsheet,sheetobj) {
                      break;
                   default:
                      throw scc.s_pssUnknownColType+" '"+t+"'";
-                     break;
                   }
                }
             break;
@@ -1397,7 +1396,6 @@ SocialCalc.ParseSheetSave = function(savedsheet,sheetobj) {
                      break;
                   default:
                      throw scc.s_pssUnknownRowType+" '"+t+"'";
-                     break;
                   }
                }
             break;
@@ -1526,7 +1524,7 @@ alert(scc.s_pssUnknownLineType+" '"+parts[0]+"'");
       parts = null;
       }
 
-   }
+   };
 
 //
 // SocialCalc.CellFromStringParts(sheet, cell, parts, j)
@@ -1645,7 +1643,7 @@ SocialCalc.CellFromStringParts = function(sheet, cell, parts, j) {
          }
       }
 
-   }
+   };
 
 
 SocialCalc.sheetfields = ["defaultrowheight", "defaultcolwidth", "circularreferencecell", "recalc", "needsrecalc", "usermaxcol", "usermaxrow"];
@@ -1769,7 +1767,7 @@ SocialCalc.CreateSheetSave = function(sheetobj, range, canonicalize) {
    delete sheetobj.xlt; // clean up
 
    return result.join("\n");
-   }
+   };
 
 //
 // line = SocialCalc.CellToString(sheet, cell)
@@ -1845,7 +1843,7 @@ SocialCalc.CellToString = function(sheet, cell) {
 
    return line;
 
-   }
+   };
 
 //
 // SocialCalc.CanonicalizeSheet(sheetobj, full)
@@ -2025,7 +2023,7 @@ SocialCalc.CanonicalizeSheet = function(sheetobj, full) {
 
    sheetobj.xlt = xlt; // leave for use by caller
 
-   }
+   };
 
 //
 // result = SocialCalc.EncodeCellAttributes(sheet, coord)
@@ -2042,24 +2040,24 @@ SocialCalc.EncodeCellAttributes = function(sheet, coord) {
 
    var InitAttrib = function(name) {
       result[name] = {def: true, val: ""};
-      }
+      };
 
    var InitAttribs = function(namelist) {
       for (var i=0; i<namelist.length; i++) {
          InitAttrib(namelist[i]);
          }
-      }
+      };
 
    var SetAttrib = function(name, v) {
       result[name].def = false;
       result[name].val = v || "";
-      }
+      };
 
    var SetAttribStar = function(name, v) {
       if (v=="*") return;
       result[name].def = false;
       result[name].val = v;
-      }
+      };
 
    var cell = sheet.GetAssuredCell(coord);
 
@@ -2149,7 +2147,7 @@ SocialCalc.EncodeCellAttributes = function(sheet, coord) {
 
    return result;
 
-   }
+   };
 
 //
 // result = SocialCalc.EncodeSheetAttributes(sheet)
@@ -2167,24 +2165,24 @@ SocialCalc.EncodeSheetAttributes = function(sheet) {
 
    var InitAttrib = function(name) {
       result[name] = {def: true, val: ""};
-      }
+      };
 
    var InitAttribs = function(namelist) {
       for (var i=0; i<namelist.length; i++) {
          InitAttrib(namelist[i]);
          }
-      }
+      };
 
    var SetAttrib = function(name, v) {
       result[name].def = false;
       result[name].val = v || value;
-      }
+      };
 
    var SetAttribStar = function(name, v) {
       if (v=="*") return;
       result[name].def = false;
       result[name].val = v;
-      }
+      };
 
    // sizes: colwidth, rowheight
 
@@ -2275,7 +2273,7 @@ SocialCalc.EncodeSheetAttributes = function(sheet) {
 
    return result;
 
-   }
+   };
 
 //
 // cmdstr = SocialCalc.DecodeCellAttributes(sheet, coord, attribs, range)
@@ -2311,7 +2309,7 @@ SocialCalc.DecodeCellAttributes = function(sheet, coord, newattribs, range) {
             DoCmd(cmdname+" "+val);
             }
          }
-      }
+      };
 
    var cmdstr = "";
 
@@ -2319,7 +2317,7 @@ SocialCalc.DecodeCellAttributes = function(sheet, coord, newattribs, range) {
       if (cmdstr) cmdstr += "\n";
       cmdstr += "set "+(range || coord)+" "+str;
       changed = true;
-      }
+      };
 
    // cellformat: alignhoriz
 
@@ -2413,7 +2411,7 @@ SocialCalc.DecodeCellAttributes = function(sheet, coord, newattribs, range) {
       return null;
       }
 
-   }
+   };
 
 
 //
@@ -2446,7 +2444,7 @@ SocialCalc.DecodeSheetAttributes = function(sheet, newattribs) {
             DoCmd(cmdname+" "+val);
             }
          }
-      }
+      };
 
    var cmdstr = "";
 
@@ -2454,7 +2452,7 @@ SocialCalc.DecodeSheetAttributes = function(sheet, newattribs) {
       if (cmdstr) cmdstr += "\n";
       cmdstr += "set sheet "+str;
       changed = true;
-      }
+      };
 
    // sizes: colwidth, rowheight
 
@@ -2536,7 +2534,7 @@ SocialCalc.DecodeSheetAttributes = function(sheet, newattribs) {
       return null;
       }
 
-   }
+   };
 
 // *************************************
 //
@@ -2588,7 +2586,7 @@ SocialCalc.ScheduleSheetCommands = function(sheet, cmdstr, saveundo) {
       SocialCalc.SheetCommandsTimerRoutine(sci, parseobj, saveundo);
    }, sci.firsttimerdelay);
 
-   }
+   };
 
 SocialCalc.SheetCommandsTimerRoutine = function(sci, parseobj, saveundo) {
 
@@ -2604,7 +2602,7 @@ SocialCalc.SheetCommandsTimerRoutine = function(sci, parseobj, saveundo) {
         if (typeof(alert) == "function")  {
           alert(errortext);
         } else {
-          console.log(errortext)
+          console.log(errortext);
         }
       }
 
@@ -2622,7 +2620,7 @@ SocialCalc.SheetCommandsTimerRoutine = function(sci, parseobj, saveundo) {
       sci.sheetobj.statuscallback(sci, "cmdend", "", sci.sheetobj.statuscallbackparams);
       }
 
-   }
+   };
 
 //
 // errortext = SocialCalc.ExecuteSheetCommand(sheet, cmd, saveundo)
@@ -3411,7 +3409,7 @@ SocialCalc.ExecuteSheetCommand = function(sheet, cmd, saveundo) {
                }
             cresult = a > b ? 1 : (a < b ? -1 : 0); // equal - return position in original to maintain it
             return cresult;
-            }
+            };
 
          sortlist.sort(sortfunction);
 
@@ -3553,29 +3551,29 @@ SocialCalc.ExecuteSheetCommand = function(sheet, cmd, saveundo) {
 
          // Expand merged cells if the new row/col is in between
 
-         var tempRenderContext = new SocialCalc.RenderContext(sheet)
-         tempRenderContext.CalculateCellSkipData()
+         var tempRenderContext = new SocialCalc.RenderContext(sheet);
+         tempRenderContext.CalculateCellSkipData();
 
-         var cellsToExpand = {} // Keep track of all merge spans we've expanded
-                                // so we don't expand one twice
+         var cellsToExpand = {}; // Keep track of all merge spans we've expanded
+                                 // so we don't expand one twice
          for (var skipCell in tempRenderContext.cellskip) {
-             var skipCellCR = SocialCalc.coordToCr(skipCell)
-               , mergerCellCoords = tempRenderContext.cellskip[skipCell]
+             var skipCellCR = SocialCalc.coordToCr(skipCell);
+             var mergerCellCoords = tempRenderContext.cellskip[skipCell];
              // for insertcol we check if the newly inserted col has
              // has any spans. This can only mean, that those cells
              // are part of a row span
              if (cmd1 === "insertcol" && skipCellCR.col === newcolstart) {
                 if (!cellsToExpand[mergerCellCoords]) {
-                    sheet.GetAssuredCell(mergerCellCoords).colspan += coloffset
+                    sheet.GetAssuredCell(mergerCellCoords).colspan += coloffset;
                     }
-                cellsToExpand[mergerCellCoords] = true
+                cellsToExpand[mergerCellCoords] = true;
                 }
              // for insertrow it's the same method
              if (cmd1 === "insertrow" && skipCellCR.row === newrowstart) {
                 if (!cellsToExpand[mergerCellCoords]) {
-                    sheet.GetAssuredCell(mergerCellCoords).rowspan += rowoffset
+                    sheet.GetAssuredCell(mergerCellCoords).rowspan += rowoffset;
                     }
-                cellsToExpand[mergerCellCoords] = true
+                cellsToExpand[mergerCellCoords] = true;
                 }
             }
 
@@ -3713,28 +3711,28 @@ SocialCalc.ExecuteSheetCommand = function(sheet, cmd, saveundo) {
 
          // Shrink merged cells if the new row/col was in between
 
-         var tempRenderContext = new SocialCalc.RenderContext(sheet)
-         tempRenderContext.CalculateCellSkipData()
+         var tempRenderContext = new SocialCalc.RenderContext(sheet);
+         tempRenderContext.CalculateCellSkipData();
 
-         var cellsToShrink = {} // Keep track of shrinked cells, so we don't do it twice
+         var cellsToShrink = {}; // Keep track of shrinked cells, so we don't do it twice
          for (var skipCell in tempRenderContext.cellskip) {
-             var skipCellCR = SocialCalc.coordToCr(skipCell)
-               , mergerCellCoords = tempRenderContext.cellskip[skipCell]
-               , mergerCellCR = tempRenderContext.coordToCR[mergerCellCoords]
+             var skipCellCR = SocialCalc.coordToCr(skipCell);
+             var mergerCellCoords = tempRenderContext.cellskip[skipCell];
+             var mergerCellCR = tempRenderContext.coordToCR[mergerCellCoords];
              // for deletecol we check if the removed col any spans that
              // are from younger cols and shrink those
              if (cmd1 === "deletecol" && skipCellCR.col === colstart+coloffset && mergerCellCR.col < skipCellCR.col) {
                 if (!cellsToShrink[mergerCellCoords]) {
-                    sheet.GetAssuredCell(mergerCellCoords).colspan += coloffset
+                    sheet.GetAssuredCell(mergerCellCoords).colspan += coloffset;
                     }
-                cellsToShrink[mergerCellCoords] = true
+                cellsToShrink[mergerCellCoords] = true;
                 }
              // for insertrow it's the same method
              if (cmd1 === "deleterow" && skipCellCR.row === rowstart+rowoffset && mergerCellCR.row < skipCellCR.row) {
                 if (!cellsToShrink[mergerCellCoords]) {
-                    sheet.GetAssuredCell(mergerCellCoords).rowspan += rowoffset
+                    sheet.GetAssuredCell(mergerCellCoords).rowspan += rowoffset;
                     }
-                cellsToShrink[mergerCellCoords] = true
+                cellsToShrink[mergerCellCoords] = true;
                 }
             }
 
@@ -4233,7 +4231,7 @@ alert(cmdstr+"|"+sheet.changes.stack.length+"--"+ustack);
    
    return errortext;
 
-   }
+   };
 
 SocialCalc.SheetUndo = function(sheet) {
 
@@ -4249,7 +4247,7 @@ SocialCalc.SheetUndo = function(sheet) {
    sheet.changes.Undo();
    sheet.ScheduleSheetCommands(cmdstr, false); // do undo operations
 
-   }
+   };
 
 SocialCalc.SheetRedo = function(sheet) {
 
@@ -4268,7 +4266,7 @@ SocialCalc.SheetRedo = function(sheet) {
       }
    sheet.ScheduleSheetCommands(cmdstr, false); // do undo operations
 
-   }
+   };
 
 SocialCalc.CreateAuditString = function(sheet) {
 
@@ -4284,7 +4282,7 @@ SocialCalc.CreateAuditString = function(sheet) {
 
    return result;
 
-   }
+   };
 
 SocialCalc.GetStyleNum = function(sheet, atype, style) {
 
@@ -4301,7 +4299,7 @@ SocialCalc.GetStyleNum = function(sheet, atype, style) {
       }
    return num;
 
-   }
+   };
 
 SocialCalc.GetStyleString = function(sheet, atype, num) {
 
@@ -4309,7 +4307,7 @@ SocialCalc.GetStyleString = function(sheet, atype, num) {
 
    return sheet[atype+"s"][num];
 
-   }
+   };
 
 //
 // updatedformula = SocialCalc.OffsetFormulaCoords(formula, coloffset, rowoffset)
@@ -4375,7 +4373,7 @@ SocialCalc.OffsetFormulaCoords = function(formula, coloffset, rowoffset) {
 
    return updatedformula;
 
-   }
+   };
 
 //
 // updatedformula = SocialCalc.AdjustFormulaCoords(formula, col, coloffset, row, rowoffset)
@@ -4457,7 +4455,7 @@ SocialCalc.AdjustFormulaCoords = function(formula, col, coloffset, row, rowoffse
 
    return updatedformula;
 
-   }
+   };
 
 //
 // updatedformula = SocialCalc.ReplaceFormulaCoords(formula, movedto)
@@ -4530,7 +4528,7 @@ SocialCalc.ReplaceFormulaCoords = function(formula, movedto) {
 
    return updatedformula;
 
-   }
+   };
 
 
 // ************************
@@ -4566,7 +4564,7 @@ SocialCalc.RecalcInfo = {
 
    LoadSheet: function(sheetname) {return false;} // default returns not found
 
-   }
+   };
 
 // SocialCalc.RecalcData - object with recalc info while determining recalc order and afterward
 
@@ -4592,7 +4590,7 @@ SocialCalc.RecalcData = function() { // initialize a RecalcData object
    this.checkinfo = {}; // attributes are coords; if no attrib for a coord, it wasn't checked or doesn't need it
                         // values are RecalcCheckInfo objects while checking or TRUE when complete
 
-   }
+   };
 
 // SocialCalc.RecalcCheckInfo - object that stores checking info while determining recalc order
 
@@ -4614,7 +4612,7 @@ SocialCalc.RecalcCheckInfo = function() { // initialize a RecalcCheckInfo object
    this.c = null; // looping values
    this.r = null;
    
-   }
+   };
 
 // Recalc the entire sheet
 
@@ -4644,7 +4642,7 @@ SocialCalc.RecalcSheet = function(sheet) {
 
    SocialCalc.RecalcSetTimeout();
 
-   }
+   };
 
 //
 // SocialCalc.RecalcSetTimeout - set a timer for next recalc step
@@ -4656,7 +4654,7 @@ SocialCalc.RecalcSetTimeout = function() {
 
    scri.recalctimer = window.setTimeout(SocialCalc.RecalcTimerRoutine, scri.timeslicedelay);
 
-   }
+   };
 
 //
 // SocialCalc.RecalcClearTimeout - cancel any timeouts
@@ -4671,7 +4669,7 @@ SocialCalc.RecalcClearTimeout = function() {
       scri.recalctimer = null;
       }
 
-   }
+   };
 
   
 //
@@ -4699,7 +4697,7 @@ SocialCalc.RecalcLoadedSheet = function(sheetname, str, recalcneeded, live) {
 
    SocialCalc.RecalcSetTimeout();
 
-   }
+   };
 
 
 //
@@ -4726,7 +4724,7 @@ SocialCalc.RecalcTimerRoutine = function() {
       if (sheet.statuscallback) {
          sheet.statuscallback(recalcdata, status, arg, sheet.statuscallbackparams);
          }
-      }
+      };
 
    SocialCalc.RecalcClearTimeout();
 
@@ -4867,7 +4865,7 @@ SocialCalc.RecalcTimerRoutine = function() {
       sheet = scri.queue.shift();
       sheet.RecalcSheet();
       }
-   }
+   };
 
 
 //
@@ -5012,10 +5010,9 @@ mainloop:
 
          if (ttype == token_coord) { // token is a coord
 
-            if (i >= 2 // look for a range
-             && parseinfo[i-1].type == token_op && parseinfo[i-1].text == ':'
-             && parseinfo[i-2].type == token_coord
-             && !sheetref) { // Range -- check each cell
+            if (i >= 2 && // look for a range
+                parseinfo[i-1].type == token_op && parseinfo[i-1].text == ':' &&
+                parseinfo[i-2].type == token_coord && !sheetref) { // Range -- check each cell
                coordvals.cr1 = SocialCalc.coordToCr(parseinfo[i-2].text); // remember range extents
                coordvals.cr2 = SocialCalc.coordToCr(ttext);
                coordvals.inrange = true; // next time use the range looping code
@@ -5068,7 +5065,7 @@ mainloop:
 
    return "";
 
-   }
+   };
 
 
 // *************************************
@@ -5095,7 +5092,7 @@ SocialCalc.Parse = function(str) {
       this.lineEnd = str.length;
       }
 
-   }
+   };
 
 // Return next token as a string
 
@@ -5114,7 +5111,7 @@ SocialCalc.Parse.prototype.NextToken = function() {
       this.pos = this.lineEnd;
       return this.str.substring(pos1, this.lineEnd);
       }
-   }
+   };
 
 // Return everything from current point until end of line
 
@@ -5123,12 +5120,12 @@ SocialCalc.Parse.prototype.RestOfString = function() {
    if (this.pos < 0 || this.pos >= this.lineEnd) return "";
    this.pos = this.lineEnd;
    return this.str.substring(oldpos, this.lineEnd);
-   }
+   };
 
 SocialCalc.Parse.prototype.RestOfStringNoMove = function() {
    if (this.pos < 0 || this.pos >= this.lineEnd) return "";
    return this.str.substring(this.pos, this.lineEnd);
-   }
+   };
 
 // Move current point to next line
 
@@ -5138,14 +5135,14 @@ SocialCalc.Parse.prototype.NextLine = function() {
    if (this.lineEnd < 0) {
       this.lineEnd = this.str.length;
       }
-   }
+   };
 
 // Check to see if at end of string with no more to process
 
 SocialCalc.Parse.prototype.EOF = function() {
    if (this.pos < 0 || this.pos >= this.str.length) return true;
    return false;
-   }
+   };
 
 
 // *************************************
@@ -5183,7 +5180,7 @@ SocialCalc.UndoStack = function() {
    this.maxRedo = 0; // Maximum size of redo stack (and audit trail which is this.stack[n].command) or zero if no limit
    this.maxUndo = 50; // Maximum number of steps kept for undo (usually the memory intensive part) or zero if no limit
 
-   }
+   };
 
 SocialCalc.UndoStack.prototype.PushChange = function(type) { // adding a new thing to the stack
    while (this.stack.length > 0 && this.stack.length-1 > this.tos) { // pop off things not redone
@@ -5197,7 +5194,7 @@ SocialCalc.UndoStack.prototype.PushChange = function(type) { // adding a new thi
       this.stack[this.stack.length - this.maxUndo - 1].undo = []; // only need to remove one
       }
    this.tos = this.stack.length - 1;
-   }
+   };
 
 SocialCalc.UndoStack.prototype.AddDo = function() {
    if (!this.stack[this.stack.length-1]) { return; }
@@ -5207,7 +5204,7 @@ SocialCalc.UndoStack.prototype.AddDo = function() {
       }
    var cmd = args.join(" ");
    this.stack[this.stack.length-1].command.push(cmd);
-   }
+   };
 
 SocialCalc.UndoStack.prototype.AddUndo = function() {
    if (!this.stack[this.stack.length-1]) { return; }
@@ -5217,12 +5214,12 @@ SocialCalc.UndoStack.prototype.AddUndo = function() {
       }
    var cmd = args.join(" ");
    this.stack[this.stack.length-1].undo.push(cmd);
-   }
+   };
 
 SocialCalc.UndoStack.prototype.TOS = function() {
    if (this.tos >= 0) return this.stack[this.tos];
    else return null;
-   }
+   };
 
 SocialCalc.UndoStack.prototype.Undo = function() {
    if (this.tos >= 0 && (!this.maxUndo || this.tos > this.stack.length - this.maxUndo - 1)) {
@@ -5232,7 +5229,7 @@ SocialCalc.UndoStack.prototype.Undo = function() {
    else {
       return false;
       }
-   }
+   };
 
 SocialCalc.UndoStack.prototype.Redo = function() {
    if (this.tos < this.stack.length-1) {
@@ -5242,7 +5239,7 @@ SocialCalc.UndoStack.prototype.Redo = function() {
    else {
       return false;
       }
-   }
+   };
 
 // *************************************
 //
@@ -5260,7 +5257,7 @@ SocialCalc.Clipboard = {
 
    clipboard:  "" // empty or string in save format with "copiedfrom:" set to a range
 
-   }
+   };
 
 
 // *************************************
@@ -5311,7 +5308,7 @@ SocialCalc.RenderContext = function(sheetobj) {
          cursorinsertup: {style: "color:#FFF;backgroundColor:#A6A6A6;backgroundRepeat:repeat-x;backgroundPosition:top left;backgroundImage:url("+scc.defaultImagePrefix+"cursorinsertup.gif);", className: scc.defaultHighlightTypeCursorClass},
          cursorinsertleft: {style: "color:#FFF;backgroundColor:#A6A6A6;backgroundRepeat:repeat-y;backgroundPosition:top left;backgroundImage:url("+scc.defaultImagePrefix+"cursorinsertleft.gif);", className: scc.defaultHighlightTypeCursorClass},
          range2: {style: "color:#000;backgroundColor:#FFF;backgroundImage:url("+scc.defaultImagePrefix+"range2.gif);", className: ""}
-      }
+      };
 
    this.cellIDprefix = scc.defaultCellIDPrefix; // if non-null, each cell will render with an ID
 
@@ -5397,7 +5394,7 @@ SocialCalc.RenderContext = function(sheetobj) {
       }
    else throw scc.s_rcMissingSheet;
 
-   }
+   };
 
 // Methods:
 
@@ -5472,7 +5469,7 @@ SocialCalc.PrecomputeSheetFontsAndLayouts = function(context) {
 
    context.needprecompute = false;
 
-   }
+   };
 
 SocialCalc.CalculateCellSkipData = function(context) {
 
@@ -5515,7 +5512,7 @@ SocialCalc.CalculateCellSkipData = function(context) {
 
    context.needcellskip = false;
 
-   }
+   };
 
 SocialCalc.CalculateColWidthData = function(context) {
 
@@ -5543,7 +5540,7 @@ SocialCalc.CalculateColWidthData = function(context) {
       }
    context.totalwidth = totalwidth;
 
-   }
+   };
 
 SocialCalc.CalculateRowHeightData = function(context) {
   var rownum, rowheight, totalheight;
@@ -5565,7 +5562,7 @@ SocialCalc.CalculateRowHeightData = function(context) {
   }
   context.totalheight = totalheight;
 
-}
+};
 
 SocialCalc.InitializeTable = function(context, tableobj) {
 
@@ -5598,7 +5595,7 @@ code does this (e.g., use table-layout:fixed).
 
    tableobj.style.width=context.totalwidth+"px";
 
-   }
+   };
 
 //
 // tableobj = SocialCalc.RenderSheet(context, oldtable, linkstyle)
@@ -5669,7 +5666,7 @@ SocialCalc.RenderSheet = function(context, oldtable, linkstyle) {
 
    return tableobj;
 
-   }
+   };
 
 SocialCalc.RenderRow = function(context, rownum, rowpane, linkstyle) {
 
@@ -5744,7 +5741,7 @@ SocialCalc.RenderRow = function(context, rownum, rowpane, linkstyle) {
       }
 
    return result;
-   }
+   };
 
 SocialCalc.RenderSpacingRow = function(context) {
 
@@ -5783,7 +5780,7 @@ SocialCalc.RenderSpacingRow = function(context) {
          }
       }
    return result;
-   }
+   };
 
 SocialCalc.RenderColHeaders = function(context) {
 
@@ -5854,7 +5851,7 @@ SocialCalc.RenderColHeaders = function(context) {
 //   }
    // }
    return result;
-   }
+   };
 
 SocialCalc.RenderColGroup = function(context) {
 
@@ -5888,7 +5885,7 @@ SocialCalc.RenderColGroup = function(context) {
          }
       }
    return result;
-   }
+   };
 
 SocialCalc.RenderSizingRow = function(context) {
 
@@ -5925,7 +5922,7 @@ SocialCalc.RenderSizingRow = function(context) {
          }
       }
    return result;
-   }
+   };
 
 SocialCalc.RenderCell = function(context, rownum, colnum, rowpane, colpane, noElement, linkstyle) {
 
@@ -6139,13 +6136,13 @@ SocialCalc.RenderCell = function(context, rownum, colnum, rowpane, colpane, noEl
       }
 
    return result;
-   }
+   };
 
 SocialCalc.CoordInPane = function(context, coord, rowpane, colpane) {
    var coordToCR = context.coordToCR[coord];
    if (!coordToCR || !coordToCR.row || !coordToCR.col) throw "Bad coordToCR for "+coord;
    return context.CellInPane(coordToCR.row, coordToCR.col, rowpane, colpane);
-   }
+   };
 
 
 SocialCalc.CellInPane = function(context, row, col, rowpane, colpane) {
@@ -6155,11 +6152,11 @@ SocialCalc.CellInPane = function(context, row, col, rowpane, colpane) {
    if (row < panerowlimits.first || row > panerowlimits.last) return false;
    if (col < panecollimits.first || col > panecollimits.last) return false;
    return true;
-   }
+   };
 
 SocialCalc.CreatePseudoElement = function() {
    return {style:{cssText:""}, innerHTML: "", className: ""};
-   }
+   };
 
 
 // *************************************
@@ -6177,7 +6174,7 @@ SocialCalc.rcColname = function(c) {
       return String.fromCharCode(colhigh + 64) + String.fromCharCode(collow);
    else
       return String.fromCharCode(collow);
-   }
+   };
 
 SocialCalc.letters = ["A","B","C","D","E","F","G","H","I","J","K","L","M",
                       "N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
@@ -6194,7 +6191,7 @@ SocialCalc.crToCoord = function(c, r) {
    else
       result = SocialCalc.letters[collow] + r;
    return result;
-   }
+   };
 
 SocialCalc.coordToCol = {}; // too expensive to set in crToCoord since that is called so many times
 SocialCalc.coordToRow = {};
@@ -6215,7 +6212,7 @@ SocialCalc.coordToCr = function(cr) {
    SocialCalc.coordToRow[cr] = r;
    return {row: r, col: c};
 
-   }
+   };
 
 SocialCalc.ParseRange = function(range) {
    var pos, cr, cr1, cr2;
@@ -6237,7 +6234,7 @@ SocialCalc.ParseRange = function(range) {
       cr2.coord = range;
       }
    return {cr1: cr1, cr2: cr2};
-   }
+   };
 
 SocialCalc.decodeFromSave = function(s) {
    if (typeof s != "string") return s;
@@ -6245,7 +6242,7 @@ SocialCalc.decodeFromSave = function(s) {
    var r=s.replace(/\\c/g,":");
    r=r.replace(/\\n/g,"\n");
    return r.replace(/\\b/g,"\\");
-   }
+   };
 
 SocialCalc.decodeFromAjax = function(s) {
    if (typeof s != "string") return s;
@@ -6254,7 +6251,7 @@ SocialCalc.decodeFromAjax = function(s) {
    r=r.replace(/\\n/g,"\n");
    r=r.replace(/\\e/g,"]]");
    return r.replace(/\\b/g,"\\");
-   }
+   };
 
 SocialCalc.encodeForSave = function(s) {
    if (typeof s != "string") return s;
@@ -6265,7 +6262,7 @@ SocialCalc.encodeForSave = function(s) {
    if (s.indexOf("\n")!=-1)
       s=s.replace(/\n/g,"\\n");
    return s;
-   }
+   };
 
 //
 // Returns estring where &, <, >, " are HTML escaped
@@ -6280,7 +6277,7 @@ SocialCalc.special_chars = function(string) {
       }
    return string;
 
-   }
+   };
 
 SocialCalc.Lookup = function(value, list) {
 
@@ -6292,7 +6289,7 @@ SocialCalc.Lookup = function(value, list) {
       }
    return list.length-1; // if all smaller, matches last
 
-   }
+   };
 
 //
 // setStyles(element, cssText)
@@ -6322,7 +6319,7 @@ SocialCalc.setStyles = function (element, cssText) {
 //      if (namevalue[0]) element.style[namevalue[0]] = namevalue[1];
       }
 
-   }
+   };
 
 //
 // GetViewportInfo() - returns object with viewport width and height, and scroll offsets
@@ -6356,7 +6353,7 @@ SocialCalc.GetViewportInfo = function () {
       }
 
    return result;
-   }
+   };
 
 //
 // GetElementPosition(element) - returns object with left and top position of the element in the document
@@ -6376,7 +6373,7 @@ SocialCalc.GetElementPosition = function (element) {
       }
    return {left:offsetLeft, top:offsetTop};
 
-   }
+   };
 
 //
 // GetElementPositionWithScroll(element) - returns object with left and top position of the element in the document
@@ -6394,7 +6391,7 @@ SocialCalc.GetElementPositionWithScroll = function (element) {
       height:rect.height?rect.height:rect.bottom-rect.top
       };
 
-   }
+   };
 
 //
 // GetElementFixedParent(element) - checks whether element has a parent with position:fixed
@@ -6409,7 +6406,7 @@ SocialCalc.GetElementFixedParent = function(element) {
       }
       return false;
 
-   }
+   };
 
 //
 // GetComputedStyle(element, style) - returns computed style value
@@ -6428,7 +6425,7 @@ SocialCalc.GetComputedStyle = function (element, style) {
       }
    return computedStyle[style];
 
-   }
+   };
 
 //
 // LookupElement(element, array) - returns array element which is an object with "element" of element
@@ -6442,7 +6439,7 @@ SocialCalc.LookupElement = function (element, array) {
       }
    return null;
 
-   }
+   };
 
 //
 // AssignID(obj, element, id) - Optionally assigns an ID with a prefix to the element
@@ -6454,7 +6451,7 @@ SocialCalc.AssignID = function (obj, element, id) {
       element.id = obj.idPrefix + id;
       }
 
-   }
+   };
 
 //
 // SocialCalc.GetCellContents(sheetobj, coord)
@@ -6488,7 +6485,7 @@ SocialCalc.GetCellContents = function(sheetobj, coord) {
 
    return result;
 
-   }
+   };
 
 //
 // Routines translated from the SocialCalc 1.1.0 Perl code:
@@ -6662,7 +6659,7 @@ SocialCalc.FormatValueForDisplay = function(sheetobj, value, cr, linkstyle) {
 	  
    return displayvalue;
 
-   }
+   };
 
  
    
@@ -6688,14 +6685,14 @@ SocialCalc.format_text_for_display = function(rawvalue, valuetype, valueformat, 
       if (!valuesubtype) valueformat="text-plain";
       }
    if (valueformat=="text-html") { // HTML - output as it as is
-      ;
+      
       }
    else if (SocialCalc.Callbacks.expand_wiki && /^text-wiki/.test(valueformat)) { // do general wiki markup
       displayvalue = SocialCalc.Callbacks.expand_wiki(displayvalue, sheetobj, linkstyle, valueformat);
       }
    else if (valueformat=="text-wiki") { // wiki text
-      displayvalue = (SocialCalc.Callbacks.expand_markup
-                      && SocialCalc.Callbacks.expand_markup(displayvalue, sheetobj, linkstyle)) || // do old wiki markup
+      displayvalue = (SocialCalc.Callbacks.expand_markup &&
+                      SocialCalc.Callbacks.expand_markup(displayvalue, sheetobj, linkstyle)) || // do old wiki markup
                      SocialCalc.special_chars("wiki-text:"+displayvalue);
       }
    else if (valueformat=="text-url") { // text is a URL for a link
@@ -6743,7 +6740,7 @@ SocialCalc.format_text_for_display = function(rawvalue, valuetype, valueformat, 
 
    return displayvalue;
 
-   }
+   };
 
 
 //
@@ -6795,7 +6792,7 @@ SocialCalc.format_number_for_display = function(rawvalue, valuetype, valueformat
 
    return SocialCalc.FormatNumber.formatNumberWithFormat(rawvalue, valueformat, "");
 
-   }
+   };
 
 //
 // valueinfo = DetermineValueType(rawvalue)
@@ -6818,7 +6815,7 @@ SocialCalc.DetermineValueType = function(rawvalue) {
       type = "";
       }
    else if (value.match(/^\s+$/)) { // just blanks
-      ; // leave type "t"
+        // leave type "t"
       }
    else if (tvalue.match(/^[-+]?\d*(?:\.)?\d*(?:[eE][-+]?\d+)?$/)) { // general number, including E
       value = tvalue - 0; // try converting to number
@@ -6930,7 +6927,7 @@ SocialCalc.DetermineValueType = function(rawvalue) {
 
    return {value: value, type: type};
 
-   }
+   };
 
 SocialCalc.InputConstants = { // strings that turn into constants for SocialCalc.DetermineValueType
       "TRUE": "1,nl", "FALSE": "0,nl", "#N/A": "0,e#N/A", "#NULL!": "0,e#NULL!", "#NUM!": "0,e#NUM!",
@@ -6958,7 +6955,7 @@ SocialCalc.default_expand_markup = function(displayvalue, sheetobj, linkstyle) {
 
    return result;
 
-   }
+   };
 
 
 //
@@ -6983,8 +6980,8 @@ SocialCalc.expand_text_link = function(displayvalue, sheetobj, linkstyle, valuef
       desc = parts.pagename ? scc.defaultPageLinkFormatString : scc.defaultLinkFormatString;
       }
 
-   if (displayvalue.length > 7 && displayvalue.substring(0,7).toLowerCase()=="http://" 
-      && displayvalue.charAt(displayvalue.length-1)!=">") {
+   if (displayvalue.length > 7 && displayvalue.substring(0,7).toLowerCase()=="http://" &&
+      displayvalue.charAt(displayvalue.length-1)!=">") {
       desc = desc.substring(7); // remove http:// unless explicit
       }
 
@@ -7008,7 +7005,7 @@ SocialCalc.expand_text_link = function(displayvalue, sheetobj, linkstyle, valuef
 
    return str;
 
-   }
+   };
 
 
 //
@@ -7047,10 +7044,10 @@ SocialCalc.ParseCellLinkText = function(str) {
    var lastbrace = str.lastIndexOf("{");
    var descend = -1;
 
-   if ((str.charAt(urlend) != ">" || lastlt == -1)
-         && (str.charAt(urlend) != "]" || lastbrkt == -1)
-         && (str.charAt(urlend) != "}" || str.charAt(urlend-1) != "]" || 
-             lastbrace == -1 || lastbrkt == -1 || lastbrkt < lastbrace)) { // plain url
+   if ((str.charAt(urlend) != ">" || lastlt == -1) &&
+        (str.charAt(urlend) != "]" || lastbrkt == -1) &&
+        (str.charAt(urlend) != "}" || str.charAt(urlend-1) != "]" ||
+        lastbrace == -1 || lastbrkt == -1 || lastbrkt < lastbrace)) { // plain url
       urlend++;
       descend = urlend;
       }
@@ -7113,7 +7110,7 @@ SocialCalc.ParseCellLinkText = function(str) {
 
    return result;
 
-   }
+   };
 
 
 //
@@ -7211,7 +7208,7 @@ SocialCalc.ConvertSaveToOtherFormat = function(savestr, outputformat, dorecalc) 
 
    return result;
 
-   }
+   };
 
 
 //
@@ -7232,7 +7229,7 @@ SocialCalc.ConvertOtherFormatToSave = function(inputstr, inputformat) {
       cr = SocialCalc.crToCoord(col, row);
       SocialCalc.SetConvertedCell(sheet, cr, value);
       value = "";
-      }
+      };
 
    if (inputformat == "scsave") {
       return inputstr;
@@ -7359,7 +7356,7 @@ SocialCalc.ConvertOtherFormatToSave = function(inputstr, inputformat) {
 
    return result;
 
-   }
+   };
 
 //
 // SocialCalc.SetConvertedCell(sheet, cr, rawvalue)
@@ -7392,7 +7389,7 @@ SocialCalc.SetConvertedCell = function(sheet, cr, rawvalue) {
       cell.formula = rawvalue;
       }
 
-   }
+   };
 
 
 //
@@ -7789,7 +7786,7 @@ SocialCalc.TableEditor = function(context) {
 
    this.range2 = {hasrange: false};
 
-   }
+   };
 
 // Methods:
 
@@ -7989,13 +7986,13 @@ SocialCalc.CreateTableEditor = function(editor, width, height) {
 
    return editor.toplevel;
 
-   }
+   };
 
 // Special code needed for change that occurred with Safari 5 that made paste not work for some reason
 
 SocialCalc.SafariPasteFunction = function(e) {
    e.preventDefault();
-   }
+   };
 
 //
 // SocialCalc.ResizeTableEditor(editor, width, height)
@@ -8031,7 +8028,7 @@ SocialCalc.ResizeTableEditor = function(editor, width, height) {
 
    return;
 
-   }
+   };
 
 //
 // str = SaveEditorSettings(editor)
@@ -8085,7 +8082,7 @@ SocialCalc.SaveEditorSettings = function(editor) {
 
    return result;
 
-   }
+   };
 
 //
 // LoadEditorSettings(editor, str, flags)
@@ -8163,7 +8160,7 @@ SocialCalc.LoadEditorSettings = function(editor, str, flags) {
 
    return;
 
-   }
+   };
 
 //
 // EditorRenderSheet(editor)
@@ -8206,7 +8203,7 @@ SocialCalc.EditorRenderSheet = function(editor) {
    editor.EditorMouseRegister();
    // } EditorRenderSheet
    
-   }
+   };
 
 //
 // EditorScheduleSheetCommands(editor, cmdstr, saveundo, ignorebusy)
@@ -8252,7 +8249,7 @@ SocialCalc.EditorScheduleSheetCommands = function(editor, cmdstr, saveundo, igno
          editor.context.sheetobj.ScheduleSheetCommands(cmdstr, saveundo);
          break;
       }
-   }
+   };
 
 
 //
@@ -8272,7 +8269,7 @@ SocialCalc.EditorSheetStatusCallback = function(recalcdata, status, arg, editor)
             editor.StatusCallback[f].func(editor, s, arg, editor.StatusCallback[f].params);
             }
          }
-      }
+      };
 
    switch (status) {
 
@@ -8309,8 +8306,8 @@ SocialCalc.EditorSheetStatusCallback = function(recalcdata, status, arg, editor)
             return;
             }
          if (sheetobj.attribs.needsrecalc &&
-               (sheetobj.attribs.recalc!="off" || sheetobj.recalconce)
-               && editor.recalcFunction) {
+               (sheetobj.attribs.recalc!="off" || sheetobj.recalconce) &&
+               editor.recalcFunction) {
             editor.FitToEditTable();
             sheetobj.renderneeded = false; // recalc will force a render
             if (sheetobj.recalconce) delete sheetobj.recalconce; // only do once
@@ -8420,7 +8417,7 @@ SocialCalc.EditorSheetStatusCallback = function(recalcdata, status, arg, editor)
 
    return;
 
-   }
+   };
 
 //
 // str = SocialCalc.EditorGetStatuslineString(editor, status, arg, params)
@@ -8533,8 +8530,8 @@ SocialCalc.EditorGetStatuslineString = function(editor, status, arg, params) {
       }
 
    // if there is a range, calculate sum (not during busy times)
-   if (!params.calculating && !params.command && !progress && editor.range.hasrange 
-       && (editor.range.left!=editor.range.right || editor.range.top!=editor.range.bottom)) {
+   if (!params.calculating && !params.command && !progress && editor.range.hasrange &&
+       (editor.range.left!=editor.range.right || editor.range.top!=editor.range.bottom)) {
       sum = 0;
       for (r=editor.range.top; r <= editor.range.bottom; r++) {
          for (c=editor.range.left; c <= editor.range.right; c++) {
@@ -8569,7 +8566,7 @@ SocialCalc.EditorGetStatuslineString = function(editor, status, arg, params) {
    // } eddy EditorGetStatuslineString 
    return sstr;
 
-   }
+   };
 
 
 //
@@ -8595,7 +8592,7 @@ SocialCalc.EditorMouseInfo = {
    mouseresizecol: "", // col being resized
    mouseresizeclientx: null, // where resize started
    mouseresizedisplay: null // element tracking new size
-   }
+   };
 
 //
 // EditorMouseRegister(editor)
@@ -8639,7 +8636,7 @@ SocialCalc.EditorMouseRegister = function(editor) {
 
    return;
 
-   }
+   };
 
 //
 // EditorMouseUnregister(editor)
@@ -8672,14 +8669,14 @@ SocialCalc.EditorMouseUnregister = function(editor) {
 
    return;
 
-   }
+   };
 
 SocialCalc.StopPropagation = function(event) {
     if (event.stopPropagation) event.stopPropagation(); // DOM Level 2
     else event.cancelBubble = true; // IE 5+
     if (event.preventDefault) event.preventDefault(); // DOM Level 2
     else event.returnValue = false; // IE 5+
-}
+};
 
 SocialCalc.SetMouseMoveUp = function(move, up, element, event) {
        // Event code from JavaScript, Flanagan, 5th Edition, pg. 422
@@ -8694,7 +8691,7 @@ SocialCalc.SetMouseMoveUp = function(move, up, element, event) {
       element.attachEvent("onlosecapture", up);
    }
     SocialCalc.StopPropagation(event);
-}
+};
 
 SocialCalc.RemoveMouseMoveUp = function(move, up, element, event) {
     SocialCalc.StopPropagation(event);
@@ -8708,7 +8705,7 @@ SocialCalc.RemoveMouseMoveUp = function(move, up, element, event) {
 	element.detachEvent("onmousemove", move);
 	element.releaseCapture();
     }
-}
+};
 
 SocialCalc.ProcessEditorMouseDown = function(e) {
 
@@ -8810,7 +8807,7 @@ SocialCalc.ProcessEditorMouseDown = function(e) {
 			      event);
    return;
 
-   }
+   };
 
 SocialCalc.EditorMouseRange = function(editor, coord) {
 
@@ -8856,7 +8853,7 @@ SocialCalc.EditorMouseRange = function(editor, coord) {
          editor.inputBox.DisplayCellContents(null);
          break;
       }
-   }
+   };
 
 SocialCalc.ProcessEditorMouseMove = function(e) {
 
@@ -8898,7 +8895,7 @@ SocialCalc.ProcessEditorMouseMove = function(e) {
    editor.EditorMouseRange(result.coord);
    SocialCalc.StopPropagation(event); 
    return;
-   }
+   };
 
 
 SocialCalc.ProcessEditorMouseUp = function(e) {
@@ -8942,7 +8939,7 @@ SocialCalc.ProcessEditorMouseUp = function(e) {
 				  event);
    return false;
 
-   }
+   };
 
 
 SocialCalc.ProcessEditorColsizeMouseDown = function(e, ele, result) {
@@ -8980,7 +8977,7 @@ SocialCalc.ProcessEditorColsizeMouseDown = function(e, ele, result) {
 			       editor.toplevel,
 			       event);
    return;
-   }
+   };
 
 
 SocialCalc.ProcessEditorColsizeMouseMove = function(e) {
@@ -9008,7 +9005,7 @@ SocialCalc.ProcessEditorColsizeMouseMove = function(e) {
       }
    SocialCalc.StopPropagation(event);
    return;
-   }
+   };
 
 
 SocialCalc.ProcessEditorColsizeMouseUp = function(e) {
@@ -9045,7 +9042,7 @@ SocialCalc.ProcessEditorColsizeMouseUp = function(e) {
 
    return false;
 
-   }
+   };
 
 
 SocialCalc.FinishColRowSize = function() {
@@ -9065,7 +9062,7 @@ SocialCalc.FinishColRowSize = function() {
 
    return;
 
-   }
+   };
 
 
 SocialCalc.ProcessEditorRowselectMouseDown = function(e, ele, result) {
@@ -9073,11 +9070,11 @@ SocialCalc.ProcessEditorRowselectMouseDown = function(e, ele, result) {
     var mouseinfo = SocialCalc.EditorMouseInfo;
     var editor = mouseinfo.editor;
     var sheet = SocialCalc.GetSpreadsheetControlObject().sheet;
-    coord1 = SocialCalc.crToCoord(1, result.row)
+    coord1 = SocialCalc.crToCoord(1, result.row);
     coord2 = SocialCalc.crToCoord(sheet.LastCol(),
-				  result.row)
+				  result.row);
     coord3 = SocialCalc.crToCoord(editor.firstscrollingcol,
-				  result.row)
+				  result.row);
     editor.RangeAnchor(coord1);
     editor.RangeExtend(coord2);
     editor.MoveECell(coord3);
@@ -9085,7 +9082,7 @@ SocialCalc.ProcessEditorRowselectMouseDown = function(e, ele, result) {
 			      SocialCalc.ProcessEditorRowselectMouseUp,
 			      editor.toplevel,
 			      event);
-}
+};
 
 SocialCalc.ProcessEditorRowselectMouseMove = function(e) {
     var event = e || window.event;
@@ -9100,13 +9097,13 @@ SocialCalc.ProcessEditorRowselectMouseMove = function(e) {
     var clientY = event.clientY - pos.top;
     result = SocialCalc.GridMousePosition(editor, clientX, clientY);
     coord2 = SocialCalc.crToCoord(sheet.LastCol(),
-				  result.row)
+				  result.row);
     coord3 = SocialCalc.crToCoord(editor.firstscrollingcol,
-				  result.row)
+				  result.row);
     editor.RangeExtend(coord2);
     editor.MoveECell(coord3);
     return;
-}
+};
 
 SocialCalc.ProcessEditorRowselectMouseUp = function(e) {
     var event = e || window.event;
@@ -9118,7 +9115,7 @@ SocialCalc.ProcessEditorRowselectMouseUp = function(e) {
 				 editor.toplevel,
 				 e);
     return;
-}
+};
 
 SocialCalc.ProcessEditorColselectMouseDown = function(e, ele, result) {
     var event = e || window.event;
@@ -9126,11 +9123,11 @@ SocialCalc.ProcessEditorColselectMouseDown = function(e, ele, result) {
     var editor = mouseinfo.editor;
     var sheet = SocialCalc.GetSpreadsheetControlObject().sheet;
 
-    coord1 = SocialCalc.crToCoord(result.col, 1)
+    coord1 = SocialCalc.crToCoord(result.col, 1);
     coord2 = SocialCalc.crToCoord(result.col,
-				  sheet.LastRow())
+				  sheet.LastRow());
     coord3 = SocialCalc.crToCoord(result.col,
-				  editor.firstscrollingrow)
+				  editor.firstscrollingrow);
     
     editor.RangeAnchor(coord1);
     editor.RangeExtend(coord2);
@@ -9140,7 +9137,7 @@ SocialCalc.ProcessEditorColselectMouseDown = function(e, ele, result) {
 			      editor.toplevel,
 			      event);
 
-}
+};
 
 SocialCalc.ProcessEditorColselectMouseMove = function(e) {
     var event = e || window.event;
@@ -9155,13 +9152,13 @@ SocialCalc.ProcessEditorColselectMouseMove = function(e) {
     var clientY = event.clientY - pos.top;
     result = SocialCalc.GridMousePosition(editor, clientX, clientY);
     coord2 = SocialCalc.crToCoord(result.col,
-				  sheet.LastRow())
+				  sheet.LastRow());
     coord3 = SocialCalc.crToCoord(result.col,
-				  editor.firstscrollingrow)
+				  editor.firstscrollingrow);
     editor.RangeExtend(coord2);
     editor.MoveECell(coord3);
     return;
-}
+};
 
 SocialCalc.ProcessEditorColselectMouseUp = function(e) {
     var event = e || window.event;
@@ -9173,7 +9170,7 @@ SocialCalc.ProcessEditorColselectMouseUp = function(e) {
 				 editor.toplevel,
 				 e);
     return;
-}
+};
 
 SocialCalc.ProcessEditorRowsizeMouseDown = function(e, ele, result) {
 
@@ -9211,7 +9208,7 @@ SocialCalc.ProcessEditorRowsizeMouseDown = function(e, ele, result) {
 			      editor.toplevel,
 			      event);
     return;
-   }
+   };
 
 
 SocialCalc.ProcessEditorRowsizeMouseMove = function(e) {
@@ -9239,7 +9236,7 @@ SocialCalc.ProcessEditorRowsizeMouseMove = function(e) {
    SocialCalc.StopPropagation(event);
    return;
 
-   }
+   };
 
 
 SocialCalc.ProcessEditorRowsizeMouseUp = function(e) {
@@ -9270,7 +9267,7 @@ SocialCalc.ProcessEditorRowsizeMouseUp = function(e) {
 
    return false;
 
-   }
+   };
 
 
 //
@@ -9376,7 +9373,7 @@ SocialCalc.SetDragAutoRepeat = function(editor, mouseinfo, callback) {
 
    return;
 
-   }
+   };
 
 //
 // DragAutoRepeat()
@@ -9410,7 +9407,7 @@ SocialCalc.DragAutoRepeat = function() {
 
    repeatinfo.timer = window.setTimeout(SocialCalc.DragAutoRepeat, repeatinfo.repeatinterval);
 
-   }
+   };
 
 //
 // Handling Clicking
@@ -9464,7 +9461,7 @@ SocialCalc.ProcessEditorDblClick = function(e) {
    SocialCalc.StopPropagation(event);
    return;
 
-   }
+   };
 
 
 SocialCalc.EditorOpenCellEdit = function(editor) {
@@ -9487,7 +9484,7 @@ SocialCalc.EditorOpenCellEdit = function(editor) {
 
    return;
 
-   }
+   };
 
 
 SocialCalc.EditorProcessKey = function(editor, ch, e) {
@@ -9667,7 +9664,7 @@ SocialCalc.EditorProcessKey = function(editor, ch, e) {
 
    return false;
 
-   }
+   };
 
 SocialCalc.EditorAddToInput = function(editor, str, prefix) {
 
@@ -9706,14 +9703,14 @@ SocialCalc.EditorAddToInput = function(editor, str, prefix) {
          break;
       }
 
-   }
+   };
 
 
 SocialCalc.EditorDisplayCellContents = function(editor) {
 
    if (editor.inputBox) editor.inputBox.DisplayCellContents();
 
-   }
+   };
 
 SocialCalc.EditorSaveEdit = function(editor, text) {
 
@@ -9778,7 +9775,7 @@ SocialCalc.EditorSaveEdit = function(editor, text) {
 
    return;
 
-   }
+   };
 
 
 // Eddy EditedTriggerCell {
@@ -9802,7 +9799,7 @@ SocialCalc.EditedTriggerCell  = function(actionFormulaCells, editedCellRef, edit
 			}
 	 }
 	
-}	
+};
 // } Eddy EditedTriggerCell
 
 
@@ -9836,7 +9833,7 @@ SocialCalc.EditorApplySetCommandsToRange = function(editor, cmd) {
 
    editor.DisplayCellContents();
 
-   }
+   };
 
 SocialCalc.EditorProcessMouseWheel = function(event, delta, mousewheelinfo, wobj) {
 
@@ -9849,7 +9846,7 @@ SocialCalc.EditorProcessMouseWheel = function(event, delta, mousewheelinfo, wobj
       wobj.functionobj.editor.ScrollRelative(true, Math.ceil(-delta * 1.5));
       }
 
-   }
+   };
 
 //
 // GridMousePosition(editor, clientX, clientY)
@@ -9892,8 +9889,8 @@ SocialCalc.GridMousePosition = function(editor, clientX, clientY) {
          // resize bar
          for (rowtoresize=1; rowtoresize<editor.rowpositions.length; rowtoresize++) {
             if (!editor.rowheight[rowtoresize]) continue;
-            if (((editor.rowpositions[rowtoresize] + editor.rowheight[rowtoresize]) - 3) <= clientY
-               && ((editor.rowpositions[rowtoresize] + editor.rowheight[rowtoresize]) + 3) >= clientY) {
+            if (((editor.rowpositions[rowtoresize] + editor.rowheight[rowtoresize]) - 3) <= clientY &&
+               ((editor.rowpositions[rowtoresize] + editor.rowheight[rowtoresize]) + 3) >= clientY) {
                result.rowtoresize = rowtoresize;
                break;
             }
@@ -9902,17 +9899,17 @@ SocialCalc.GridMousePosition = function(editor, clientX, clientY) {
          // Handle unhide row.
          if (unhide = editor.context.rowunhidetop[row]) {
            pos = SocialCalc.GetElementPosition(unhide);
-           if (clientX >= pos.left && clientX < pos.left+unhide.offsetWidth
-               && clientY >= (editor.rowpositions[row] + editor.rowheight[row] - unhide.offsetHeight)
-               && clientY < (editor.rowpositions[row] + editor.rowheight[row])) {
+           if (clientX >= pos.left && clientX < pos.left+unhide.offsetWidth &&
+               clientY >= (editor.rowpositions[row] + editor.rowheight[row] - unhide.offsetHeight) &&
+               clientY < (editor.rowpositions[row] + editor.rowheight[row])) {
              result.rowtounhide = row+1;
            }
          }
          if (unhide = editor.context.rowunhidebottom[row]) {
            pos = SocialCalc.GetElementPosition(unhide);
-           if (clientX >= pos.left && clientX < pos.left+unhide.offsetWidth
-               && clientY >= (editor.rowpositions[row])
-               && clientY < (editor.rowpositions[row] + unhide.offsetHeight)) {
+           if (clientX >= pos.left && clientX < pos.left+unhide.offsetWidth &&
+               clientY >= (editor.rowpositions[row]) &&
+               clientY < (editor.rowpositions[row] + unhide.offsetHeight)) {
              result.rowtounhide = row-1;
            }
          }
@@ -9937,8 +9934,8 @@ SocialCalc.GridMousePosition = function(editor, clientX, clientY) {
          // resize bar
          for (coltoresize=1; coltoresize<editor.colpositions.length; coltoresize++) {
             if (!editor.colwidth[coltoresize]) continue;
-            if (((editor.colpositions[coltoresize] + editor.colwidth[coltoresize]) - 3) <= clientX
-               && ((editor.colpositions[coltoresize] + editor.colwidth[coltoresize]) + 3) >= clientX) {
+            if (((editor.colpositions[coltoresize] + editor.colwidth[coltoresize]) - 3) <= clientX &&
+               ((editor.colpositions[coltoresize] + editor.colwidth[coltoresize]) + 3) >= clientX) {
                result.coltoresize = coltoresize;
                break;
             }
@@ -10001,7 +9998,7 @@ SocialCalc.GridMousePosition = function(editor, clientX, clientY) {
 
    return null;
 
-   }
+   };
 
 //
 // GetEditorCellElement(editor, row, col)
@@ -10050,7 +10047,7 @@ SocialCalc.GetEditorCellElement = function(editor, row, col) {
       }
 
    return null;
-}
+};
 
 //
 // cellcoord = MoveECellWithKey(editor, ch)
@@ -10146,7 +10143,7 @@ SocialCalc.MoveECellWithKey = function(editor, ch) {
 
    return coord;
 
-   }
+   };
 
 //
 // cellcoord = MoveECell(editor, newecell)
@@ -10211,7 +10208,7 @@ SocialCalc.MoveECell = function(editor, newcell) {
 
    return newcell;
 
-   }
+   };
 
 SocialCalc.EnsureECellVisible = function(editor) {
 
@@ -10242,7 +10239,7 @@ SocialCalc.EnsureECellVisible = function(editor) {
       editor.cellhandles.ShowCellHandles(true);
       }
 
-   }
+   };
 
 SocialCalc.ReplaceCell = function(editor, cell, row, col) {
 
@@ -10259,7 +10256,7 @@ SocialCalc.ReplaceCell = function(editor, cell, row, col) {
             cell.element.style[a] = newelement.style[a];
          }
       }
-   }
+   };
 
 
 SocialCalc.UpdateCellCSS = function(editor, cell, row, col) {
@@ -10275,7 +10272,7 @@ SocialCalc.UpdateCellCSS = function(editor, cell, row, col) {
             cell.element.style[a] = newelement.style[a];
          }
       }
-   }
+   };
 
 
 SocialCalc.SetECellHeaders = function(editor, selected) {
@@ -10334,7 +10331,7 @@ SocialCalc.SetECellHeaders = function(editor, selected) {
          }
       colindex += last - first + 1 + 1;
       }
-   }
+   };
 
 //
 // ECellReadonly(editor, ecoord)
@@ -10353,7 +10350,7 @@ SocialCalc.ECellReadonly = function(editor, ecoord) {
    var cell = editor.context.sheetobj.cells[ecoord];
    return cell && cell.readonly;
 
-   }
+   };
 
 //
 // RangeAnchor(editor, ecoord)
@@ -10369,7 +10366,7 @@ SocialCalc.RangeAnchor = function(editor, ecoord) {
 
    editor.RangeExtend(ecoord);
 
-   }
+   };
 
 //
 // RangeExtend(editor, ecoord)
@@ -10508,7 +10505,7 @@ SocialCalc.RangeExtend = function(editor, ecoord) {
 
    return;
 
-   }
+   };
 
 //
 // RangeRemove(editor)
@@ -10571,7 +10568,7 @@ SocialCalc.RangeRemove = function(editor) {
 
    return;
 
-   }
+   };
 
 //
 // Range2Remove(editor)
@@ -10606,7 +10603,7 @@ SocialCalc.Range2Remove = function(editor) {
 
    return;
 
-   }
+   };
 
 //
 // FitToEditTable(editor)
@@ -10673,7 +10670,7 @@ SocialCalc.FitToEditTable = function(editor) {
 
    context.rowpanes[rowpane].last = context.sheetobj.attribs.usermaxrow || context.rowpanes[rowpane].first + Math.floor(needed / context.pixelsPerRow) + 1;
 
-   }
+   };
 
 //
 // CalculateEditorPositions(editor)
@@ -10733,7 +10730,7 @@ SocialCalc.CalculateEditorPositions = function(editor) {
 
    editor.verticaltablecontrol.ComputeTableControlPositions();
    editor.horizontaltablecontrol.ComputeTableControlPositions();
-   }
+   };
 
 //
 // ScheduleRender(editor)
@@ -10749,7 +10746,7 @@ SocialCalc.ScheduleRender = function(editor) {
    SocialCalc.EditorSheetStatusCallback(null, "schedrender", null, editor);
    editor.timeout = window.setTimeout(function() { SocialCalc.DoRenderStep(editor); }, 1);
 
-   }
+   };
 
 // DoRenderStep(editor)
 //
@@ -10766,7 +10763,7 @@ SocialCalc.DoRenderStep = function(editor) {
 
    editor.timeout = window.setTimeout(function() { SocialCalc.DoPositionCalculations(editor); }, 1);
 
-   }
+   };
 
 //
 // SocialCalc.SchedulePositionCalculations(editor)
@@ -10778,7 +10775,7 @@ SocialCalc.SchedulePositionCalculations = function(editor) {
 
    editor.timeout = window.setTimeout(function() { SocialCalc.DoPositionCalculations(editor); }, 1);
 
-   }
+   };
 
 // DoPositionCalculations(editor)
 //
@@ -10808,7 +10805,7 @@ SocialCalc.DoPositionCalculations = function(editor) {
 //!!! Need to now check to see if this positioned controls out of the editing area
 //!!! (such as when there is a large wrapped cell and it pushes the pane boundary too far down).
 
-   }
+   };
 
 SocialCalc.CalculateRowPositions = function(editor, panenum, positions, sizes) {
 
@@ -10847,7 +10844,7 @@ SocialCalc.CalculateRowPositions = function(editor, panenum, positions, sizes) {
 
    return;
 
-   }
+   };
 
 SocialCalc.CalculateColPositions = function(editor, panenum, positions, sizes) {
 
@@ -10887,7 +10884,7 @@ SocialCalc.CalculateColPositions = function(editor, panenum, positions, sizes) {
 
    return;
 
-   }
+   };
 
 
 // ScrollRelative(editor, vertical, amount)
@@ -10904,7 +10901,7 @@ SocialCalc.ScrollRelative = function(editor, vertical, amount) {
       }
    return;
 
-   }
+   };
 
 // ScrollRelativeBoth(editor, vamount, hamount)
 //
@@ -10969,7 +10966,7 @@ SocialCalc.ScrollRelativeBoth = function(editor, vamount, hamount) {
       editor.ScheduleRender();
       }
 
-   }
+   };
 
 
 // PageRelative(editor, vertical, direction)
@@ -11016,7 +11013,7 @@ SocialCalc.PageRelative = function(editor, vertical, direction) {
    editor.FitToEditTable();
    editor.ScheduleRender();
 
-   }
+   };
 
 // LimitLastPanes(editor)
 //
@@ -11040,7 +11037,7 @@ SocialCalc.LimitLastPanes = function(editor) {
    if (context.sheetobj.attribs.usermaxcol && context.colpanes[plen-1].first > context.sheetobj.attribs.usermaxcol)
        context.colpanes[plen-1].first = context.sheetobj.attribs.usermaxcol;
 
-   }
+   };
 
 SocialCalc.ScrollTableUpOneRow = function(editor) {
 
@@ -11123,7 +11120,7 @@ SocialCalc.ScrollTableUpOneRow = function(editor) {
       }
 
    return tableobj;
-   }
+   };
 
 SocialCalc.ScrollTableDownOneRow = function(editor) {
 
@@ -11207,7 +11204,7 @@ SocialCalc.ScrollTableDownOneRow = function(editor) {
       }
 
    return tableobj;
-   }
+   };
 
 
 // *************************************
@@ -11246,7 +11243,7 @@ SocialCalc.InputBox = function(element, editor) {
       if (e.state!="start") return; // if not in normal keyboard mode don't replace formula bar
       editor.inputBox.DisplayCellContents(e.ecell.coord);
       };
-   }
+   };
 
 
 // Methods:
@@ -11318,7 +11315,7 @@ SocialCalc.InputBoxDisplayCellContents = function(inputbox, coord) {
       }
    inputbox.SetText(text);
 
-   }
+   };
 
 //
 // SocialCalc.InputBoxFocus(inputbox)
@@ -11374,7 +11371,7 @@ SocialCalc.InputBoxOnMouseDown = function(e) {
       case "inputboxdirect":
          break;
       }
-   }
+   };
 
 
 // *************************************
@@ -11433,7 +11430,7 @@ SocialCalc.InputEcho = function(editor) {
 
    editor.toplevel.appendChild(this.container);
 
-   }
+   };
 
 // Methods:
 
@@ -11467,7 +11464,7 @@ SocialCalc.ShowInputEcho = function(inputecho, show) {
       inputecho.container.style.display = "none";
       }
 
-   }
+   };
 
 SocialCalc.SetInputEchoText = function(inputecho, str) {
 
@@ -11501,7 +11498,7 @@ SocialCalc.SetInputEchoText = function(inputecho, str) {
       inputecho.prompt.style.display = "none";
       }
 
-   }
+   };
 
 SocialCalc.InputEchoHeartbeat = function() {
 
@@ -11510,7 +11507,7 @@ SocialCalc.InputEchoHeartbeat = function() {
 
    editor.inputEcho.SetText(editor.inputBox.GetText()+"_");
 
-   }
+   };
 
 SocialCalc.InputEchoMouseDown = function(e) {
       var event = e || window.event;
@@ -11594,7 +11591,7 @@ SocialCalc.CellHandles = function(editor) {
       throw "Browser not supported";
       }
 
-   }
+   };
 
 // Methods:
 
@@ -11683,14 +11680,14 @@ SocialCalc.ShowCellHandles = function(cellhandles, show, moveshow) {
       cellhandles.dragtooltip.style.display = "none";
       }
 
-   }
+   };
 
 SocialCalc.CellHandlesMouseMoveOnHandle = function(e) {
 
    var scc = SocialCalc.Constants;
 
    var event = e || window.event;
-   var target = event.target || event.srcElement
+   var target = event.target || event.srcElement;
 
    var editor = SocialCalc.Keyboard.focusTable; // get TableEditor doing keyboard stuff
    if (!editor) return true; // we're not handling it -- let browser do default
@@ -11721,7 +11718,7 @@ SocialCalc.CellHandlesMouseMoveOnHandle = function(e) {
 
    return;
 
-   }
+   };
 
 //
 // whichsegment = SocialCalc.SegmentDivHit(segtable, divWithMouseHit, x, y)
@@ -11745,7 +11742,7 @@ SocialCalc.SegmentDivHit = function(segtable, divWithMouseHit, x, y) {
    var top = divWithMouseHit.offsetTop;
    var v = 0;
    var table = segtable;
-   var len = Math.sqrt(Math.pow(x-left-(width/2.0-.5), 2)+Math.pow(y-top-(height/2.0-.5), 2));
+   var len = Math.sqrt(Math.pow(x-left-(width/2.0-0.5), 2)+Math.pow(y-top-(height/2.0-0.5), 2));
 
    if (table.length==2) { // type 2 segtable
       if (x >= left && x < left+width/2 && y >= top && y < top+height/2) { // upper left
@@ -11822,7 +11819,7 @@ SocialCalc.SegmentDivHit = function(segtable, divWithMouseHit, x, y) {
 //addmsg((x-divWithMouseHit.offsetLeft)+","+(y-divWithMouseHit.offsetTop)+"="+quadrant+" "+v);
    return v;
 
-}
+};
 
 SocialCalc.CellHandlesHoverTimeout = function() {
 
@@ -11835,7 +11832,7 @@ SocialCalc.CellHandlesHoverTimeout = function() {
       }
    editor.cellhandles.ShowCellHandles(true, false); // hide move handles
 
-}
+};
 
 SocialCalc.CellHandlesMouseDown = function(e) {
 
@@ -11976,7 +11973,7 @@ SocialCalc.CellHandlesMouseDown = function(e) {
    SocialCalc.StopPropagation(event);
    return;
 
-   }
+   };
 
 SocialCalc.CellHandlesMouseMove = function(e) {
 
@@ -12120,7 +12117,7 @@ SocialCalc.CellHandlesMouseMove = function(e) {
    mouseinfo.mouselastcoord = result.coord;
    SocialCalc.StopPropagation(event);
    return;
-   }
+   };
 
 SocialCalc.CellHandlesDragAutoRepeat = function(coord, direction) {
 
@@ -12211,7 +12208,7 @@ SocialCalc.CellHandlesDragAutoRepeat = function(coord, direction) {
 
    mouseinfo.mouselastcoord = newcoord;
 
-   }
+   };
 
 SocialCalc.CellHandlesMouseUp = function(e) {
 
@@ -12302,8 +12299,8 @@ SocialCalc.CellHandlesMouseUp = function(e) {
          editor.context.cursorsuffix = "";
          cstr = "movepaste "+
                      SocialCalc.crToCoord(editor.range2.left, editor.range2.top) + ":" +
-                     SocialCalc.crToCoord(editor.range2.right, editor.range2.bottom)
-                     +" "+editor.ecell.coord+cmdtype2;
+                     SocialCalc.crToCoord(editor.range2.right, editor.range2.bottom) + " " +
+                     editor.ecell.coord+cmdtype2;
          editor.EditorScheduleSheetCommands(cstr, true, false);
          editor.Range2Remove();
 
@@ -12318,8 +12315,8 @@ SocialCalc.CellHandlesMouseUp = function(e) {
          deltar = editor.ecell.row - editor.range2.top;
          cstr = "moveinsert "+
                      SocialCalc.crToCoord(editor.range2.left, editor.range2.top) + ":" +
-                     SocialCalc.crToCoord(editor.range2.right, editor.range2.bottom)
-                     +" "+editor.ecell.coord+cmdtype2;
+                     SocialCalc.crToCoord(editor.range2.right, editor.range2.bottom) + " " +
+                     editor.ecell.coord+cmdtype2;
          editor.EditorScheduleSheetCommands(cstr, true, false);
          editor.Range2Remove();
          editor.RangeRemove();
@@ -12341,7 +12338,7 @@ SocialCalc.CellHandlesMouseUp = function(e) {
 				    event);
    mouseinfo.editor = null;
    return false;
-   }
+   };
 
 // *************************************
 //
@@ -12412,7 +12409,7 @@ SocialCalc.TableControl = function(editor, vertical, size) {
    this.thumbthickness = scc.defaultTCThumbThickness;
    this.minscrollingpanesize = this.buttonthickness+this.buttonthickness+this.thumbthickness+20; // the 20 is to leave a little space
 
-   }
+   };
 
 // Methods:
 
@@ -12491,7 +12488,7 @@ SocialCalc.CreateTableControl = function(control) {
    s.overflow = "hidden"; // IE will make the DIV at least font-size height...so use this
    s.position = "absolute";
    setStyles(control.lessbutton, scc.TClessbuttonStyle);
-   s.backgroundImage="url("+imageprefix+"less-"+vh+"n.gif)"
+   s.backgroundImage="url("+imageprefix+"less-"+vh+"n.gif)";
    if (scc.TClessbuttonClass) control.lessbutton.className = scc.TClessbuttonClass;
    AssignID(control.editor, control.lessbutton, "lessbutton"+vh);
 
@@ -12515,7 +12512,7 @@ SocialCalc.CreateTableControl = function(control) {
    s.overflow = "hidden"; // IE will make the DIV at least font-size height...so use this
    s.position = "absolute";
    setStyles(control.morebutton, scc.TCmorebuttonStyle);
-   s.backgroundImage="url("+imageprefix+"more-"+vh+"n.gif)"
+   s.backgroundImage="url("+imageprefix+"more-"+vh+"n.gif)";
    if (scc.TCmorebuttonClass) control.morebutton.className = scc.TCmorebuttonClass;
    AssignID(control.editor, control.morebutton, "morebutton"+vh);
 
@@ -12582,7 +12579,7 @@ SocialCalc.CreateTableControl = function(control) {
 
    return control.main;
 
-}
+};
 
 //
 // ScrollAreaClick - Button function to process pageup/down clicks
@@ -12600,7 +12597,7 @@ SocialCalc.ScrollAreaClick = function(e, buttoninfo, bobj) {
 
    return;
 
-}
+};
 
 //
 // PositionTableControlElements
@@ -12617,7 +12614,7 @@ SocialCalc.PositionTableControlElements = function(control) {
       control.endcap.style.top = control.endcapstart+"px";
       control.endcap.style.left = border;
       control.paneslider.style.top = control.panesliderstart+"px";
-      control.paneslider.style.left = border
+      control.paneslider.style.left = border;
       control.lessbutton.style.top = control.lessbuttonstart+"px";
       control.lessbutton.style.left = border;
       control.morebutton.style.top = control.morebuttonstart+"px";
@@ -12637,7 +12634,7 @@ SocialCalc.PositionTableControlElements = function(control) {
       control.endcap.style.left = control.endcapstart+"px";
       control.endcap.style.top = border;
       control.paneslider.style.left = control.panesliderstart+"px";
-      control.paneslider.style.top = border
+      control.paneslider.style.top = border;
       control.lessbutton.style.left = control.lessbuttonstart+"px";
       control.lessbutton.style.top = border;
       control.morebutton.style.left = control.morebuttonstart+"px";
@@ -12655,7 +12652,7 @@ SocialCalc.PositionTableControlElements = function(control) {
    control.thumbpos = thumbpos;
    control.main.style.display="block";
 
-   }
+   };
 
 //
 // ComputeTableControlPositions
@@ -12690,7 +12687,7 @@ SocialCalc.ComputeTableControlPositions = function(control) {
       control.scrollareaend = control.morebuttonstart-1;
       control.scrollareasize = control.scrollareaend-control.scrollareastart+1;
       }
-   }
+   };
 
 ////// TCPS - TableControl Pan Slider methods
 
@@ -12712,7 +12709,7 @@ SocialCalc.TCPSDragFunctionStart = function(event, draginfo, dobj) {
       (editor.tableheight-(editor.headposition.top-editor.gridposition.top))+"px";
    draginfo.trackingline.style.width = dobj.vertical ? 
       (editor.tablewidth-(editor.headposition.left-editor.gridposition.left))+"px" : scc.TCPStrackinglineThickness;
-   draginfo.trackingline.style.backgroundImage="url("+editor.imageprefix+"trackingline-"+(dobj.vertical?"v":"h")+".gif)";;
+   draginfo.trackingline.style.backgroundImage="url("+editor.imageprefix+"trackingline-"+(dobj.vertical?"v":"h")+".gif)";
    if (scc.TCPStrackinglineClass) draginfo.trackingline.className = scc.TCPStrackinglineClass;
    SocialCalc.setStyles(draginfo.trackingline, scc.TCPStrackinglineStyle);
 
@@ -12741,7 +12738,7 @@ SocialCalc.TCPSDragFunctionStart = function(event, draginfo, dobj) {
 
    editor.griddiv.appendChild(draginfo.trackingline);
 
-   }
+   };
 
 //
 // TCPSDragFunctionMove(event, draginfo, dobj)
@@ -12787,7 +12784,7 @@ SocialCalc.TCPSDragFunctionMove = function(event, draginfo, dobj) {
 
    SocialCalc.DragFunctionPosition(event, draginfo, dobj);
 
-   }
+   };
 
 //
 // TCPSDragFunctionStop(event, draginfo, dobj)
@@ -12834,7 +12831,7 @@ SocialCalc.TCPSDragFunctionStop = function(event, draginfo, dobj) {
      editor.EditorScheduleSheetCommands('pane col ' + col, true, false);
    }
 
-   }
+   };
 
 ////// TCT - TableControl Thumb methods
 
@@ -12896,7 +12893,7 @@ SocialCalc.TCTDragFunctionStart = function(event, draginfo, dobj) {
       draginfo.thumbstatus.innerHTML = scc.s_TCTDFthumbstatusPrefixh+SocialCalc.rcColname(editor.firstscrollingcol);
       }
 
-   }
+   };
 
 
 //
@@ -12917,7 +12914,7 @@ SocialCalc.TCTDragFunctionRowSetStatus = function(draginfo, editor, row) {
 
    var ele = draginfo.thumbcontext.RenderSheet(draginfo.thumbstatus.rowpreviewele.firstChild, {type: "html"});
 
-   }
+   };
 
 
 //
@@ -12940,9 +12937,9 @@ SocialCalc.TCTDragFunctionMove = function(event, draginfo, dobj) {
       draginfo.thumbstatus.style.top = draginfo.clientY+"px";
 
       first =
-         ((draginfo.clientY+draginfo.offsetY-control.scrollareastart+1)/(control.scrollareasize-control.thumbthickness))
-         * (editor.context.sheetobj.attribs.lastrow-editor.lastnonscrollingrow)
-         + editor.lastnonscrollingrow + 1;
+         ((draginfo.clientY+draginfo.offsetY-control.scrollareastart+1)/(control.scrollareasize-control.thumbthickness)) *
+         (editor.context.sheetobj.attribs.lastrow-editor.lastnonscrollingrow) + 
+         editor.lastnonscrollingrow + 1;
       first = Math.floor(first);
       if (first <= editor.lastnonscrollingrow) first = editor.lastnonscrollingrow + 1;
       if (first > editor.context.sheetobj.attribs.lastrow) first = editor.context.sheetobj.attribs.lastrow;
@@ -12959,9 +12956,9 @@ SocialCalc.TCTDragFunctionMove = function(event, draginfo, dobj) {
       draginfo.thumbstatus.style.left = draginfo.clientX+"px";
 
       first =
-         ((draginfo.clientX+draginfo.offsetX-control.scrollareastart+1)/(control.scrollareasize-control.thumbthickness))
-         * (editor.context.sheetobj.attribs.lastcol-editor.lastnonscrollingcol)
-         + editor.lastnonscrollingcol + 1;
+         ((draginfo.clientX+draginfo.offsetX-control.scrollareastart+1)/(control.scrollareasize-control.thumbthickness)) *
+         (editor.context.sheetobj.attribs.lastcol-editor.lastnonscrollingcol) +
+         editor.lastnonscrollingcol + 1;
       first = Math.floor(first);
       if (first <= editor.lastnonscrollingcol) first = editor.lastnonscrollingcol + 1;
       if (first > editor.context.sheetobj.attribs.lastcol) first = editor.context.sheetobj.attribs.lastcol;
@@ -12971,7 +12968,7 @@ SocialCalc.TCTDragFunctionMove = function(event, draginfo, dobj) {
 
    SocialCalc.DragFunctionPosition(event, draginfo, dobj);
 
-   }
+   };
 
 //
 // TCTDragFunctionStop(event, draginfo, dobj)
@@ -12985,9 +12982,9 @@ SocialCalc.TCTDragFunctionStop = function(event, draginfo, dobj) {
 
    if (dobj.vertical) {
       first =
-         ((draginfo.clientY+draginfo.offsetY-control.scrollareastart+1)/(control.scrollareasize-control.thumbthickness))
-         * (editor.context.sheetobj.attribs.lastrow-editor.lastnonscrollingrow)
-         + editor.lastnonscrollingrow + 1;
+         ((draginfo.clientY+draginfo.offsetY-control.scrollareastart+1)/(control.scrollareasize-control.thumbthickness)) *
+         (editor.context.sheetobj.attribs.lastrow-editor.lastnonscrollingrow) +
+         editor.lastnonscrollingrow + 1;
       first = Math.floor(first);
       if (first <= editor.lastnonscrollingrow) first = editor.lastnonscrollingrow + 1;
       if (first > editor.context.sheetobj.attribs.lastrow) first = editor.context.sheetobj.attribs.lastrow;
@@ -12996,9 +12993,9 @@ SocialCalc.TCTDragFunctionStop = function(event, draginfo, dobj) {
       }
    else {
       first =
-         ((draginfo.clientX+draginfo.offsetX-control.scrollareastart+1)/(control.scrollareasize-control.thumbthickness))
-         * (editor.context.sheetobj.attribs.lastcol-editor.lastnonscrollingcol)
-         + editor.lastnonscrollingcol + 1;
+         ((draginfo.clientX+draginfo.offsetX-control.scrollareastart+1)/(control.scrollareasize-control.thumbthickness)) *
+         (editor.context.sheetobj.attribs.lastcol-editor.lastnonscrollingcol) +
+         editor.lastnonscrollingcol + 1;
       first = Math.floor(first);
       if (first <= editor.lastnonscrollingcol) first = editor.lastnonscrollingcol + 1;
       if (first > editor.context.sheetobj.attribs.lastcol) first = editor.context.sheetobj.attribs.lastcol;
@@ -13015,7 +13012,7 @@ SocialCalc.TCTDragFunctionStop = function(event, draginfo, dobj) {
 
    editor.ScheduleRender();
 
-   }
+   };
 
 // *************************************
 //
@@ -13046,7 +13043,7 @@ SocialCalc.DragInfo = {
    offsetY: 0,
    relativeOffset: {left:0,top:0} // retrieved at drag start
 
-   }
+   };
 
 //
 // DragRegister(element, vertical, horizontal, functionobj, parent) - make element draggable
@@ -13078,7 +13075,7 @@ SocialCalc.DragRegister = function(element, vertical, horizontal, functionobj, p
       throw SocialCalc.Constants.s_BrowserNotSupported;
       }
 
-   }
+   };
 
 //
 // DragUnregister(element) - remove object from list
@@ -13107,7 +13104,7 @@ SocialCalc.DragUnregister = function(element) {
 
    return; // ignore if not in list
 
-   }
+   };
 
 //
 // DragMouseDown(event)
@@ -13149,7 +13146,7 @@ SocialCalc.DragMouseDown = function(event) {
 
    return false;
 
-   }
+   };
 
 //
 // DragMouseMove(event)
@@ -13167,7 +13164,7 @@ SocialCalc.DragMouseMove = function(event) {
    SocialCalc.StopPropagation(e);
    if (dobj && dobj.functionobj && dobj.functionobj.MouseMove) dobj.functionobj.MouseMove(e, draginfo, dobj);
    return false;
-   }
+   };
 
 //
 // DragMouseUp(event)
@@ -13191,7 +13188,7 @@ SocialCalc.DragMouseUp = function(event) {
 				dobj.element, e);
    draginfo.draggingElement = null;
    return false;
-   }
+   };
 
 //
 // DragFunctionStart(event, draginfo, dobj)
@@ -13204,7 +13201,7 @@ SocialCalc.DragFunctionStart = function(event, draginfo, dobj) {
    draginfo.offsetY = parseInt(element.style.top) - draginfo.clientY;
    draginfo.offsetX = parseInt(element.style.left) - draginfo.clientX;
 
-   }
+   };
 
 //
 // DragFunctionPosition(event, draginfo, dobj)
@@ -13217,7 +13214,7 @@ SocialCalc.DragFunctionPosition = function(event, draginfo, dobj) {
    if (dobj.vertical) element.style.top = (draginfo.clientY + draginfo.offsetY)+"px";
    if (dobj.horizontal) element.style.left = (draginfo.clientX + draginfo.offsetX)+"px";
 
-   }
+   };
 
 // *************************************
 //
@@ -13252,7 +13249,7 @@ SocialCalc.ButtonInfo = {
    clientX: 0,
    clientY: 0
 
-   }
+   };
 
 //
 // ButtonRegister(editor, element, paramobj, functionobj) - make element clickable
@@ -13287,7 +13284,7 @@ SocialCalc.ButtonRegister = function(editor, element, paramobj, functionobj) {
       }
 
    return;
-   }
+   };
 
 //
 // ButtonMouseOver(event)
@@ -13324,7 +13321,7 @@ SocialCalc.ButtonMouseOver = function(event) {
 
    return;
 
-   }
+   };
 
 //
 // ButtonMouseOut(event)
@@ -13354,7 +13351,7 @@ SocialCalc.ButtonMouseOut = function(event) {
 
    return;
 
-   }
+   };
 
 //
 // ButtonMouseDown(event)
@@ -13407,7 +13404,7 @@ SocialCalc.ButtonMouseDown = function(event) {
 
    return;
 
-   }
+   };
 
 //
 // ButtonMouseUp(event)
@@ -13447,7 +13444,7 @@ SocialCalc.ButtonMouseUp = function(event) {
 
    if (bobj && bobj.functionobj && bobj.functionobj.MouseUp) bobj.functionobj.MouseUp(e, buttoninfo, bobj);
 
-   }
+   };
 
 //
 // ButtonRepeat()
@@ -13464,7 +13461,7 @@ SocialCalc.ButtonRepeat = function() {
 
    buttoninfo.timer = window.setTimeout(SocialCalc.ButtonRepeat, bobj.repeatinterval || 100);
 
-   }
+   };
 
 // *************************************
 //
@@ -13483,7 +13480,7 @@ SocialCalc.MouseWheelInfo = {
 
    registeredElements: []
 
-   }
+   };
 
 //
 // MouseWheelRegister(element, functionobj) - make element respond to mousewheel
@@ -13510,7 +13507,7 @@ SocialCalc.MouseWheelRegister = function(element, functionobj) {
 
    return;
 
-   }
+   };
 
 SocialCalc.ProcessMouseWheel = function(e) {
 
@@ -13539,7 +13536,7 @@ SocialCalc.ProcessMouseWheel = function(e) {
    if (event.preventDefault) event.preventDefault();
    event.returnValue = false;
 
-   }
+   };
 
 // *************************************
 //
@@ -13630,7 +13627,7 @@ SocialCalc.keyboardTables = {
       117: "[f6]", 118: "[f7]", 119: "[f8]", 120: "[f9]", 121: "[f10]", 122: "[f11]", 123: "[f12]",
       144: "[numlock]", 145: "[scrolllock]", 224: "[cmd]"
       }
-   }
+   };
 
 SocialCalc.Keyboard = {
    areListener: false, // if true, we have been installed as a listener for keyboard events
@@ -13658,14 +13655,14 @@ SocialCalc.KeyboardSetFocus = function(editor) {
       SocialCalc.Keyboard.passThru = null;
       }
    window.focus();
-   }
+   };
 
 SocialCalc.KeyboardFocus = function() {
 
    SocialCalc.Keyboard.passThru = null;
    window.focus();
 
-   }
+   };
 
 SocialCalc.ProcessKeyDown = function(e) {
 
@@ -13718,7 +13715,7 @@ SocialCalc.ProcessKeyDown = function(e) {
 
    return status;
 
-   }
+   };
 
 SocialCalc.ProcessKeyPress = function(e) {
 
@@ -13808,7 +13805,7 @@ SocialCalc.ProcessKeyPress = function(e) {
 
    return status;
 
-   }
+   };
 
 //
 // status = SocialCalc.ProcessKey(ch, e)
@@ -13820,7 +13817,7 @@ SocialCalc.ProcessKey = function (ch, e) {
    var ft = SocialCalc.Keyboard.focusTable;
    if (!ft) return true; // we're not handling it -- let browser do default
    return ft.EditorProcessKey(ch, e);
-   }
+   };
 
 
 
@@ -14154,7 +14151,7 @@ SocialCalc.FormatNumber.formatNumberWithFormat = function(rawvalue, format_strin
 
    oppos = sectioninfo.sectionstart;
 
-   while (op = thisformat.operators[oppos]) { // execute format
+   while ((op = thisformat.operators[oppos]) != null) { // execute format
       operandstr = thisformat.operands[oppos++]; // get next operator and operand
 
       if (op == scfn.commands.copy) { // put char in result
@@ -14188,8 +14185,8 @@ SocialCalc.FormatNumber.formatNumberWithFormat = function(rawvalue, format_strin
                   }
                }
             }
-         if (integervalue.length < sectioninfo.integerdigits
-             && integerdigits2 <= sectioninfo.integerdigits - integervalue.length) { // field is wider than value
+         if (integervalue.length < sectioninfo.integerdigits &&
+             integerdigits2 <= sectioninfo.integerdigits - integervalue.length) { // field is wider than value
             if (operandstr == "0" || operandstr == "?") { // fill with appropriate characters
                result += operandstr == "0" ? "0" : "&nbsp;";
                if (sectioninfo.thousandssep) { // see if this is a separator position
@@ -14437,7 +14434,7 @@ SocialCalc.FormatNumber.formatTextWithFormat = function(rawvalue, format_string)
    sectioninfo = thisformat.sectioninfo[section]; // look at values for our section
    oppos = sectioninfo.sectionstart;
 
-   while (op = thisformat.operators[oppos]) { // execute format
+   while ((op = thisformat.operators[oppos]) != null) { // execute format
       operandstr = thisformat.operands[oppos++]; // get next operator and operand
 
       if (op == scfn.commands.copy) { // put char in result
@@ -14714,7 +14711,7 @@ SocialCalc.FormatNumber.parse_format_string = function(format_defs, format_strin
 
    return;
 
-   }
+   };
 
 
 /* *******************
@@ -14755,7 +14752,7 @@ SocialCalc.FormatNumber.parse_format_bracket = function(bracketstr) {
       bracketdata.operator = scfn.commands.color;
       bracketdata.operand = scfn.allowedcolors[bracketstr.toUpperCase()];
       }
-   else if (parts=bracketstr.match(/^style=([^"]*)$/)) { // [style=...]
+   else if ((parts=bracketstr.match(/^style=([^"]*)$/)) != null) { // [style=...]
       bracketdata.operator = scfn.commands.style;
       bracketdata.operand = parts[1];
       }
@@ -14767,7 +14764,7 @@ SocialCalc.FormatNumber.parse_format_bracket = function(bracketstr) {
       bracketdata.operator = scfn.commands.date;
       bracketdata.operand = scfn.alloweddates[bracketstr.toUpperCase()];
       }
-   else if (parts=bracketstr.match(/^[<>=]/)) { // comparison operator
+   else if ((parts=bracketstr.match(/^[<>=]/)) != null) { // comparison operator
       parts=bracketstr.match(/^([<>=]+)(.+)$/); // split operator and value
       bracketdata.operator = scfn.commands.comparison;
       bracketdata.operand = parts[1]+":"+parts[2];
@@ -14779,7 +14776,7 @@ SocialCalc.FormatNumber.parse_format_bracket = function(bracketstr) {
 
    return bracketdata;
 
-   }
+   };
 
 /* *******************
 
@@ -14808,7 +14805,7 @@ SocialCalc.FormatNumber.convert_date_gregorian_to_julian = function(year, month,
 
    return juliandate;
 
-   }
+   };
 
 
 /* *******************
@@ -14843,7 +14840,7 @@ SocialCalc.FormatNumber.convert_date_julian_to_gregorian = function(juliandate) 
 
    return {year:I, month:J, day:K};
 
-   }
+   };
 
 SocialCalc.intFunc = function(n) {
    if (n < 0) {
@@ -14852,7 +14849,7 @@ SocialCalc.intFunc = function(n) {
    else {
       return Math.floor(n);
       }
-   }
+   };
 
 
 //
@@ -14921,7 +14918,7 @@ SocialCalc.TriggerIoAction = {}; // eddy
        "n": "N", "o": "O", "p": "P", "q": "Q", "r": "R", "s": "S", "t": "T", "u": "U", "v": "V", "w": "W", "x": "X", "y": "Y", "z": "Z",
        "A": "A", "B": "B", "C": "C", "D": "D", "E": "E", "F": "F", "G": "G", "H": "H", "I": "I", "J": "J", "K": "K", "L": "L", "M": "M",
        "N": "N", "O": "O", "P": "P", "Q": "Q", "R": "R", "S": "S", "T": "T", "U": "U", "V": "V", "W": "W", "X": "X", "Y": "Y", "Z": "Z"
-       }
+       };
 
    SocialCalc.Formula.SpecialConstants = { // names that turn into constants for name lookup
       "#NULL!": "0,e#NULL!", "#NUM!": "0,e#NUM!", "#DIV/0!": "0,e#DIV/0!", "#VALUE!": "0,e#VALUE!",
@@ -15064,7 +15061,7 @@ SocialCalc.Formula.ParseFormulaIntoTokens = function(line) {
             str += ch;
             }
          else if (ch == 'E' || ch == 'e') {
-            ;
+            
             }
          else {
             pushtoken(parseinfo, scc.s_parseerrexponent, tokentype.error, 0);
@@ -15092,8 +15089,8 @@ SocialCalc.Formula.ParseFormulaIntoTokens = function(line) {
          else if (cclass == charclass.incoord) {
             state = parsestate.coord;
             }
-         else if (cclass == charclass.op || cclass == charclass.numstart
-                || cclass == charclass.space || cclass == charclass.eof) {
+         else if (cclass == charclass.op || cclass == charclass.numstart ||
+                cclass == charclass.space || cclass == charclass.eof) {
             pushtoken(parseinfo, str.toUpperCase(), tokentype.name, 0);
             state = 0;
             }
@@ -15135,8 +15132,8 @@ SocialCalc.Formula.ParseFormulaIntoTokens = function(line) {
          if (cclass == charclass.num || cclass == charclass.alpha) {
             str += ch;
             }
-         else if (cclass == charclass.op || cclass == charclass.numstart
-                || cclass == charclass.space || cclass == charclass.eof) {
+         else if (cclass == charclass.op || cclass == charclass.numstart ||
+                cclass == charclass.space || cclass == charclass.eof) {
             pushtoken(parseinfo, str.toUpperCase(), tokentype.name, 0);
             state = 0;
             }
@@ -15229,8 +15226,8 @@ SocialCalc.Formula.ParseFormulaIntoTokens = function(line) {
                last_token_text = "EOF";
                }
             t = tokentype.op;
-            if ((parseinfo.length == 0)
-                || (last_token_type == charclass.op && last_token_text != ')' && last_token_text != '%')) { // Unary operator
+            if ((parseinfo.length == 0) ||
+                (last_token_type == charclass.op && last_token_text != ')' && last_token_text != '%')) { // Unary operator
                if (str == '-') { // M is unary minus
                   str = "M";
                   ch = "M";
@@ -15240,7 +15237,7 @@ SocialCalc.Formula.ParseFormulaIntoTokens = function(line) {
                   ch = "P";
                   }
                else if (str == ')' && last_token_text == '(') { // null arg list OK
-                  ;
+                  
                   }
                else if (str != '(') { // binary-op open-paren OK, others no
                   t = tokentype.error;
@@ -15285,13 +15282,13 @@ SocialCalc.Formula.ParseFormulaIntoTokens = function(line) {
 
    return parseinfo;
 
-   }
+   };
 
 SocialCalc.Formula.ParsePushToken = function(parseinfo, ttext, ttype, topcode) {
 
    parseinfo.push({text: ttext, type: ttype, opcode: topcode});
 
-   }
+   };
 
 /* *******************
 
@@ -15322,7 +15319,7 @@ SocialCalc.Formula.evaluate_parsed_formula = function(parseinfo, sheet, allowran
 
    return result;
 
-}
+};
 
 //
 // revpolish = SocialCalc.Formula.ConvertInfixToPolish(parseinfo)
@@ -15395,8 +15392,8 @@ SocialCalc.Formula.ConvertInfixToPolish = function(parseinfo) {
          if (parsestack.length && parseinfo[parsestack[parsestack.length-1]].type == tokentype.name) {
             revpolish.push(parsestack.pop());
             }
-         while (parsestack.length && parseinfo[parsestack[parsestack.length-1]].type == tokentype.op
-                && parseinfo[parsestack[parsestack.length-1]].text != '(') {
+         while (parsestack.length && parseinfo[parsestack[parsestack.length-1]].type == tokentype.op &&
+                parseinfo[parsestack[parsestack.length-1]].text != '(') {
             tprecedence = token_precedence[pii.opcode];
             tstackprecedence = token_precedence[parseinfo[parsestack[parsestack.length-1]].opcode];
             if (tprecedence >= 0 && tprecedence < tstackprecedence) {
@@ -15436,7 +15433,7 @@ SocialCalc.Formula.ConvertInfixToPolish = function(parseinfo) {
 
    return revpolish;
 
-   }
+   };
 
 
 // DebugLog
@@ -15445,7 +15442,7 @@ if(typeof SocialCalc.debug_log === 'undefined') SocialCalc.debug_log = [];
 
 SocialCalc.DebugLog = function(logObject) {	
 //	SocialCalc.debug_log.push(logObject);
-}
+};
 
 
 //
@@ -15777,7 +15774,7 @@ SocialCalc.Formula.EvaluatePolish = function(parseinfo, revpolish, sheet, allowr
 
    return ({value: value, type: valuetype, error: errortext});
 
-   }
+   };
 
 
 /*
@@ -15825,7 +15822,7 @@ SocialCalc.Formula.LookupResultType = function(type1, type2, typelookup) {
       }
    return "e#VALUE!";
 
-   }
+   };
 
 /*
 #
@@ -15860,7 +15857,7 @@ SocialCalc.Formula.TopOfStackValueAndType = function(sheet, operand) {
 
    return result;
 
-   }
+   };
 
 
 /*
@@ -15905,7 +15902,7 @@ SocialCalc.Formula.OperandAsNumber = function(sheet, operand) {
 
    return operandinfo;
 
-   }
+   };
 
 /*
 #
@@ -15924,7 +15921,7 @@ SocialCalc.Formula.OperandAsText = function(sheet, operand) {
    t = operandinfo.type.charAt(0);
 
    if (t ==  "t") { // any flavor of text returns as is
-      ;
+      
       }
    else if (t == "n") {
       operandinfo.value = SocialCalc.format_number_for_display ?
@@ -15946,7 +15943,7 @@ SocialCalc.Formula.OperandAsText = function(sheet, operand) {
 
    return operandinfo;
 
-   }
+   };
 
 /*
 #
@@ -16021,7 +16018,7 @@ SocialCalc.Formula.OperandValueAndType = function(sheet, operand) {
 
    return result;
 
-   }
+   };
 
 /*
 #
@@ -16035,7 +16032,7 @@ SocialCalc.Formula.OperandValueAndType = function(sheet, operand) {
 
 SocialCalc.Formula.OperandAsCoord = function(sheet, operand) {
 	return SocialCalc.Formula.OperandAsType(sheet, operand, "coord");
-}
+};
 
 
 /*
@@ -16049,7 +16046,7 @@ SocialCalc.Formula.OperandAsCoord = function(sheet, operand) {
 
 SocialCalc.Formula.OperandAsRange = function(sheet, operand) {
 	return SocialCalc.Formula.OperandAsType(sheet, operand, "range");
-}
+};
 
 /*
 #
@@ -16081,7 +16078,7 @@ SocialCalc.Formula.OperandAsType = function(sheet, operand, operandtype) {
       result.type = "e#REF!";
       return result;
       }
-}
+};
 
 
 /*
@@ -16139,7 +16136,7 @@ SocialCalc.Formula.OperandsAsCoordOnSheet = function(sheet, operand) {
       }
    return result;
    
-   }
+   };
 
 /*
 #
@@ -16190,7 +16187,7 @@ SocialCalc.Formula.OperandsAsRangeOnSheet = function(sheet, operand) {
    else { // bad form
       return {value: scc.s_calcerrcellrefmissing, type: "e#REF!"};
       }
-   }
+   };
 
 
 /*
@@ -16244,7 +16241,7 @@ SocialCalc.Formula.OperandAsSheetName = function(sheet, operand) {
       return result;
       }
 
-   }
+   };
 
 //
 // value = SocialCalc.Formula.LookupName(sheet, name)
@@ -16322,7 +16319,7 @@ SocialCalc.Formula.LookupName = function(sheet, name, isEnd) {
       value.error = SocialCalc.Constants.s_calcerrunknownname+' "'+name+'"';
       return value;
       }
-   }
+   };
 
 /*
 #
@@ -16371,7 +16368,7 @@ SocialCalc.Formula.StepThroughRangeDown = function(operand, rangevalue) {
             }
          }
       }
-   }
+   };
 
 /*
 #
@@ -16421,9 +16418,9 @@ SocialCalc.Formula.DecodeRangeParts = function(sheetdata, range) {
 
    rp = scf.OrderRangeParts(value1, value2);
 
-   return {sheetdata: coordsheetdata, sheetname: sheet1, col1num: rp.c1, ncols: rp.c2-rp.c1+1, row1num: rp.r1, nrows: rp.r2-rp.r1+1}
+   return {sheetdata: coordsheetdata, sheetname: sheet1, col1num: rp.c1, ncols: rp.c2-rp.c1+1, row1num: rp.r1, nrows: rp.r2-rp.r1+1};
 
-   }
+   };
 
 
 
@@ -16588,9 +16585,9 @@ SocialCalc.Formula.StoreIoEventFormula = function(function_name, coord, operand_
   
   //IF GUI widget is "Input"
   if(io_parameters == "Input" ) {
-    var formDataViewer = (SocialCalc.CurrentSpreadsheetControlObject != null) 
-          ? SocialCalc.CurrentSpreadsheetControlObject.formDataViewer 
-          : SocialCalc.CurrentSpreadsheetViewerObject.formDataViewer;
+    var formDataViewer = (SocialCalc.CurrentSpreadsheetControlObject != null) ?
+            SocialCalc.CurrentSpreadsheetControlObject.formDataViewer :
+            SocialCalc.CurrentSpreadsheetViewerObject.formDataViewer;
     
     if(formDataViewer != null && formDataViewer.loaded == true) {
       
@@ -16623,7 +16620,7 @@ SocialCalc.Formula.StoreIoEventFormula = function(function_name, coord, operand_
 
 	//SocialCalc.DebugLog({ ioEventTree: sheet.ioEventTree});
 	//SocialCalc.DebugLog({ ioParameterList: sheet.ioParameterList});
-}   
+};
    
 
 /**
@@ -16661,9 +16658,9 @@ SocialCalc.Formula.Clone =   function(destination, source) {
  */    
     
 SocialCalc.Formula.LoadFormFields =   function() {
-  var formDataViewer = (SocialCalc.CurrentSpreadsheetControlObject != null) 
-    ? SocialCalc.CurrentSpreadsheetControlObject.formDataViewer 
-    : SocialCalc.CurrentSpreadsheetViewerObject.formDataViewer;
+  var formDataViewer = (SocialCalc.CurrentSpreadsheetControlObject != null) ?
+      SocialCalc.CurrentSpreadsheetControlObject.formDataViewer :
+      SocialCalc.CurrentSpreadsheetViewerObject.formDataViewer;
 
   formDataViewer.formFields = {};
 
@@ -16690,8 +16687,8 @@ SocialCalc.Formula.LoadFormFields =   function() {
   }
   formDataViewer.formFieldsLength = col -2;
 
-}    
-   
+};
+
 /*
 #
 # errortext = SocialCalc.Formula.CalculateFunction(fname, operand, sheet)
@@ -16760,7 +16757,7 @@ SocialCalc.Formula.CalculateFunction = function(fname, operand, sheet, coord) {
 
    return errortext;
 
-}
+};
 
 //
 // SocialCalc.Formula.PushOperand(operand, t, v)
@@ -16772,7 +16769,7 @@ SocialCalc.Formula.PushOperand = function(operand, t, v) {
 
    operand.push({type: t, value: v});
 
-   }
+   };
 
 //
 // SocialCalc.Formula.CopyFunctionArgs(operand, foperand)
@@ -16795,7 +16792,7 @@ SocialCalc.Formula.CopyFunctionArgs = function(operand, foperand) {
 
    return;
 
-   }
+   };
 
 //
 // errortext = SocialCalc.Formula.FunctionArgsError(fname, operand)
@@ -16810,7 +16807,7 @@ SocialCalc.Formula.FunctionArgsError = function(fname, operand) {
 
    return errortext;
 
-   }
+   };
 
 
 //
@@ -16825,7 +16822,7 @@ SocialCalc.Formula.FunctionSpecificError = function(fname, operand, errortype, e
 
    return errortext;
 
-   }
+   };
 
 //
 // haserror = SocialCalc.Formula.CheckForErrorValue(operand, v)
@@ -16843,7 +16840,7 @@ SocialCalc.Formula.CheckForErrorValue = function(operand, v) {
       return false;
       }
 
-   }
+   };
 
 /////////////////////////
 //
@@ -16900,7 +16897,7 @@ SocialCalc.Formula.FillFunctionInfo = function() {
       scf.FunctionClasses[cname].items.sort();
       }
 
-   }
+   };
 
 //
 // str = SocialCalc.Formula.FunctionArgString(fname)
@@ -16944,7 +16941,7 @@ SocialCalc.Formula.FunctionArgString = function(fname) {
 
    return str;
 
-   }
+   };
 
 
 /////////////////////////
@@ -17117,7 +17114,7 @@ SocialCalc.Formula.SeriesFunctions = function(fname, operand, foperand, sheet) {
 
    return null;
 
-   }
+   };
 
 //*********************
 //
@@ -17189,7 +17186,7 @@ SocialCalc.Formula.SumProductFunction = function(fname, operand, foperand, sheet
 
    return;
 
-   }
+   };
 
 SocialCalc.Formula.FunctionList["SUMPRODUCT"] = [SocialCalc.Formula.SumProductFunction, -1, "rangen", "", "stat"];
 
@@ -17416,7 +17413,7 @@ CRITERIAROW:
 
    return;
 
-   }
+   };
 
 //*********************
 //
@@ -17475,7 +17472,7 @@ SocialCalc.Formula.FieldToColnum = function(sheet, col1num, ncols, row1num, fiel
       }
    return 0; // looked at all and no match
 
-   }
+   };
 
 
 /*
@@ -17610,8 +17607,8 @@ SocialCalc.Formula.LookupFunctions = function(fname, operand, foperand, sheet) {
             if (lookupvalue.value == value) { // match
                break;
                }
-            if ((rangelookup > 0 && lookupvalue.value > value)
-                || (rangelookup < 0 && lookupvalue.value < value)) { // possible match: wait and see
+            if ((rangelookup > 0 && lookupvalue.value > value) ||
+                (rangelookup < 0 && lookupvalue.value < value)) { // possible match: wait and see
                previousOK = 1;
                csave = c; // remember col and row of last OK
                rsave = r;
@@ -17627,8 +17624,8 @@ SocialCalc.Formula.LookupFunctions = function(fname, operand, foperand, sheet) {
             if (lookupvalue.value == value) { // match
                break;
                }
-            if ((rangelookup > 0 && lookupvalue.value > value)
-                || (rangelookup < 0 && lookupvalue.value < value)) { // possible match: wait and see
+            if ((rangelookup > 0 && lookupvalue.value > value) ||
+                (rangelookup < 0 && lookupvalue.value < value)) { // possible match: wait and see
                previousOK = 1;
                csave = c;
                rsave = r;
@@ -17684,7 +17681,7 @@ SocialCalc.Formula.LookupFunctions = function(fname, operand, foperand, sheet) {
 
    return;
 
-   }
+   };
 
 SocialCalc.Formula.FunctionList["HLOOKUP"] = [SocialCalc.Formula.LookupFunctions, -3, "hlookup", "", "lookup"];
 SocialCalc.Formula.FunctionList["MATCH"] = [SocialCalc.Formula.LookupFunctions, -2, "match", "", "lookup"];
@@ -17799,7 +17796,7 @@ SocialCalc.Formula.IndexFunction = function(fname, operand, foperand, sheet) {
 
    return;
 
-   }
+   };
 
 SocialCalc.Formula.FunctionList["INDEX"] = [SocialCalc.Formula.IndexFunction, -1, "index", "", "lookup"];
 
@@ -17895,7 +17892,7 @@ SocialCalc.Formula.CountifSumifFunctions = function(fname, operand, foperand, sh
 
    return;
 
-   }
+   };
 
 SocialCalc.Formula.FunctionList["COUNTIF"] = [SocialCalc.Formula.CountifSumifFunctions, 2, "rangec", "", "stat"];
 SocialCalc.Formula.FunctionList["SUMIF"] = [SocialCalc.Formula.CountifSumifFunctions, -2, "sumif", "", "stat"];
@@ -17975,7 +17972,7 @@ SocialCalc.Formula.SumifsFunction = function(fname, operand, foperand, sheet) {
    PushOperand(resulttypesum, sum);
    return;
 
-   }
+   };
 
 
 SocialCalc.Formula.FunctionList["SUMIFS"] = [SocialCalc.Formula.SumifsFunction, -3, "sum_range, criteria_range1, criteria1, [criteria_range2, criteria2, ... criteria_range_n, criteria_n]", "", "stat"];
@@ -18013,7 +18010,7 @@ SocialCalc.Formula.IfFunction = function(fname, operand, foperand, sheet) {
 
    operand.push(cond.value ? op1 : op2);
 
-   }
+   };
 
 // Add to function list
 SocialCalc.Formula.FunctionList["IF"] = [SocialCalc.Formula.IfFunction, -2, "iffunc", "", "test"];
@@ -18042,7 +18039,7 @@ SocialCalc.Formula.DateFunction = function(fname, operand, foperand, sheet) {
    scf.PushOperand(operand, resulttype, result);
    return;
 
-   }
+   };
 
 SocialCalc.Formula.FunctionList["DATE"] = [SocialCalc.Formula.DateFunction, 3, "date", "", "datetime"];
 
@@ -18068,7 +18065,7 @@ SocialCalc.Formula.TimeFunction = function(fname, operand, foperand, sheet) {
    scf.PushOperand(operand, resulttype, result);
    return;
 
-   }
+   };
 
 SocialCalc.Formula.FunctionList["TIME"] = [SocialCalc.Formula.TimeFunction, 3, "hms", "", "datetime"];
 
@@ -18131,7 +18128,7 @@ SocialCalc.Formula.DMYFunctions = function(fname, operand, foperand, sheet) {
    scf.PushOperand(operand, resulttype, result);
    return;
 
-   }
+   };
 
 SocialCalc.Formula.FunctionList["DAY"] = [SocialCalc.Formula.DMYFunctions, 1, "v", "", "datetime"];
 SocialCalc.Formula.FunctionList["MONTH"] = [SocialCalc.Formula.DMYFunctions, 1, "v", "", "datetime"];
@@ -18183,7 +18180,7 @@ SocialCalc.Formula.HMSFunctions = function(fname, operand, foperand, sheet) {
    scf.PushOperand(operand, resulttype, result);
    return;
 
-   }
+   };
 
 SocialCalc.Formula.FunctionList["HOUR"] = [SocialCalc.Formula.HMSFunctions, 1, "v", "", "datetime"];
 SocialCalc.Formula.FunctionList["MINUTE"] = [SocialCalc.Formula.HMSFunctions, 1, "v", "", "datetime"];
@@ -18268,7 +18265,7 @@ SocialCalc.Formula.ExactFunction = function(fname, operand, foperand, sheet) {
    scf.PushOperand(operand, resulttype, result);
    return;
 
-   }
+   };
 
 SocialCalc.Formula.FunctionList["EXACT"] = [SocialCalc.Formula.ExactFunction, 2, "", "", "text"];
 
@@ -18515,7 +18512,7 @@ SocialCalc.Formula.StringFunctions = function(fname, operand, foperand, sheet) {
    scf.PushOperand(operand, resulttype, result);
    return;
 
-   }
+   };
 
 SocialCalc.Formula.FunctionList["FIND"] = [SocialCalc.Formula.StringFunctions, -2, "find", "", "text"];
 SocialCalc.Formula.FunctionList["LEFT"] = [SocialCalc.Formula.StringFunctions, -2, "tc", "", "text"];
@@ -18594,7 +18591,7 @@ SocialCalc.Formula.IsFunctions = function(fname, operand, foperand, sheet) {
 
    return;
 
-   }
+   };
 
 SocialCalc.Formula.FunctionList["ISBLANK"] = [SocialCalc.Formula.IsFunctions, 1, "v", "", "test"];
 SocialCalc.Formula.FunctionList["ISERR"] = [SocialCalc.Formula.IsFunctions, 1, "v", "", "test"];
@@ -18663,7 +18660,7 @@ SocialCalc.Formula.NTVFunctions = function(fname, operand, foperand, sheet) {
 
    return;
 
-   }
+   };
 
 SocialCalc.Formula.FunctionList["N"] = [SocialCalc.Formula.NTVFunctions, 1, "v", "", "math"];
 SocialCalc.Formula.FunctionList["T"] = [SocialCalc.Formula.NTVFunctions, 1, "v", "", "text"];
@@ -18826,7 +18823,7 @@ SocialCalc.Formula.Math1Functions = function(fname, operand, foperand, sheet) {
 
    return null;
 
-   }
+   };
 
 // Add to function list
 SocialCalc.Formula.FunctionList["ABS"] = [SocialCalc.Formula.Math1Functions, 1, "v", "", "math"];
@@ -18925,7 +18922,7 @@ SocialCalc.Formula.Math2Functions = function(fname, operand, foperand, sheet) {
 
    return null;
 
-   }
+   };
 
 // Add to function list
 SocialCalc.Formula.FunctionList["ATAN2"] = [SocialCalc.Formula.Math2Functions, 2, "xy", "", "math"];
@@ -18977,7 +18974,7 @@ SocialCalc.Formula.LogFunction = function(fname, operand, foperand, sheet) {
 
    return;
 
-   }
+   };
 
 SocialCalc.Formula.FunctionList["LOG"] = [SocialCalc.Formula.LogFunction, -1, "log", "", "math"];
 
@@ -19043,7 +19040,7 @@ SocialCalc.Formula.RoundFunction = function(fname, operand, foperand, sheet) {
 
    return;
 
-   }
+   };
 
 SocialCalc.Formula.FunctionList["ROUND"] = [SocialCalc.Formula.RoundFunction, -1, "vp", "", "math"];
 
@@ -19107,7 +19104,7 @@ SocialCalc.Formula.CeilingFloorFunctions = function(fname, operand, foperand, sh
 
    return;
 
-   }
+   };
 
 SocialCalc.Formula.FunctionList["CEILING"] = [SocialCalc.Formula.CeilingFloorFunctions, -1, "vsig", "", "math"];
 SocialCalc.Formula.FunctionList["FLOOR"] = [SocialCalc.Formula.CeilingFloorFunctions, -1, "vsig", "", "math"];
@@ -19158,7 +19155,7 @@ SocialCalc.Formula.AndOrFunctions = function(fname, operand, foperand, sheet) {
 
    return;
 
-   }
+   };
 
 SocialCalc.Formula.FunctionList["AND"] = [SocialCalc.Formula.AndOrFunctions, -1, "vn", "", "test"];
 SocialCalc.Formula.FunctionList["OR"] = [SocialCalc.Formula.AndOrFunctions, -1, "vn", "", "test"];
@@ -19188,7 +19185,7 @@ SocialCalc.Formula.NotFunction = function(fname, operand, foperand, sheet) {
 
    return;
 
-   }
+   };
 
 SocialCalc.Formula.FunctionList["NOT"] = [SocialCalc.Formula.NotFunction, 1, "v", "", "test"];
 
@@ -19230,7 +19227,7 @@ SocialCalc.Formula.ChooseFunction = function(fname, operand, foperand, sheet) {
 
    return;
 
-   }
+   };
 
 SocialCalc.Formula.FunctionList["CHOOSE"] = [SocialCalc.Formula.ChooseFunction, -2, "choose", "", "lookup"];
 
@@ -19273,7 +19270,7 @@ SocialCalc.Formula.ColumnsRowsFunctions = function(fname, operand, foperand, she
 
    return;
 
-   }
+   };
 
 SocialCalc.Formula.FunctionList["COLUMNS"] = [SocialCalc.Formula.ColumnsRowsFunctions, 1, "range", "", "lookup"];
 SocialCalc.Formula.FunctionList["ROWS"] = [SocialCalc.Formula.ColumnsRowsFunctions, 1, "range", "", "lookup"];
@@ -19353,7 +19350,7 @@ SocialCalc.Formula.ZeroArgFunctions = function(fname, operand, foperand, sheet) 
 
    return null;
 
-}
+};
 
 // Add to function list
 SocialCalc.Formula.FunctionList["FALSE"] = [SocialCalc.Formula.ZeroArgFunctions, 0, "", "", "test"];
@@ -19422,7 +19419,7 @@ SocialCalc.Formula.DDBFunction = function(fname, operand, foperand, sheet) {
 
    return;
 
-   }
+   };
 
 SocialCalc.Formula.FunctionList["DDB"] = [SocialCalc.Formula.DDBFunction, -4, "ddb", "", "financial"];
 
@@ -19459,7 +19456,7 @@ SocialCalc.Formula.SLNFunction = function(fname, operand, foperand, sheet) {
 
    return;
 
-   }
+   };
 
 SocialCalc.Formula.FunctionList["SLN"] = [SocialCalc.Formula.SLNFunction, 3, "csl", "", "financial"];
 
@@ -19498,7 +19495,7 @@ SocialCalc.Formula.SYDFunction = function(fname, operand, foperand, sheet) {
 
    return;
 
-   }
+   };
 
 SocialCalc.Formula.FunctionList["SYD"] = [SocialCalc.Formula.SYDFunction, 4, "cslp", "", "financial"];
 
@@ -19687,7 +19684,7 @@ SocialCalc.Formula.InterestFunctions = function(fname, operand, foperand, sheet)
 
    return;
 
-   }
+   };
 
 SocialCalc.Formula.FunctionList["FV"] = [SocialCalc.Formula.InterestFunctions, -3, "fv", "", "financial"];
 SocialCalc.Formula.FunctionList["NPER"] = [SocialCalc.Formula.InterestFunctions, -3, "nper", "", "financial"];
@@ -19739,7 +19736,7 @@ SocialCalc.Formula.NPVFunction = function(fname, operand, foperand, sheet) {
 
    return;
 
-   }
+   };
 
 SocialCalc.Formula.FunctionList["NPV"] = [SocialCalc.Formula.NPVFunction, -2, "npv", "", "financial"];
 
@@ -19834,7 +19831,7 @@ SocialCalc.Formula.IRRFunction = function(fname, operand, foperand, sheet) {
 
    return;
 
-   }
+   };
 
 SocialCalc.Formula.FunctionList["IRR"] = [SocialCalc.Formula.IRRFunction, -1, "irr", "", "financial"];
 
@@ -20210,7 +20207,7 @@ SocialCalc.Formula.IoFunctions = function(fname, operand, foperand, sheet, coord
    scf.PushOperand(operand, resulttype, result);
    return;
 
-   }
+   };
 
 //*********************
 //
@@ -20284,7 +20281,7 @@ SocialCalc.TriggerIoAction.AddAutocomplete = function(triggerCellId) {
       SocialCalc.TriggerIoAction.AutoComplete(triggerCellId);
     }
   });  
-}
+};
 // Event triggered, e.g. button/imagebutton clicked. - call linked action formulas 
 // eddy TriggerIoAction {
 SocialCalc.TriggerIoAction.Button = function(triggerCellId) {
@@ -20443,7 +20440,7 @@ SocialCalc.TriggerIoAction.Button = function(triggerCellId) {
 
  } 
 
-}
+};
 
 
 /******************************
@@ -20511,7 +20508,7 @@ SocialCalc.TriggerIoAction.CopyFormulaToRange = function(formulaData, destcr) {
 
   return sheetCommandList;
 
-}
+};
 
 /******************************
  * CopyValueToRange
@@ -20579,7 +20576,7 @@ SocialCalc.TriggerIoAction.CopyValueToRange = function(sourceData, destcr) {
   
   return sheetCommandList;  
 
-}
+};
 //----------------------
 
 
@@ -20694,7 +20691,7 @@ SocialCalc.TriggerIoAction.Email = function(emailFormulaCellId, optionalTriggerC
 	 if(setStatusBarMessage) SocialCalc.EditorSheetStatusCallback(null, "emailing", null, spreadsheet.editor);	 
    return emailContentsList; // cron job email
 
-}
+};
 
 /*
  * creates command on form: submitform \rtimestamp\rB2value\rC2value ...
@@ -20723,28 +20720,28 @@ SocialCalc.TriggerIoAction.Submit = function(triggerCellId) {
     
     sheet.ScheduleSheetCommands('submitform \r'+formDataValues,  false);
   }
-}
+};
 
 //onChange=select tag (combobox) 
 SocialCalc.TriggerIoAction.SelectList = function(selectListCellId) {
   var getHTMLselectListCellValue = function( selectListWidget ) { return selectListWidget.value; };
   var function_name = "SELECT";
   SocialCalc.TriggerIoAction.updateInputWidgetFormula(function_name, selectListCellId, getHTMLselectListCellValue );
-}
+};
 
 //onKeyUp=AutoComplete
 SocialCalc.TriggerIoAction.AutoComplete = function(autoCompleteCellId) {
   var getHTMLAutoCompleteCellValue = function( autoCompleteWidget ) { return autoCompleteWidget.value; };
   var function_name = "AUTOCOMPLETE";
   SocialCalc.TriggerIoAction.updateInputWidgetFormula(function_name, autoCompleteCellId, getHTMLAutoCompleteCellValue );
-}
+};
 
 // onKeyUp=TextBox 
 SocialCalc.TriggerIoAction.TextBox = function(textBoxCellId) {
   var getHTMLTextBoxCellValue = function( textBoxWidget ) { return textBoxWidget.value; };
   var function_name = "TEXTBOX";
   SocialCalc.TriggerIoAction.updateInputWidgetFormula(function_name, textBoxCellId, getHTMLTextBoxCellValue );
-}
+};
 
 //onKeyUp=CheckBox 
 SocialCalc.TriggerIoAction.CheckBox = function(checkBoxCellId) {
@@ -20763,7 +20760,7 @@ SocialCalc.TriggerIoAction.RadioButton = function(radioButtonGroupName) {
   $('input[name="'+radioButtonGroupName+'"]').each(function () {
      SocialCalc.TriggerIoAction.updateInputWidgetFormula(function_name,  $(this).attr('id').replace(/RADIOBUTTON_/,''), getHTMLRadioButtonValue );
   });
-}
+};
 
 
 SocialCalc.TriggerIoAction.updateInputWidgetFormula = function(function_name, widgetCellId, getHTMLWidgetCellValue ) {
@@ -20813,7 +20810,7 @@ SocialCalc.TriggerIoAction.updateInputWidgetFormula = function(function_name, wi
  spreadsheet.editor.EditorScheduleSheetCommands(sheetCommand,  true, false);
  
  SocialCalc.TriggerIoAction.UpdateFormDataSheet(function_name, widgetCellId, inputValue);
-}
+};
 
 // On edit of Form Input widget - Update form data sheet 
 SocialCalc.TriggerIoAction.UpdateFormDataSheet = function(function_name, formCellId, inputValue) {
@@ -20827,7 +20824,7 @@ SocialCalc.TriggerIoAction.UpdateFormDataSheet = function(function_name, formCel
     var valueCoord = SocialCalc.crToCoord(formDataViewer.formFields[formFieldName], 2);
     formDataViewer.sheet.ScheduleSheetCommands("set "+valueCoord+" text t "+inputValue, false);    
   }
-}
+};
 
 
 
@@ -20836,14 +20833,14 @@ SocialCalc.TriggerIoAction.UpdateFormDataSheet = function(function_name, formCel
 // CALL getProcessedParameter  with request for values 
 SocialCalc.Formula.getStandardizedValues = function(sheet, parameterData) {
   return SocialCalc.Formula.getStandardizedParameter(sheet, parameterData, true, true);
-}  
+};
 
 
 // getStandardizedCoords(parameterData)  // gets coord(s) of range/coord
 // CALL getProcessedParameter  with request for coord info
 SocialCalc.Formula.getStandardizedCoords = function(sheet, parameterData) {
   return SocialCalc.Formula.getStandardizedParameter(sheet, parameterData, true, false);
-}  
+};
 
 /***************
  * getStandardizedList
@@ -20867,7 +20864,7 @@ SocialCalc.Formula.getStandardizedList = function(sheet, listParameter) {
    }    
   }
   return listValues;
-}
+};
 
 /**************************
  * getStandardizedParameter(parameterData, includeCellCoord, includeCellData)
@@ -20986,7 +20983,7 @@ SocialCalc.Formula.getStandardizedParameter = function(sheet, parameterData, inc
     
   //RETURN 
   return result;
-}
+};
 
 
 
@@ -21066,7 +21063,7 @@ alert("Using SocialCalc.Formula.SheetCache.loadsheet - deprecated");
 
    return null; // return not found
 
-   }
+   };
 
 //
 // newsheet = SocialCalc.Formula.AddSheetToCache(sheetname, str, live)
@@ -21093,7 +21090,7 @@ SocialCalc.Formula.AddSheetToCache = function(sheetname, str, live) {
 
    return newsheet;
 
-   }
+   };
 
 //
 // nsheet = SocialCalc.Formula.NormalizeSheetName(sheetname)
@@ -21107,7 +21104,7 @@ SocialCalc.Formula.NormalizeSheetName = function(sheetname) {
    else {
       return sheetname.toLowerCase();
       }
-   }
+   };
 
 //
 // REMOTE FUNCTION INFO
@@ -21169,7 +21166,7 @@ SocialCalc.Formula.FreshnessInfoReset = function() {
    scffi.volatile = {};
    scffi.recalc_completed = false;
 
-   }
+   };
 
 //
 // MISC ROUTINES
@@ -21187,7 +21184,7 @@ SocialCalc.Formula.PlainCoord = function(coord) {
 
    return coord.replace(/\$/g, ""); // remove any $'s
 
-   }
+   };
 
 //
 // result = SocialCalc.Formula.OrderRangeParts(coord1, coord2)
@@ -21209,7 +21206,7 @@ SocialCalc.Formula.OrderRangeParts = function(coord1, coord2) {
 
    return result;
 
-   }
+   };
 
 //
 // cond = SocialCalc.Formula.TestCriteria(value, type, criteria)
@@ -21379,7 +21376,7 @@ SocialCalc.Formula.TestCriteria = function(value, type, criteria) {
 
    return cond;
 
-   }
+   };
 
 //
 /*
@@ -21471,7 +21468,7 @@ SocialCalc.Popup.Create = function(type, id, attribs) {
 
    SocialCalc.Popup.imagePrefix = SocialCalc.Constants.defaultImagePrefix; // image prefix
 
-   }
+   };
 
 
 //
@@ -21499,7 +21496,7 @@ SocialCalc.Popup.SetValue = function(id, value) {
          }
       }
 
-   }
+   };
 
 
 //
@@ -21527,7 +21524,7 @@ SocialCalc.Popup.SetDisabled = function(id, disabled) {
       pt.SetDisabled(type, id, disabled);
       }
 
-   }
+   };
 
 
 //
@@ -21553,7 +21550,7 @@ SocialCalc.Popup.GetValue = function(id) {
 
    return null;
 
-   }
+   };
 
 
 //
@@ -21577,7 +21574,7 @@ SocialCalc.Popup.Initialize = function(id, data) {
       pt.Initialize(type, id, data);
       }
 
-   }
+   };
 
 
 //
@@ -21594,7 +21591,7 @@ SocialCalc.Popup.Reset = function(type) {
 
    if (spt[type].Reset) spt[type].Reset(type);
 
-   }
+   };
 
 
 //
@@ -21631,7 +21628,7 @@ SocialCalc.Popup.CClick = function(id) {
 
    sp.Current.id = id;
 
-   }
+   };
 
 
 //
@@ -21650,7 +21647,7 @@ SocialCalc.Popup.Close = function() {
 
    sp.CClick(sp.Current.id);
 
-   }
+   };
 
 //
 // SocialCalc.Popup.Cancel()
@@ -21674,7 +21671,7 @@ SocialCalc.Popup.Cancel = function() {
 
    sp.Current.id = null;
 
-   }
+   };
 
 //
 // ele = SocialCalc.Popup.CreatePopupDiv(id, attribs)
@@ -21726,7 +21723,7 @@ SocialCalc.Popup.CreatePopupDiv = function(id, attribs) {
 
    return main;
 
-   }
+   };
 
 //
 // SocialCalc.Popup.EnsurePosition(id, container)
@@ -21742,7 +21739,7 @@ SocialCalc.Popup.EnsurePosition = function(id, container) {
    var spcdata = spc[id].data;
 
    var main = spcdata.mainele.firstChild;
-   if (!main) {alert("No main popup element firstChild.");return};
+   if (!main) {alert("No main popup element firstChild.");return;}
    var popup = spcdata.popupele;
 
    function GetLayoutValues(ele) {
@@ -21816,7 +21813,7 @@ SocialCalc.Popup.EnsurePosition = function(id, container) {
       }
 //addmsg("Popup layout "+t);
 
-}
+};
 
 //
 // ele = SocialCalc.Popup.DestroyPopupDiv(ele, dragregistered)
@@ -21836,7 +21833,7 @@ SocialCalc.Popup.DestroyPopupDiv = function(ele, dragregistered) {
       ele.parentNode.removeChild(ele);
       }
 
-   }
+   };
 
 //
 // Color Utility Functions
@@ -21856,7 +21853,7 @@ SocialCalc.Popup.RGBToHex = function(val) {
    else {
       return "000000";
       }
-   }
+   };
 
 SocialCalc.Popup.HexDigits="0123456789ABCDEF";
 
@@ -21865,7 +21862,7 @@ SocialCalc.Popup.ToHex = function(num) {
    var first=Math.floor(num / 16);
    var second=num % 16;
    return sp.HexDigits.charAt(first)+sp.HexDigits.charAt(second);
-   }
+   };
 
 SocialCalc.Popup.FromHex = function(str) {
 
@@ -21873,7 +21870,7 @@ SocialCalc.Popup.FromHex = function(str) {
    var first = sp.HexDigits.indexOf(str.charAt(0).toUpperCase());
    var second = sp.HexDigits.indexOf(str.charAt(1).toUpperCase());
    return ((first>=0)?first:0)*16+((second>=0)?second:0);
-   }
+   };
 
 SocialCalc.Popup.HexToRGB = function(val) {
 
@@ -21881,11 +21878,11 @@ SocialCalc.Popup.HexToRGB = function(val) {
 
    return "rgb("+sp.FromHex(val.substring(1,3))+","+sp.FromHex(val.substring(3,5))+","+sp.FromHex(val.substring(5,7))+")";
 
-   }
+   };
 
 SocialCalc.Popup.makeRGB = function(r, g, b) {
    return "rgb("+(r>0?r:0)+","+(g>0?g:0)+","+(b>0?b:0)+")";
-   }
+   };
 
 SocialCalc.Popup.splitRGB = function(rgb) {
    var parts = rgb.match(/(\d+)\D+(\d+)\D+(\d+)\D/);
@@ -21895,7 +21892,7 @@ SocialCalc.Popup.splitRGB = function(rgb) {
    else {
       return {r: parts[1]-0, g: parts[2]-0, b: parts[3]-0};
       }
-   }
+   };
 
 // * * * * * * * * * * * * * * * *
 //
@@ -21959,7 +21956,7 @@ SocialCalc.Popup.Types.List.Create = function(type, id, attribs) {
 
    spcdata.options = []; // set to nothing - use Initialize to fill
 
-   }
+   };
 
 SocialCalc.Popup.Types.List.SetValue = function(type, id, value) {
 
@@ -21994,7 +21991,7 @@ SocialCalc.Popup.Types.List.SetValue = function(type, id, value) {
       spcdata.mainele.firstChild.value = spcdata.display;
       }
 
-   }
+   };
 
 
 SocialCalc.Popup.Types.List.SetDisabled = function(type, id, disabled) {
@@ -22012,7 +22009,7 @@ SocialCalc.Popup.Types.List.SetDisabled = function(type, id, disabled) {
       spcdata.mainele.firstChild.disabled = disabled;
       }
 
-   }
+   };
 
 
 SocialCalc.Popup.Types.List.GetValue = function(type, id) {
@@ -22024,7 +22021,7 @@ SocialCalc.Popup.Types.List.GetValue = function(type, id) {
 
    return spcdata.value;
 
-   }
+   };
 
 
 // data is: {value: initial value, attribs: {attribs stuff}, options: [{o: option-name, v: value-to-return, a: optional-attribs}, ...]}
@@ -22048,7 +22045,7 @@ SocialCalc.Popup.Types.List.Initialize = function(type, id, data) {
       sp.SetValue(id, data.value);
       }
 
-   }
+   };
 
 
 SocialCalc.Popup.Types.List.Reset = function(type) {
@@ -22062,7 +22059,7 @@ SocialCalc.Popup.Types.List.Reset = function(type) {
       sp.Current.id = null;
       }
 
-   }
+   };
 
 
 SocialCalc.Popup.Types.List.Show = function(type, id) {
@@ -22072,7 +22069,7 @@ SocialCalc.Popup.Types.List.Show = function(type, id) {
    var sp = SocialCalc.Popup;
    var spt = sp.Types;
    var spc = sp.Controls;
-   var spcdata = spc[id].data
+   var spcdata = spc[id].data;
 
    var str = "";
 
@@ -22109,7 +22106,7 @@ SocialCalc.Popup.Types.List.Show = function(type, id) {
       SocialCalc.Popup.EnsurePosition(id, spcdata.attribs.ensureWithin);
       }
 
-   }
+   };
 
 
 SocialCalc.Popup.Types.List.MakeList = function(type, id) {
@@ -22119,7 +22116,7 @@ SocialCalc.Popup.Types.List.MakeList = function(type, id) {
    var sp = SocialCalc.Popup;
    var spt = sp.Types;
    var spc = sp.Controls;
-   var spcdata = spc[id].data
+   var spcdata = spc[id].data;
 
    var str = '<table cellspacing="0" cellpadding="0"><tr>';
    var td = '<td style="vertical-align:top;">';
@@ -22154,7 +22151,7 @@ SocialCalc.Popup.Types.List.MakeList = function(type, id) {
 
    return str;
 
-   }
+   };
 
 
 SocialCalc.Popup.Types.List.MakeCustom = function(type, id) {
@@ -22184,7 +22181,7 @@ SocialCalc.Popup.Types.List.MakeCustom = function(type, id) {
 
    return str;
 
-   }
+   };
 
 
 SocialCalc.Popup.Types.List.ItemClicked = function(id, num) {
@@ -22221,7 +22218,7 @@ SocialCalc.Popup.Types.List.ItemClicked = function(id, num) {
 
    SocialCalc.Popup.Close();
    
-   }
+   };
 
 
 SocialCalc.Popup.Types.List.CustomToList = function(id) {
@@ -22244,7 +22241,7 @@ SocialCalc.Popup.Types.List.CustomToList = function(id) {
    if (spcdata.attribs.ensureWithin) {
       SocialCalc.Popup.EnsurePosition(id, spcdata.attribs.ensureWithin);
       }
-   }
+   };
 
 
 SocialCalc.Popup.Types.List.CustomOK = function(id) {
@@ -22259,7 +22256,7 @@ SocialCalc.Popup.Types.List.CustomOK = function(id) {
 
    SocialCalc.Popup.Close();
    
-   }
+   };
 
 
 SocialCalc.Popup.Types.List.MouseMove = function(id, ele) {
@@ -22284,7 +22281,7 @@ SocialCalc.Popup.Types.List.MouseMove = function(id, ele) {
 
    ele.style.backgroundColor = "#DDF";
    
-   }
+   };
 
 SocialCalc.Popup.Types.List.Hide = function(type, id) {
 
@@ -22300,13 +22297,13 @@ SocialCalc.Popup.Types.List.Hide = function(type, id) {
       spcdata.mainele.firstChild.disabled = false;
       }
 
-   }
+   };
 
 SocialCalc.Popup.Types.List.Cancel = function(type, id) {
 
    SocialCalc.Popup.Types.List.Hide(type, id);
 
-   }
+   };
 
 
 //
@@ -22366,7 +22363,7 @@ SocialCalc.Popup.Types.ColorChooser.Create = function(type, id, attribs) {
                    (spca.sampleWidth || '15px')+';height:'+(spca.sampleHeight || '15px')+
                    ';" onclick="SocialCalc.Popup.Types.ColorChooser.ControlClicked(\''+id+'\');">&nbsp;</div>';
 
-   }
+   };
 
 SocialCalc.Popup.Types.ColorChooser.SetValue = function(type, id, value) {
 
@@ -22407,7 +22404,7 @@ SocialCalc.Popup.Types.ColorChooser.SetValue = function(type, id, value) {
       spcdata.mainele.firstChild.style.backgroundImage = img;
       }
 
-   }
+   };
 
 
 SocialCalc.Popup.Types.ColorChooser.SetDisabled = function(type, id, disabled) {
@@ -22441,7 +22438,7 @@ SocialCalc.Popup.Types.ColorChooser.SetDisabled = function(type, id, disabled) {
          }
       }
 
-   }
+   };
 
 
 SocialCalc.Popup.Types.ColorChooser.GetValue = function(type, id) {
@@ -22453,7 +22450,7 @@ SocialCalc.Popup.Types.ColorChooser.GetValue = function(type, id) {
 
    return spcdata.value;
 
-   }
+   };
 
 
 SocialCalc.Popup.Types.ColorChooser.Initialize = function(type, id, data) {
@@ -22473,7 +22470,7 @@ SocialCalc.Popup.Types.ColorChooser.Initialize = function(type, id, data) {
       sp.SetValue(id, data.value);
       }
 
-   }
+   };
 
 
 SocialCalc.Popup.Types.ColorChooser.Reset = function(type) {
@@ -22487,7 +22484,7 @@ SocialCalc.Popup.Types.ColorChooser.Reset = function(type) {
       sp.Current.id = null;
       }
 
-   }
+   };
 
 
 SocialCalc.Popup.Types.ColorChooser.Show = function(type, id) {
@@ -22497,7 +22494,7 @@ SocialCalc.Popup.Types.ColorChooser.Show = function(type, id) {
    var sp = SocialCalc.Popup;
    var spt = sp.Types;
    var spc = sp.Controls;
-   var spcdata = spc[id].data
+   var spcdata = spc[id].data;
 
    var str = "";
 
@@ -22532,7 +22529,7 @@ SocialCalc.Popup.Types.ColorChooser.Show = function(type, id) {
       SocialCalc.Popup.EnsurePosition(id, spcdata.attribs.ensureWithin);
       }
 
-   }
+   };
 
 
 SocialCalc.Popup.Types.ColorChooser.MakeCustom = function(type, id) {
@@ -22558,7 +22555,7 @@ SocialCalc.Popup.Types.ColorChooser.MakeCustom = function(type, id) {
 
    return str;
 
-   }
+   };
 
 
 SocialCalc.Popup.Types.ColorChooser.ItemClicked = function(id, num) {
@@ -22571,7 +22568,7 @@ SocialCalc.Popup.Types.ColorChooser.ItemClicked = function(id, num) {
 
    SocialCalc.Popup.Close();
    
-   }
+   };
 
 
 SocialCalc.Popup.Types.ColorChooser.CustomToList = function(id) {
@@ -22582,7 +22579,7 @@ SocialCalc.Popup.Types.ColorChooser.CustomToList = function(id) {
    var spc = sp.Controls;
    var spcdata = spc[id].data;
 
-   }
+   };
 
 
 SocialCalc.Popup.Types.ColorChooser.CustomOK = function(id) {
@@ -22597,7 +22594,7 @@ SocialCalc.Popup.Types.ColorChooser.CustomOK = function(id) {
 
    sp.Close();
    
-   }
+   };
 
 
 SocialCalc.Popup.Types.ColorChooser.Hide = function(type, id) {
@@ -22610,7 +22607,7 @@ SocialCalc.Popup.Types.ColorChooser.Hide = function(type, id) {
    sp.DestroyPopupDiv(spcdata.popupele, spcdata.dragregistered);
    spcdata.popupele = null;
 
-   }
+   };
 
 
 SocialCalc.Popup.Types.ColorChooser.Cancel = function(type, id) {
@@ -22624,7 +22621,7 @@ SocialCalc.Popup.Types.ColorChooser.Cancel = function(type, id) {
 
    SocialCalc.Popup.Types.ColorChooser.Hide(type, id);
 
-   }
+   };
 
 
 SocialCalc.Popup.Types.ColorChooser.CreateGrid = function (type, id) {
@@ -22697,13 +22694,13 @@ SocialCalc.Popup.Types.ColorChooser.CreateGrid = function (type, id) {
 
    return mainele;
 
-   }
+   };
 
 SocialCalc.Popup.Types.ColorChooser.gridToG = function(grid, row, col) {
 
    return grid[row+","+col];
 
-   }
+   };
 
 SocialCalc.Popup.Types.ColorChooser.DetermineColors = function(id) {
 
@@ -22753,7 +22750,7 @@ SocialCalc.Popup.Types.ColorChooser.DetermineColors = function(id) {
       sptc.gridToG(grid,row,col).rgb = "rgb("+steps[x.charAt(0)-0]+","+steps[x.charAt(1)-0]+","+steps[x.charAt(2)-0]+")";
       }
 
-   }
+   };
 
 SocialCalc.Popup.Types.ColorChooser.SetColors = function(id) {
 
@@ -22800,7 +22797,7 @@ SocialCalc.Popup.Types.ColorChooser.SetColors = function(id) {
       grid.msg.title = sp.RGBToHex(spcdata.value);
       }
 
-   }
+   };
 
 SocialCalc.Popup.Types.ColorChooser.GridMouseDown = function(e) {
 
@@ -22836,7 +22833,7 @@ SocialCalc.Popup.Types.ColorChooser.GridMouseDown = function(e) {
    var clientY = event.clientY - pos.top;
    var gpos = SocialCalc.GetElementPositionWithScroll(grid.table);
    gpos.left -= pos.left;
-   gpos.top -= pos.top
+   gpos.top -= pos.top;
    var row = Math.floor((clientY-gpos.top-2)/10); // -2 is to split the diff btw IE & FF
    row = row < 0 ? 0 : row;
    var col = Math.floor((clientX-gpos.left)/20);
@@ -22864,7 +22861,7 @@ SocialCalc.Popup.Types.ColorChooser.GridMouseDown = function(e) {
    sptc.DetermineColors(id);
    sptc.SetColors(id);
 
-   }
+   };
 
 
 SocialCalc.Popup.Types.ColorChooser.ControlClicked = function(id) {
@@ -22882,7 +22879,7 @@ SocialCalc.Popup.Types.ColorChooser.ControlClicked = function(id) {
 
    sptc.CloseOK();
 
-   }
+   };
 
 SocialCalc.Popup.Types.ColorChooser.DefaultClicked = function(e) {
 
@@ -22903,7 +22900,7 @@ SocialCalc.Popup.Types.ColorChooser.DefaultClicked = function(e) {
 
    SocialCalc.Popup.Close();
 
-   }
+   };
 
 SocialCalc.Popup.Types.ColorChooser.CustomClicked = function(e) {
 
@@ -22935,7 +22932,7 @@ SocialCalc.Popup.Types.ColorChooser.CustomClicked = function(e) {
       SocialCalc.Popup.EnsurePosition(id, spcdata.attribs.ensureWithin);
       }
 
-   }
+   };
 
 
 
@@ -22964,7 +22961,7 @@ SocialCalc.Popup.Types.ColorChooser.CustomToGrid = function(id) {
    if (spcdata.attribs.ensureWithin) {
       SocialCalc.Popup.EnsurePosition(id, spcdata.attribs.ensureWithin);
       }
-   }
+   };
 
 
 SocialCalc.Popup.Types.ColorChooser.CustomOK = function(id) {
@@ -22979,7 +22976,7 @@ SocialCalc.Popup.Types.ColorChooser.CustomOK = function(id) {
 
    SocialCalc.Popup.Close();
    
-   }
+   };
 
 SocialCalc.Popup.Types.ColorChooser.CloseOK = function(e) {
 
@@ -22999,7 +22996,7 @@ SocialCalc.Popup.Types.ColorChooser.CloseOK = function(e) {
 
    SocialCalc.Popup.Close();
 
-   }
+   };
 
 
 //
@@ -23245,7 +23242,7 @@ SocialCalc.SpreadsheetControl = function(idPrefix) {
                          command: SocialCalc.SpreadsheetControl.DoLink},
       sum: {image: "autosum.png", tooltip: "Auto Sum",
                          command: SocialCalc.SpreadsheetControl.DoSum}
-      }
+      };
    
    // find buttons
    this.findbuttons = {
@@ -23253,7 +23250,7 @@ SocialCalc.SpreadsheetControl = function(idPrefix) {
               command: SocialCalc.SpreadsheetControl.SearchUp},
        next: {image: 'downsearch.png', tooltip: 'Find Next', 
               command: SocialCalc.SpreadsheetControl.SearchDown}
-   }
+   };
 
    // Default tabs:
 
@@ -23798,7 +23795,7 @@ SocialCalc.SpreadsheetControl = function(idPrefix) {
 				if (typeof(o) == "object") ObjToSource.check.pop();
 				if (na) return "{"+str.slice(0,-1)+"}";
 				else return "["+str.slice(0,-1)+"]";
-			}
+			};
 			
 			// --------------------------------------------   
 			
@@ -23908,7 +23905,7 @@ SocialCalc.SpreadsheetControl = function(idPrefix) {
 
    return;
 
-   }
+   };
 
    
 // Methods:
@@ -23987,7 +23984,7 @@ SocialCalc.InitializeSpreadsheetControl = function(spreadsheet, node, height, wi
 
    // create the tabbed UI at the top
 
-   html = '<div>'
+   html = '<div>';
    html += '<div style="'+spreadsheet.tabbackground+'">'+
       '<table cellpadding="0" cellspacing="0"><tr>';
 
@@ -23997,14 +23994,14 @@ SocialCalc.InitializeSpreadsheetControl = function(spreadsheet, node, height, wi
          '" onclick="%s.SetTab(this);">' + SCLoc(tabs[i].text) + '</td>';
       }
 
-   html += ' </tr></table></div>'
+   html += ' </tr></table></div>';
    html += '<div style="'+spreadsheet.toolbarbackground+'padding:12px 10px 10px 4px;">';
 
    for (i=0; i<tabs.length; i++) {
       html += tabs[i].html;
       }
 
-   html += '</div>'
+   html += '</div>';
    html += '</div>';
 
    spreadsheet.currentTab = 0; // this is where we started
@@ -24054,7 +24051,7 @@ spreadsheet.Buttons = {
    button_hiderow: {tooltip: "Hide Row", command: "hiderow"},
    button_hidecol: {tooltip: "Hide Column", command: "hidecol"},
    button_recalc: {tooltip: "Recalculate", command: "recalc"}
-   }
+   };
 
    for (button in spreadsheet.Buttons) {
       bele = document.getElementById(spreadsheet.idPrefix+button);
@@ -24151,7 +24148,7 @@ spreadsheet.Buttons = {
    var appViewDiv = document.createElement("div");
    appViewDiv.id = "te_appView";
    
-   appViewDiv.appendChild(spreadsheet.editorDiv)
+   appViewDiv.appendChild(spreadsheet.editorDiv);
    spreadsheet.editorDiv = appViewDiv;
 
    var formDataDiv = document.createElement("div");
@@ -24229,7 +24226,7 @@ spreadsheet.Buttons = {
 
    return;
 
-   }
+   };
 
 
 // eddy CalculateSheetNonViewHeight {
@@ -24240,7 +24237,7 @@ SocialCalc.CalculateSheetNonViewHeight = function(spreadsheet) {
     spreadsheet.nonviewheight += spreadsheet.spreadsheetDiv.childNodes[nodeIndex].offsetHeight;
   }
   
-}
+};
 
 // }
 
@@ -24264,7 +24261,7 @@ SocialCalc.LocalizeString = function(str) {
       SocialCalc.LocalizeStringList[str] = cstr;
       }
    return cstr;
-   }
+   };
 
 
 
@@ -24303,7 +24300,7 @@ SocialCalc.LocalizeSubstrings = function(str) {
          }
       });
 
-   }
+   };
 
 //
 // obj = GetSpreadsheetControlObject()
@@ -24314,13 +24311,13 @@ SocialCalc.LocalizeSubstrings = function(str) {
 SocialCalc.GetSpreadsheetControlObject = function() {
 
   // if in viewer mode return CurrentSpreadsheetViewerObject because CurrentSpreadsheetControlObject is null (bug fix) 
-   var csco = (SocialCalc.CurrentSpreadsheetControlObject != null) 
-   ? SocialCalc.CurrentSpreadsheetControlObject : SocialCalc.CurrentSpreadsheetViewerObject;
+   var csco = (SocialCalc.CurrentSpreadsheetControlObject != null) ?
+   SocialCalc.CurrentSpreadsheetControlObject : SocialCalc.CurrentSpreadsheetViewerObject;
    if (csco) return csco;
 
 //   throw ("No current SpreadsheetControl object.");
 
-   }
+   };
 
 //
 // SetSpreadsheetControlObject(spreadsheet)
@@ -24334,7 +24331,7 @@ SocialCalc.SetSpreadsheetControlObject = function(spreadsheet) {
       SocialCalc.Keyboard.focusTable = spreadsheet.editor;
       }
 
-   }
+   };
 
 
 //
@@ -24351,7 +24348,7 @@ SocialCalc.DoOnResize = function(spreadsheet) {
    var needresize = spreadsheet.SizeSSDiv();
    if (!needresize) return;
 
-   for (vname in views) {
+   for (var vname in views) {
       v = views[vname].element;
       v.style.width = spreadsheet.width + "px";
       v.style.height = (spreadsheet.height-spreadsheet.nonviewheight) + "px";
@@ -24359,7 +24356,7 @@ SocialCalc.DoOnResize = function(spreadsheet) {
 
    spreadsheet.editor.ResizeTableEditor(spreadsheet.width, spreadsheet.height-spreadsheet.nonviewheight);
 
-   }
+   };
 
 
 //
@@ -24418,7 +24415,7 @@ SocialCalc.SizeSSDiv = function(spreadsheet) {
 
    return resized;
 
-   }
+   };
 
 
 //
@@ -24514,7 +24511,7 @@ SocialCalc.SetTab = function(obj) {
 
    return;
 
-   }
+   };
 
 //
 // SocialCalc.SpreadsheetControlStatuslineCallback
@@ -24551,7 +24548,7 @@ SocialCalc.SpreadsheetControlStatuslineCallback = function(editor, status, arg, 
          break;
       }
 
-   }
+   };
 
 
 //
@@ -24571,7 +24568,7 @@ SocialCalc.UpdateSortRangeProposal = function(editor) {
       ele.options[0].text = SocialCalc.LocalizeString("[select range]");
       }
 
-   }
+   };
 
 //
 // SocialCalc.LoadColumnChoosers(spreadsheet)
@@ -24627,7 +24624,7 @@ SocialCalc.LoadColumnChoosers = function(spreadsheet) {
       }
    sele.selectedIndex = oldindex > 0 && oldindex <= (range.cr2.col-range.cr1.col+1) ? oldindex : 0; // default to [none]
 
-   }
+   };
 
 //
 // SocialCalc.CmdGotFocus(obj)
@@ -24639,7 +24636,7 @@ SocialCalc.CmdGotFocus = function(obj) {
 
    SocialCalc.Keyboard.passThru = obj;
 
-   }
+   };
 
 
 //
@@ -24650,7 +24647,7 @@ SocialCalc.DoButtonCmd = function(e, buttoninfo, bobj) {
 
    SocialCalc.DoCmd(bobj.element, bobj.functionobj.command);
 
-   }
+   };
 
 //
 // SocialCalc.DoCmd(obj, which)
@@ -24827,8 +24824,8 @@ SocialCalc.DoCmd = function(obj, which) {
             spreadsheet.context.cursorsuffix = "";
             combostr = which+" "+
                SocialCalc.crToCoord(editor.range2.left, editor.range2.top) + ":" +
-               SocialCalc.crToCoord(editor.range2.right, editor.range2.bottom)
-               +" "+editor.ecell.coord;
+               SocialCalc.crToCoord(editor.range2.right, editor.range2.bottom) + " " +
+               editor.ecell.coord;
             spreadsheet.ExecuteCommand(combostr, "");
             editor.Range2Remove();
             ele = document.getElementById(spreadsheet.idPrefix+"button_movefrom");
@@ -24862,7 +24859,7 @@ SocialCalc.DoCmd = function(obj, which) {
    if (obj && obj.blur) obj.blur();
    SocialCalc.KeyboardFocus();   
 
-   }
+   };
 
 SocialCalc.SpreadsheetCmdLookup = {
  'copy': 'copy %C all',
@@ -24892,12 +24889,12 @@ SocialCalc.SpreadsheetCmdLookup = {
  'undo': 'undo',
  'redo': 'redo',
  'recalc': 'recalc'
- }
+ };
 
 SocialCalc.SpreadsheetCmdSLookup = {
  'borderon': '1px solid rgb(0,0,0)',
  'borderoff': ''
- }
+ };
 
 /******* NO LONGER USED
 
@@ -25080,7 +25077,7 @@ SocialCalc.SpreadsheetControlExecuteCommand = function(obj, combostr, sstr) {
 
    var str = {};
    str.P = "%";
-   str.N = "\n"
+   str.N = "\n";
    if (eobj.range.hasrange) {
       str.R = SocialCalc.crToCoord(eobj.range.left, eobj.range.top)+
              ":"+SocialCalc.crToCoord(eobj.range.right, eobj.range.bottom);
@@ -25095,8 +25092,8 @@ SocialCalc.SpreadsheetControlExecuteCommand = function(obj, combostr, sstr) {
       str.H = SocialCalc.coordToCr(eobj.ecell.coord).row;
       }
    else {
-      str.C = 'A1'
-      str.R = 'A1:A1'
+      str.C = 'A1';
+      str.R = 'A1:A1';
       str.W = SocialCalc.rcColname(SocialCalc.coordToCr('A1').col);
       str.H = SocialCalc.coordToCr('A1').row;
       }
@@ -25111,7 +25108,7 @@ SocialCalc.SpreadsheetControlExecuteCommand = function(obj, combostr, sstr) {
 
    eobj.EditorScheduleSheetCommands(combostr, true, false);
 
-   }
+   };
 
 //
 // result = SocialCalc.SpreadsheetControlCreateSheetHTML(spreadsheet)
@@ -25135,7 +25132,7 @@ SocialCalc.SpreadsheetControlCreateSheetHTML = function(spreadsheet) {
    delete div;
    return result;
 
-   }
+   };
 
 //
 // result = SocialCalc.SpreadsheetControlCreateCellHTML(spreadsheet, coord, linkstyle)
@@ -25161,7 +25158,7 @@ SocialCalc.SpreadsheetControlCreateCellHTML = function(spreadsheet, coord, links
 
    return result;
 
-   }
+   };
 
 //
 // result = SocialCalc.SpreadsheetControlCreateCellHTMLSave(spreadsheet, range, linkstyle)
@@ -25212,7 +25209,7 @@ SocialCalc.SpreadsheetControlCreateCellHTMLSave = function(spreadsheet, range, l
 
    result.push(""); // one extra to get extra \n
    return result.join("\n");
-   }
+   };
 
 //
 // Formula Bar Button Routines
@@ -25289,7 +25286,7 @@ SocialCalc.SpreadsheetControl.DoFunctionList = function() {
    SocialCalc.CmdGotFocus(ele);
 //!!! need to do keyboard handling: if esc, hide; if All, letter scrolls to there
 
-   }
+   };
 
 SocialCalc.SpreadsheetControl.GetFunctionNamesStr = function(cname) {
 
@@ -25304,7 +25301,7 @@ SocialCalc.SpreadsheetControl.GetFunctionNamesStr = function(cname) {
 
    return str;
 
-   }
+   };
 
 SocialCalc.SpreadsheetControl.FillFunctionNames = function(cname, ele) {
 
@@ -25319,7 +25316,7 @@ SocialCalc.SpreadsheetControl.FillFunctionNames = function(cname, ele) {
          ele.options[i].selected = true;
          }
       }
-   }
+   };
 
 SocialCalc.SpreadsheetControl.GetFunctionInfoStr = function(fname) {
    
@@ -25332,7 +25329,7 @@ SocialCalc.SpreadsheetControl.GetFunctionInfoStr = function(fname) {
 
    return str;
 
-   }
+   };
 
 SocialCalc.SpreadsheetControl.FunctionClassChosen = function(cname) {
 
@@ -25344,7 +25341,7 @@ SocialCalc.SpreadsheetControl.FunctionClassChosen = function(cname) {
 
    SocialCalc.SpreadsheetControl.FunctionChosen(scf.FunctionClasses[cname].items[0]);
 
-   }
+   };
 
 SocialCalc.SpreadsheetControl.FunctionChosen = function(fname) {
 
@@ -25353,7 +25350,7 @@ SocialCalc.SpreadsheetControl.FunctionChosen = function(fname) {
 
    document.getElementById(idp+"desc").innerHTML = SocialCalc.SpreadsheetControl.GetFunctionInfoStr(fname);
 
-   }
+   };
 
 SocialCalc.SpreadsheetControl.HideFunctions = function() {
 
@@ -25370,7 +25367,7 @@ SocialCalc.SpreadsheetControl.HideFunctions = function() {
       ele.parentNode.removeChild(ele);
       }
 
-   }
+   };
 
 SocialCalc.SpreadsheetControl.DoFunctionPaste = function() {
 
@@ -25392,7 +25389,7 @@ SocialCalc.SpreadsheetControl.DoFunctionPaste = function() {
       editor.EditorAddToInput(text, "=");
       }
 
-   }
+   };
 
 
 SocialCalc.SpreadsheetControl.DoMultiline = function() {
@@ -25474,7 +25471,7 @@ SocialCalc.SpreadsheetControl.DoMultiline = function() {
    SocialCalc.CmdGotFocus(ele);
 //!!! need to do keyboard handling: if esc, hide?
 
-   }
+   };
 
 
 SocialCalc.SpreadsheetControl.HideMultiline = function() {
@@ -25506,7 +25503,7 @@ SocialCalc.SpreadsheetControl.HideMultiline = function() {
          break;
       }
 
-   }
+   };
 
 SocialCalc.SpreadsheetControl.DoMultilineClear = function() {
 
@@ -25517,7 +25514,7 @@ SocialCalc.SpreadsheetControl.DoMultilineClear = function() {
    ele.value = "";
    ele.focus();
 
-   }
+   };
 
 
 SocialCalc.SpreadsheetControl.DoMultilinePaste = function() {
@@ -25549,7 +25546,7 @@ SocialCalc.SpreadsheetControl.DoMultilinePaste = function() {
 
    editor.EditorSaveEdit(text);
 
-   }
+   };
 
 
 SocialCalc.SpreadsheetControl.DoLink = function() {
@@ -25661,7 +25658,7 @@ SocialCalc.SpreadsheetControl.DoLink = function() {
    SocialCalc.CmdGotFocus(ele);
 //!!! need to do keyboard handling: if esc, hide?
 
-   }
+   };
 
 
 SocialCalc.SpreadsheetControl.HideLink = function() {
@@ -25693,7 +25690,7 @@ SocialCalc.SpreadsheetControl.HideLink = function() {
          break;
       }
 
-   }
+   };
 
 SocialCalc.SpreadsheetControl.DoLinkClear = function() {
 
@@ -25707,7 +25704,7 @@ SocialCalc.SpreadsheetControl.DoLinkClear = function() {
    ele.value = "";
    ele.focus();
 
-   }
+   };
 
 
 SocialCalc.SpreadsheetControl.DoLinkPaste = function() {
@@ -25769,7 +25766,7 @@ SocialCalc.SpreadsheetControl.DoLinkPaste = function() {
 
    editor.EditorSaveEdit(text);
 
-   }
+   };
 
 SocialCalc.SpreadsheetControl.DoSum = function() {
 
@@ -25814,7 +25811,7 @@ SocialCalc.SpreadsheetControl.DoSum = function() {
 
    editor.EditorScheduleSheetCommands(cmd, true, false);
 
-   }
+   };
 
 SocialCalc.SpreadsheetControl.FindInSheet = function() {
     var searchstatus = $("#searchstatus");
@@ -25854,7 +25851,7 @@ SocialCalc.SpreadsheetControl.FindInSheet = function() {
         searchstatus.text("No Matches");
     }
         
-}
+};
 
 SocialCalc.SpreadsheetControl.SearchSheet = function(direction) {
     var spreadsheet = SocialCalc.GetSpreadsheetControlObject();
@@ -25873,15 +25870,15 @@ SocialCalc.SpreadsheetControl.SearchSheet = function(direction) {
     sheet.selected_search_cell = selected_cell; 
     spreadsheet.editor.MoveECell(new_cell);
     document.getElementById("searchstatus").textContent = String(selected_cell+1) + " of " + cells.length;
-}
+};
  
 SocialCalc.SpreadsheetControl.SearchUp = function() {
     SocialCalc.SpreadsheetControl.SearchSheet(0);    
-}
+};
 
 SocialCalc.SpreadsheetControl.SearchDown = function() {
     SocialCalc.SpreadsheetControl.SearchSheet(1);
-}
+};
 
 //
 // TAB Routines
@@ -25921,7 +25918,7 @@ SocialCalc.SpreadsheetControlSortOnclick = function(s, t) {
    SocialCalc.KeyboardFocus();
    return;
 
-   }
+   };
 
 SocialCalc.SpreadsheetControlSortSave = function(editor, setting) {
    // Format is:
@@ -25951,7 +25948,7 @@ SocialCalc.SpreadsheetControlSortSave = function(editor, setting) {
       str += "::";
       }
    return str+"\n";
-   }
+   };
 
 SocialCalc.SpreadsheetControlSortLoad = function(editor, setting, line, flags) {
    var parts, ele;
@@ -25993,7 +25990,7 @@ SocialCalc.SpreadsheetControlSortLoad = function(editor, setting, line, flags) {
       }
 
    return true;
-   }
+   };
 
 // Comment
 
@@ -26002,7 +25999,7 @@ SocialCalc.SpreadsheetControlCommentOnclick = function(s, t) {
    SocialCalc.SpreadsheetControlCommentDisplay(s, t);
    SocialCalc.KeyboardFocus();
    return;
-   }
+   };
 
 SocialCalc.SpreadsheetControlCommentDisplay = function(s, t) {
    var c = "";
@@ -26010,11 +26007,11 @@ SocialCalc.SpreadsheetControlCommentDisplay = function(s, t) {
       c = s.sheet.cells[s.editor.ecell.coord].comment || "";
       }
    document.getElementById(s.idPrefix+"commenttext").value = c;
-   }
+   };
 
 SocialCalc.SpreadsheetControlCommentMoveECell = function(editor) {
    SocialCalc.SpreadsheetControlCommentDisplay(SocialCalc.GetSpreadsheetControlObject(), "comment");
-   }
+   };
 
 SocialCalc.SpreadsheetControlCommentSet = function() {
    var s=SocialCalc.GetSpreadsheetControlObject();
@@ -26025,11 +26022,11 @@ SocialCalc.SpreadsheetControlCommentSet = function() {
       s.editor.UpdateCellCSS(cell, s.editor.ecell.row, s.editor.ecell.col);
       }
    SocialCalc.KeyboardFocus();
-   }
+   };
 
 SocialCalc.SpreadsheetControlCommentOnunclick = function(s, t) {
    delete s.editor.MoveECellCallback.comment;
-   }
+   };
 
 // Names
 
@@ -26042,7 +26039,7 @@ SocialCalc.SpreadsheetControlNamesOnclick = function(s, t) {
    SocialCalc.SpreadsheetControlNamesRangeChange(s.editor);
    SocialCalc.SpreadsheetControlNamesFillNameList();
    SocialCalc.SpreadsheetControlNamesChangedName();
-   }
+   };
 
 SocialCalc.SpreadsheetControlNamesFillNameList = function() {
    var SCLoc = SocialCalc.LocalizeString;
@@ -26072,7 +26069,7 @@ SocialCalc.SpreadsheetControlNamesFillNameList = function() {
    if (currentname == "") {
       nl.options[0].selected = true;
       }
-   }
+   };
 
 SocialCalc.SpreadsheetControlNamesChangedName = function() {
    var s=SocialCalc.GetSpreadsheetControlObject();
@@ -26088,7 +26085,7 @@ SocialCalc.SpreadsheetControlNamesChangedName = function() {
       document.getElementById(s.idPrefix+"namesdesc").value = "";
       document.getElementById(s.idPrefix+"namesvalue").value = "";
       }
-   }
+   };
 
 SocialCalc.SpreadsheetControlNamesRangeChange = function(editor) {
    var s = SocialCalc.GetSpreadsheetControlObject();
@@ -26100,18 +26097,18 @@ SocialCalc.SpreadsheetControlNamesRangeChange = function(editor) {
    else {
       ele.value = editor.ecell.coord;
       }
-   }
+   };
 
 SocialCalc.SpreadsheetControlNamesOnunclick = function(s, t) {
    delete s.editor.RangeChangeCallback.names;
    delete s.editor.MoveECellCallback.names;
-   }
+   };
 
 SocialCalc.SpreadsheetControlNamesSetValue = function() {
    var s = SocialCalc.GetSpreadsheetControlObject();
    document.getElementById(s.idPrefix+"namesvalue").value = document.getElementById(s.idPrefix+"namesrangeproposal").value;
    SocialCalc.KeyboardFocus();
-   }
+   };
 
 SocialCalc.SpreadsheetControlNamesSave = function() {
    var s = SocialCalc.GetSpreadsheetControlObject();
@@ -26122,7 +26119,7 @@ SocialCalc.SpreadsheetControlNamesSave = function() {
       s.ExecuteCommand("name define "+name+" "+document.getElementById(s.idPrefix+"namesvalue").value+"\n"+
          "name desc "+name+" "+document.getElementById(s.idPrefix+"namesdesc").value);
       }
-   }
+   };
 
 SocialCalc.SpreadsheetControlNamesDelete = function() {
    var s = SocialCalc.GetSpreadsheetControlObject();
@@ -26137,7 +26134,7 @@ SocialCalc.SpreadsheetControlNamesDelete = function() {
 //      SocialCalc.SpreadsheetControlNamesFillNameList();
       }
    SocialCalc.KeyboardFocus();
-   }
+   };
 
 // Clipboard
 
@@ -26147,13 +26144,13 @@ SocialCalc.SpreadsheetControlClipboardOnclick = function(s, t) {
    document.getElementById(s.idPrefix+"clipboardformat-tab").checked = true;
    clipele.value = SocialCalc.ConvertSaveToOtherFormat(SocialCalc.Clipboard.clipboard, "tab");
    return;
-   }
+   };
 
 SocialCalc.SpreadsheetControlClipboardFormat = function(which) {
    var s = SocialCalc.GetSpreadsheetControlObject();
    clipele = document.getElementById(s.idPrefix+"clipboardtext");
    clipele.value = SocialCalc.ConvertSaveToOtherFormat(SocialCalc.Clipboard.clipboard, which);
-   }
+   };
 
 SocialCalc.SpreadsheetControlClipboardLoad = function() {
    var s = SocialCalc.GetSpreadsheetControlObject();
@@ -26171,7 +26168,7 @@ SocialCalc.SpreadsheetControlClipboardLoad = function() {
    s.editor.EditorScheduleSheetCommands("loadclipboard "+
       SocialCalc.encodeForSave(
          SocialCalc.ConvertOtherFormatToSave(document.getElementById(s.idPrefix+"clipboardtext").value, savetype)), true, false);
-   }
+   };
 
 SocialCalc.SpreadsheetControlClipboardClear = function() {
    var s = SocialCalc.GetSpreadsheetControlObject();
@@ -26179,7 +26176,7 @@ SocialCalc.SpreadsheetControlClipboardClear = function() {
    clipele.value = "";
    s.editor.EditorScheduleSheetCommands("clearclipboard", true, false);
    clipele.focus();
-   }
+   };
 
 SocialCalc.SpreadsheetControlClipboardExport = function() {
    var s = SocialCalc.GetSpreadsheetControlObject();
@@ -26188,7 +26185,7 @@ SocialCalc.SpreadsheetControlClipboardExport = function() {
       }
    SocialCalc.SetTab(s.tabs[0].name); // return to first tab
    SocialCalc.KeyboardFocus();
-   }
+   };
 
 // Settings
 
@@ -26213,7 +26210,7 @@ SocialCalc.SpreadsheetControlSettingsSwitch = function(target) {
       celltoolbar.style.display = "block";
       SocialCalc.SettingsControlSetCurrentPanel(s.views.settings.values.cellspanel);
       }
-   }
+   };
 
 SocialCalc.SettingsControlSave = function(target) {
    var range, cmdstr;
@@ -26240,7 +26237,7 @@ SocialCalc.SettingsControlSave = function(target) {
    if (cmdstr) {
       s.editor.EditorScheduleSheetCommands(cmdstr, true, false);
       }
-   }
+   };
 
 ///////////////////////
 //
@@ -26305,7 +26302,7 @@ SocialCalc.SpreadsheetControlCreateSpreadsheetSave = function(spreadsheet, other
 
    return result;
 
-   }
+   };
 
 
 //
@@ -26376,7 +26373,7 @@ SocialCalc.SpreadsheetControlDecodeSpreadsheetSave = function(spreadsheet, str) 
 
    return parts;
 
-   }
+   };
 
 
 /*
@@ -26418,7 +26415,7 @@ SocialCalc.SettingsControlSetCurrentPanel = function(panelobj) {
 
    SocialCalc.SettingsControls.PopupChangeCallback({panelobj: panelobj}, "", null);
 
-   }
+   };
 
 
 //
@@ -26436,7 +26433,7 @@ SocialCalc.SettingsControlInitializePanel = function(panelobj) {
       if (ctrl && ctrl.Initialize) ctrl.Initialize(panelobj, ctrlname);
       }
 
-   }
+   };
 
 
 //
@@ -26454,7 +26451,7 @@ SocialCalc.SettingsControlLoadPanel = function(panelobj, attribs) {
       if (ctrl && ctrl.SetValue) ctrl.SetValue(panelobj, ctrlname, attribs[panelobj[ctrlname].setting]);
       }
 
-   }
+   };
 
 //
 // attribs = SocialCalc.SettingsControlUnloadPanel(panel-object)
@@ -26474,7 +26471,7 @@ SocialCalc.SettingsControlUnloadPanel = function(panelobj) {
 
    return attribs;
 
-   }
+   };
 
 //
 // SocialCalc.SettingsControls.PopupChangeCallback
@@ -26539,7 +26536,7 @@ SocialCalc.SettingsControls.PopupChangeCallback = function(attribs, id, value) {
       
    ele.childNodes[1].innerHTML = str1;
 
-   }
+   };
 
 //
 // PopupList Control
@@ -26558,7 +26555,7 @@ SocialCalc.SettingsControls.PopupListSetValue = function(panelobj, ctrlname, val
       sp.SetValue(panelobj[ctrlname].id, "");
       }
 
-   }
+   };
 
 //
 // SocialCalc.SettingsControls.PopupListGetValue
@@ -26577,7 +26574,7 @@ SocialCalc.SettingsControls.PopupListGetValue = function(panelobj, ctrlname) {
       return {def: true, val: 0};
       }
 
-   }
+   };
 
 //
 // SocialCalc.SettingsControls.PopupListInitialize
@@ -26625,7 +26622,7 @@ SocialCalc.SettingsControls.PopupListInitialize = function(panelobj, ctrlname) {
       {options: options, 
        attribs:{changedcallback: SocialCalc.SettingsControls.PopupChangeCallback, panelobj: panelobj}});
 
-   }
+   };
 
 
 //
@@ -26636,7 +26633,7 @@ SocialCalc.SettingsControls.PopupListReset = function(ctrlname) {
 
    SocialCalc.Popup.Reset("List");
 
-   }
+   };
 
 SocialCalc.SettingsControls.Controls.PopupList = {
    SetValue: SocialCalc.SettingsControls.PopupListSetValue,
@@ -26644,7 +26641,7 @@ SocialCalc.SettingsControls.Controls.PopupList = {
    Initialize: SocialCalc.SettingsControls.PopupListInitialize,
    OnReset: SocialCalc.SettingsControls.PopupListReset,
    ChangedCallback: null
-   }
+   };
 
 //
 // ColorChooser Control
@@ -26663,7 +26660,7 @@ SocialCalc.SettingsControls.ColorChooserSetValue = function(panelobj, ctrlname, 
       sp.SetValue(panelobj[ctrlname].id, "");
       }
 
-   }
+   };
 
 //
 // SocialCalc.SettingsControls.ColorChooserGetValue
@@ -26679,7 +26676,7 @@ SocialCalc.SettingsControls.ColorChooserGetValue = function(panelobj, ctrlname) 
       return {def: true, val: 0};
       }
 
-   }
+   };
 
 //
 // SocialCalc.SettingsControls.ColorChooserInitialize
@@ -26695,7 +26692,7 @@ SocialCalc.SettingsControls.ColorChooserInitialize = function(panelobj, ctrlname
       {attribs:{title: "&nbsp;", moveable: true, width: "106px",
                 changedcallback: SocialCalc.SettingsControls.PopupChangeCallback, panelobj: panelobj}});
 
-   }
+   };
 
 
 //
@@ -26706,7 +26703,7 @@ SocialCalc.SettingsControls.ColorChooserReset = function(ctrlname) {
 
    SocialCalc.Popup.Reset("ColorChooser");
 
-   }
+   };
 
 SocialCalc.SettingsControls.Controls.ColorChooser = {
    SetValue: SocialCalc.SettingsControls.ColorChooserSetValue,
@@ -26714,7 +26711,7 @@ SocialCalc.SettingsControls.Controls.ColorChooser = {
    Initialize: SocialCalc.SettingsControls.ColorChooserInitialize,
    OnReset: SocialCalc.SettingsControls.ColorChooserReset,
    ChangedCallback: null
-   }
+   };
 
 
 //
@@ -26748,7 +26745,7 @@ SocialCalc.SettingsControls.BorderSideSetValue = function(panelobj, ctrlname, va
       SocialCalc.Popup.SetDisabled(idname, true);
       }
 
-   }
+   };
 
 //
 // SocialCalc.SettingsControls.BorderSideGetValue
@@ -26773,7 +26770,7 @@ SocialCalc.SettingsControls.BorderSideGetValue = function(panelobj, ctrlname) {
       return {def: false, val: ""};
       }
 
-   }
+   };
 
 //
 // SocialCalc.SettingsControls.BorderSideInitialize
@@ -26789,7 +26786,7 @@ SocialCalc.SettingsControls.BorderSideInitialize = function(panelobj, ctrlname) 
       {attribs:{title: "&nbsp;", width: "106px", moveable: true,
                 changedcallback: SocialCalc.SettingsControls.PopupChangeCallback, panelobj: panelobj}});
 
-   }
+   };
 
 
 //
@@ -26806,7 +26803,7 @@ SocialCalc.SettingsControlOnchangeBorder = function(ele) {
    if (!nameparts) return;
    var prefix = nameparts[1];
    var ctrlname = nameparts[2];
-   var ctrlsubid = nameparts[3]
+   var ctrlsubid = nameparts[3];
    var ctrlidsuffix = nameparts[4];
    var ctrltype = panelobj[ctrlname].type;
 
@@ -26821,7 +26818,7 @@ SocialCalc.SettingsControlOnchangeBorder = function(ele) {
          break;
       }
 
-   }
+   };
 
 
 SocialCalc.SettingsControls.Controls.BorderSide = {
@@ -26831,7 +26828,7 @@ SocialCalc.SettingsControls.Controls.BorderSide = {
    Initialize: SocialCalc.SettingsControls.BorderSideInitialize,
    InitialData: {thickness: "1 pixel:1px", style: "Solid:solid"},
    ChangedCallback: null
-   }
+   };
 
 
 SocialCalc.SettingControlReset = function() {
@@ -26842,7 +26839,7 @@ SocialCalc.SettingControlReset = function() {
    for (ctrlname in sc.Controls) {
       if (sc.Controls[ctrlname].OnReset) sc.Controls[ctrlname].OnReset(ctrlname);
       }
-   }
+   };
 
 
 /**********************
@@ -26877,7 +26874,7 @@ SocialCalc.CtrlSEditor = function(whichpart) {
    ebta.focus();
    SocialCalc.CmdGotFocus(ebta);
 
-   }
+   };
 
 SocialCalc.CtrlSEditorDone = function(idprefix, whichpart) {
 
@@ -26896,7 +26893,7 @@ SocialCalc.CtrlSEditorDone = function(idprefix, whichpart) {
    SocialCalc.KeyboardFocus();
    editbox.parentNode.removeChild(editbox);
 
-   }
+   };
 
 
 //
@@ -27085,7 +27082,7 @@ SocialCalc.SpreadsheetViewer = function(idPrefix) {
 
    return;
 
-   }
+   };
 
 // Methods:
 
@@ -27185,7 +27182,7 @@ SocialCalc.InitializeSpreadsheetViewer = function(spreadsheet, node, height, wid
 
    return;
 
-   }
+   };
 
 SocialCalc.SpreadsheetViewerLoadSave = function(spreadsheet, savestr) {
 
@@ -27225,7 +27222,7 @@ SocialCalc.SpreadsheetViewerLoadSave = function(spreadsheet, savestr) {
    else {
       spreadsheet.editor.EditorScheduleSheetCommands("recalc");
       }
-   }
+   };
 
 //
 // SocialCalc.SpreadsheetViewerDoRepeatingMacro
@@ -27245,7 +27242,7 @@ SocialCalc.SpreadsheetViewerDoRepeatingMacro = function() {
 
    editor.EditorScheduleSheetCommands(spreadsheet.repeatingMacroCommands);
 
-}
+};
 
 SocialCalc.SpreadsheetViewerRepeatMacroCommand = function(name, data, sheet, cmd, saveundo) {
 
@@ -27258,7 +27255,7 @@ SocialCalc.SpreadsheetViewerRepeatMacroCommand = function(name, data, sheet, cmd
 
    spreadsheet.repeatingMacroTimer = window.setTimeout(SocialCalc.SpreadsheetViewerDoRepeatingMacro, spreadsheet.repeatingMacroInterval * 1000);
 
-}
+};
 
 SocialCalc.SpreadsheetViewerStopRepeatingMacro = function() {
 
@@ -27268,7 +27265,7 @@ SocialCalc.SpreadsheetViewerStopRepeatingMacro = function() {
       window.clearTimeout(spreadsheet.repeatingMacroTimer);
       spreadsheet.repeatingMacroTimer = null;
       }
-}
+};
 
 //
 // SocialCalc.SpreadsheetViewerDoButtonCmd(e, buttoninfo, bobj)
@@ -27296,7 +27293,7 @@ SocialCalc.SpreadsheetViewerDoButtonCmd = function(e, buttoninfo, bobj) {
    if (obj && obj.blur) obj.blur();
    SocialCalc.KeyboardFocus();   
 
-   }
+   };
 
 
 //
@@ -27318,7 +27315,7 @@ SocialCalc.LocalizeString = function(str) {
       SocialCalc.LocalizeStringList[str] = cstr;
       }
    return cstr;
-   }
+   };
 
 SocialCalc.LocalizeStringList = {}; // a list of strings to localize accumulated by the routine
 
@@ -27355,7 +27352,7 @@ SocialCalc.LocalizeSubstrings = function(str) {
          }
       });
 
-   }
+   };
 
 //
 // obj = GetSpreadsheetViewerObject()
@@ -27370,7 +27367,7 @@ SocialCalc.GetSpreadsheetViewerObject = function() {
 
    throw ("No current SpreadsheetViewer object.");
 
-   }
+   };
 
 
 //
@@ -27387,7 +27384,7 @@ SocialCalc.DoOnResize = function(spreadsheet) {
    var needresize = spreadsheet.SizeSSDiv();
    if (!needresize) return;
 
-   for (vname in views) {
+   for (var vname in views) {
       v = views[vname].element;
       v.style.width = spreadsheet.width + "px";
       v.style.height = (spreadsheet.height-spreadsheet.nonviewheight) + "px";
@@ -27396,7 +27393,7 @@ SocialCalc.DoOnResize = function(spreadsheet) {
    if(SocialCalc._app) return; // app has no scroll bars and keep normal HTML style page scroll - for mobile
    spreadsheet.editor.ResizeTableEditor(spreadsheet.width, spreadsheet.height-spreadsheet.nonviewheight);
 
-   }
+   };
 
 
 //
@@ -27455,7 +27452,7 @@ SocialCalc.SizeSSDiv = function(spreadsheet) {
 
    return resized;
 
-   }
+   };
 
 
 //
@@ -27488,7 +27485,7 @@ SocialCalc.SpreadsheetViewerStatuslineCallback = function(editor, status, arg, p
          break;
       }
 
-   }
+   };
 
 
 //
@@ -27501,7 +27498,7 @@ SocialCalc.CmdGotFocus = function(obj) {
 
    SocialCalc.Keyboard.passThru = obj;
 
-   }
+   };
 
 
 //
@@ -27526,7 +27523,7 @@ SocialCalc.SpreadsheetViewerCreateSheetHTML = function(spreadsheet) {
    delete div;
    return result;
 
-   }
+   };
 
 
 ///////////////////////
@@ -27607,7 +27604,7 @@ str = str.replace(/([^\n])\r([^\n])/g, "$1\r\n$2");
 
    return parts;
 
-   }
+   };
 
 
 // END OF FILE

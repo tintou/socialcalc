@@ -328,7 +328,7 @@ SocialCalc.FormatNumber.formatNumberWithFormat = function(rawvalue, format_strin
 
    oppos = sectioninfo.sectionstart;
 
-   while (op = thisformat.operators[oppos]) { // execute format
+   while ((op = thisformat.operators[oppos]) != null) { // execute format
       operandstr = thisformat.operands[oppos++]; // get next operator and operand
 
       if (op == scfn.commands.copy) { // put char in result
@@ -362,8 +362,8 @@ SocialCalc.FormatNumber.formatNumberWithFormat = function(rawvalue, format_strin
                   }
                }
             }
-         if (integervalue.length < sectioninfo.integerdigits
-             && integerdigits2 <= sectioninfo.integerdigits - integervalue.length) { // field is wider than value
+         if (integervalue.length < sectioninfo.integerdigits &&
+             integerdigits2 <= sectioninfo.integerdigits - integervalue.length) { // field is wider than value
             if (operandstr == "0" || operandstr == "?") { // fill with appropriate characters
                result += operandstr == "0" ? "0" : "&nbsp;";
                if (sectioninfo.thousandssep) { // see if this is a separator position
@@ -611,7 +611,7 @@ SocialCalc.FormatNumber.formatTextWithFormat = function(rawvalue, format_string)
    sectioninfo = thisformat.sectioninfo[section]; // look at values for our section
    oppos = sectioninfo.sectionstart;
 
-   while (op = thisformat.operators[oppos]) { // execute format
+   while ((op = thisformat.operators[oppos]) != null) { // execute format
       operandstr = thisformat.operands[oppos++]; // get next operator and operand
 
       if (op == scfn.commands.copy) { // put char in result
@@ -888,7 +888,7 @@ SocialCalc.FormatNumber.parse_format_string = function(format_defs, format_strin
 
    return;
 
-   }
+   };
 
 
 /* *******************
@@ -929,7 +929,7 @@ SocialCalc.FormatNumber.parse_format_bracket = function(bracketstr) {
       bracketdata.operator = scfn.commands.color;
       bracketdata.operand = scfn.allowedcolors[bracketstr.toUpperCase()];
       }
-   else if (parts=bracketstr.match(/^style=([^"]*)$/)) { // [style=...]
+   else if ((parts=bracketstr.match(/^style=([^"]*)$/)) != null) { // [style=...]
       bracketdata.operator = scfn.commands.style;
       bracketdata.operand = parts[1];
       }
@@ -941,7 +941,7 @@ SocialCalc.FormatNumber.parse_format_bracket = function(bracketstr) {
       bracketdata.operator = scfn.commands.date;
       bracketdata.operand = scfn.alloweddates[bracketstr.toUpperCase()];
       }
-   else if (parts=bracketstr.match(/^[<>=]/)) { // comparison operator
+   else if ((parts=bracketstr.match(/^[<>=]/)) != null) { // comparison operator
       parts=bracketstr.match(/^([<>=]+)(.+)$/); // split operator and value
       bracketdata.operator = scfn.commands.comparison;
       bracketdata.operand = parts[1]+":"+parts[2];
@@ -953,7 +953,7 @@ SocialCalc.FormatNumber.parse_format_bracket = function(bracketstr) {
 
    return bracketdata;
 
-   }
+   };
 
 /* *******************
 
@@ -982,7 +982,7 @@ SocialCalc.FormatNumber.convert_date_gregorian_to_julian = function(year, month,
 
    return juliandate;
 
-   }
+   };
 
 
 /* *******************
@@ -1017,7 +1017,7 @@ SocialCalc.FormatNumber.convert_date_julian_to_gregorian = function(juliandate) 
 
    return {year:I, month:J, day:K};
 
-   }
+   };
 
 SocialCalc.intFunc = function(n) {
    if (n < 0) {
@@ -1026,5 +1026,5 @@ SocialCalc.intFunc = function(n) {
    else {
       return Math.floor(n);
       }
-   }
+   };
 
