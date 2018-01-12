@@ -4,18 +4,26 @@ var uglify = require('gulp-uglify');
 var filesExist = require('files-exist');
 var jshint = require('gulp-jshint');
 
-js_top_file = 'module-wrapper-top.js';
-js_bottom_file = 'module-wrapper-bottom.js';
+var js_folder = './js/';
+var css_folder = './css/';
+var dist_folder = './dist/';
 
-js_files = [
-    'socialcalcconstants.js',
-    'socialcalc-3.js',
-    'socialcalctableeditor.js',
-    'formatnumber2.js',
-    'formula1.js',
-    'socialcalcpopup.js',
-    'socialcalcspreadsheetcontrol.js',
-    'socialcalcviewer.js'
+var js_top_file = js_folder + 'module-wrapper-top.js';
+var js_bottom_file = js_folder + 'module-wrapper-bottom.js';
+
+var js_files = [
+    js_folder + 'socialcalcconstants.js',
+    js_folder + 'socialcalc-3.js',
+    js_folder + 'socialcalctableeditor.js',
+    js_folder + 'formatnumber2.js',
+    js_folder + 'formula1.js',
+    js_folder + 'socialcalcpopup.js',
+    js_folder + 'socialcalcspreadsheetcontrol.js',
+    js_folder + 'socialcalcviewer.js'
+];
+
+var css_files = [
+    css_folder + 'socialcalc.css'
 ];
 
 gulp.task('validate-js', function () {
@@ -33,13 +41,18 @@ gulp.task('validate-js', function () {
         .pipe(jshint.reporter('jshint-stylish'));
 });
 
-
 gulp.task('js', ['validate-js'], function () {
     var files = filesExist([].concat(js_top_file, js_files, js_bottom_file));
     return gulp.src(files)
         .pipe(concat('SocialCalc.js'))
-        .pipe(gulp.dest('.'));
+        .pipe(gulp.dest(dist_folder));
 });
 
-gulp.task('default', ['js'], function () {});
+gulp.task('css', function () {
+    var files = filesExist(css_files);
+    return gulp.src(files)
+        .pipe(concat('socialcalc.css'))
+        .pipe(gulp.dest(dist_folder));
+});
 
+gulp.task('default', ['js', 'css'], function () {});
