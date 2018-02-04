@@ -47,4 +47,29 @@
 #searchbar {
   float:right;
 }
-
+.socialcalc-dialog {
+    border: 1px solid black;
+    background-color:#DDD;
+    z-index: 100;
+    width: 400px;
+    position: absolute;
+}
+.socialcalc-titlebar {
+    float: left;
+    width: 100%;
+    border-bottom: 1px solid black;
+    background-color:#A0A0A0;
+}
+.socialcalc-titlebar-title {
+    float: left;
+    padding: 3px;
+    width: calc(100% - 22px - 6px);
+}
+.socialcalc-titlebar-cross {
+    float: left;
+    padding: 3px;
+    width: 16px;
+}
+.socialcalc-dialog-content {
+    padding: 6px;
+}

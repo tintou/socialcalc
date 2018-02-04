@@ -2230,55 +2230,23 @@ SocialCalc.SpreadsheetControl.DoFunctionList = function() {
 
    scf.FillFunctionInfo();
 
-   str = '<table><tr><td><span style="font-size:x-small;font-weight:bold">%loc!Category!</span><br>'+
+   str = '<table style="width: 100%;"><tr><td><span style="font-size:x-small;font-weight:bold">%loc!Category!</span><br>'+
       '<select id="'+idp+'class" size="'+fcl.length+'" style="width:120px;" onchange="SocialCalc.SpreadsheetControl.FunctionClassChosen(this.options[this.selectedIndex].value);">';
    for (i=0; i<fcl.length; i++) {
       str += '<option value="'+fcl[i]+'"'+(i==0?' selected>':'>')+SocialCalc.special_chars(scf.FunctionClasses[fcl[i]].name)+'</option>';
       }
    str += '</select></td><td>&nbsp;&nbsp;</td><td id="'+idp+'list"><span style="font-size:x-small;font-weight:bold">%loc!Functions!</span><br>'+
-      '<select id="'+idp+'name" size="'+fcl.length+'" style="width:240px;" '+
+      '<select id="'+idp+'name" size="'+fcl.length+'" style="width:246px;" '+
       'onchange="SocialCalc.SpreadsheetControl.FunctionChosen(this.options[this.selectedIndex].value);" ondblclick="SocialCalc.SpreadsheetControl.DoFunctionPaste();">';
    str += SocialCalc.SpreadsheetControl.GetFunctionNamesStr("all");
    str += '</td></tr><tr><td colspan="3">'+
-          '<div id="'+idp+'desc" style="width:380px;height:80px;overflow:auto;font-size:x-small;">'+SocialCalc.SpreadsheetControl.GetFunctionInfoStr(scf.FunctionClasses[fcl[0]].items[0])+'</div>'+
-          '<div style="width:380px;text-align:right;padding-top:6px;font-size:small;">'+
-          '<input type="button" value="%loc!Paste!" style="font-size:smaller;" onclick="SocialCalc.SpreadsheetControl.DoFunctionPaste();">&nbsp;'+
-          '<input type="button" value="%loc!Cancel!" style="font-size:smaller;" onclick="SocialCalc.SpreadsheetControl.HideFunctions();"></div>'+
+          '<div id="'+idp+'desc" style="height:80px;overflow:auto;font-size:x-small;">'+SocialCalc.SpreadsheetControl.GetFunctionInfoStr(scf.FunctionClasses[fcl[0]].items[0])+'</div>'+
+          '<div style="text-align:right;font-size:small;">'+
+          '<input type="button" value="%loc!Paste!" onclick="SocialCalc.SpreadsheetControl.DoFunctionPaste();">&nbsp;'+
+          '<input type="button" value="%loc!Cancel!" onclick="SocialCalc.SpreadsheetControl.HideFunctions();"></div>'+
           '</td></tr></table>';
 
-   var main = document.createElement("div");
-   main.id = idp+"dialog";
-
-   main.style.position = "absolute";
-
-   var vp = SocialCalc.GetViewportInfo();
-   var pos = SocialCalc.GetElementPositionWithScroll(spreadsheet.spreadsheetDiv);
-
-   main.style.top = ((vp.height/3)-pos.top)+"px";
-   main.style.left = ((vp.width/3)-pos.left)+"px";
-   main.style.zIndex = 100;
-   main.style.backgroundColor = "#FFF";
-   main.style.border = "1px solid black";
-
-   main.style.width = "400px";
-
-   str = '<table cellspacing="0" cellpadding="0" style="border-bottom:1px solid black;"><tr>'+
-      '<td style="font-size:10px;cursor:default;width:100%;background-color:#999;color:#FFF;">'+"&nbsp;%loc!Function List!"+'</td>'+
-      '<td style="font-size:10px;cursor:default;color:#666;" onclick="SocialCalc.SpreadsheetControl.HideFunctions();">&nbsp;X&nbsp;</td></tr></table>'+
-      '<div style="background-color:#DDD;">'+str+'</div>';
-
-   str = SocialCalc.LocalizeSubstrings(str);
-
-   main.innerHTML = str;
-
-   SocialCalc.DragRegister(main.firstChild.firstChild.firstChild.firstChild, true, true,
-                 {MouseDown: SocialCalc.DragFunctionStart, 
-                  MouseMove: SocialCalc.DragFunctionPosition,
-                  MouseUp: SocialCalc.DragFunctionPosition,
-                  Disabled: null, positionobj: main},
-                  spreadsheet.spreadsheetDiv);
-
-   spreadsheet.spreadsheetDiv.appendChild(main);
+   spreadsheet.spreadsheetDiv.appendChild(SocialCalc.Dialog(idp, "%loc!Function List!", str));
 
    ele = document.getElementById(idp+"name");
    ele.focus();
@@ -2427,43 +2395,14 @@ SocialCalc.SpreadsheetControl.DoMultiline = function() {
 
    text = SocialCalc.special_chars(text);
 
-   str = '<textarea id="'+idp+'textarea" style="width:380px;height:120px;margin:10px 0px 0px 6px;">'+text+'</textarea>'+
-         '<div style="width:380px;text-align:right;padding:6px 0px 4px 6px;font-size:small;">'+
-         SCLocSS('<input type="button" value="%loc!Set Cell Contents!" style="font-size:smaller;" onclick="SocialCalc.SpreadsheetControl.DoMultilinePaste();">&nbsp;'+
-         '<input type="button" value="%loc!Clear!" style="font-size:smaller;" onclick="SocialCalc.SpreadsheetControl.DoMultilineClear();">&nbsp;'+
-         '<input type="button" value="%loc!Cancel!" style="font-size:smaller;" onclick="SocialCalc.SpreadsheetControl.HideMultiline();"></div>'+
+   str = '<textarea id="'+idp+'textarea" style="width:calc(100% - 6px);height:120px;margin:6px 0;">'+text+'</textarea>'+
+         '<div style="text-align:right;font-size:small;">'+
+         SCLocSS('<input type="button" value="%loc!Set Cell Contents!" onclick="SocialCalc.SpreadsheetControl.DoMultilinePaste();">&nbsp;'+
+         '<input type="button" value="%loc!Clear!" onclick="SocialCalc.SpreadsheetControl.DoMultilineClear();">&nbsp;'+
+         '<input type="button" value="%loc!Cancel!" onclick="SocialCalc.SpreadsheetControl.HideMultiline();"></div>'+
          '</div>');
 
-   var main = document.createElement("div");
-   main.id = idp+"dialog";
-
-   main.style.position = "absolute";
-
-   var vp = SocialCalc.GetViewportInfo();
-   var pos = SocialCalc.GetElementPositionWithScroll(spreadsheet.spreadsheetDiv);
-
-   main.style.top = ((vp.height/3)-pos.top)+"px";
-   main.style.left = ((vp.width/3)-pos.left)+"px";
-   main.style.zIndex = 100;
-   main.style.backgroundColor = "#FFF";
-   main.style.border = "1px solid black";
-
-   main.style.width = "400px";
-
-   main.innerHTML = '<table cellspacing="0" cellpadding="0" style="border-bottom:1px solid black;"><tr>'+
-      '<td style="font-size:10px;cursor:default;width:100%;background-color:#999;color:#FFF;">'+
-      SCLocSS("&nbsp;%loc!Multi-line Input Box!")+'</td>'+
-      '<td style="font-size:10px;cursor:default;color:#666;" onclick="SocialCalc.SpreadsheetControl.HideMultiline();">&nbsp;X&nbsp;</td></tr></table>'+
-      '<div style="background-color:#DDD;">'+str+'</div>';
-
-   SocialCalc.DragRegister(main.firstChild.firstChild.firstChild.firstChild, true, true, 
-                 {MouseDown: SocialCalc.DragFunctionStart, 
-                  MouseMove: SocialCalc.DragFunctionPosition,
-                  MouseUp: SocialCalc.DragFunctionPosition,
-                  Disabled: null, positionobj: main},
-                  spreadsheet.spreadsheetDiv);
-
-   spreadsheet.spreadsheetDiv.appendChild(main);
+   spreadsheet.spreadsheetDiv.appendChild(SocialCalc.Dialog(idp, "%loc!Multi-line Input Box!", str));
 
    ele = document.getElementById(idp+"textarea");
    ele.focus();
@@ -2600,8 +2539,7 @@ SocialCalc.SpreadsheetControl.DoLink = function() {
 
    popup = parts.newwin ? " checked" : "";
 
-   str = '<div style="padding:6px 0px 4px 6px;">'+
-         '<span style="font-size:smaller;">'+SCLoc("Description")+'</span><br>'+
+   str = '<span style="font-size:smaller;">'+SCLoc("Description")+'</span><br>'+
          '<input type="text" id="'+idp+'desc" style="width:380px;" value="'+SocialCalc.special_chars(parts.desc)+'"><br>'+
          '<span style="font-size:smaller;">'+SCLoc("URL")+'</span><br>'+
          '<input type="text" id="'+idp+'url" style="width:380px;" value="'+SocialCalc.special_chars(parts.url)+'"><br>';
@@ -2616,41 +2554,12 @@ SocialCalc.SpreadsheetControl.DoLink = function() {
          '<input type="checkbox" id="'+idp+'popup"'+popup+'>&nbsp;'+
          '<span style="font-size:smaller;">%loc!Show in new browser window!</span>'+
          '</div>'+
-         '<div style="width:380px;text-align:right;padding:6px 0px 4px 6px;font-size:small;">'+
-         '<input type="button" value="%loc!Set Cell Contents!" style="font-size:smaller;" onclick="SocialCalc.SpreadsheetControl.DoLinkPaste();">&nbsp;'+
-         '<input type="button" value="%loc!Clear!" style="font-size:smaller;" onclick="SocialCalc.SpreadsheetControl.DoLinkClear();">&nbsp;'+
-         '<input type="button" value="%loc!Cancel!" style="font-size:smaller;" onclick="SocialCalc.SpreadsheetControl.HideLink();"></div>'+
-         '</div>');
+         '<div style="text-align:right;font-size:small;">'+
+         '<input type="button" value="%loc!Set Cell Contents!" onclick="SocialCalc.SpreadsheetControl.DoLinkPaste();">&nbsp;'+
+         '<input type="button" value="%loc!Clear!" onclick="SocialCalc.SpreadsheetControl.DoLinkClear();">&nbsp;'+
+         '<input type="button" value="%loc!Cancel!" onclick="SocialCalc.SpreadsheetControl.HideLink();"></div>');
 
-   var main = document.createElement("div");
-   main.id = idp+"dialog";
-
-   main.style.position = "absolute";
-
-   var vp = SocialCalc.GetViewportInfo();
-   var pos = SocialCalc.GetElementPositionWithScroll(spreadsheet.spreadsheetDiv);
-
-   main.style.top = ((vp.height/3)-pos.top)+"px";
-   main.style.left = ((vp.width/3)-pos.left)+"px";
-   main.style.zIndex = 100;
-   main.style.backgroundColor = "#FFF";
-   main.style.border = "1px solid black";
-
-   main.style.width = "400px";
-
-   main.innerHTML = '<table cellspacing="0" cellpadding="0" style="border-bottom:1px solid black;"><tr>'+
-      '<td style="font-size:10px;cursor:default;width:100%;background-color:#999;color:#FFF;">'+"&nbsp;"+SCLoc("Link Input Box")+'</td>'+
-      '<td style="font-size:10px;cursor:default;color:#666;" onclick="SocialCalc.SpreadsheetControl.HideLink();">&nbsp;X&nbsp;</td></tr></table>'+
-      '<div style="background-color:#DDD;">'+str+'</div>';
-
-   SocialCalc.DragRegister(main.firstChild.firstChild.firstChild.firstChild, true, true, 
-                 {MouseDown: SocialCalc.DragFunctionStart, 
-                  MouseMove: SocialCalc.DragFunctionPosition,
-                  MouseUp: SocialCalc.DragFunctionPosition,
-                  Disabled: null, positionobj: main},
-                  spreadsheet.spreadsheetDiv);
-
-   spreadsheet.spreadsheetDiv.appendChild(main);
+   spreadsheet.spreadsheetDiv.appendChild(SocialCalc.Dialog(idp, "%loc!Link Input Box!", str));
 
    ele = document.getElementById(idp+"url");
    ele.focus();

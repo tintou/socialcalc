@@ -13,6 +13,7 @@ var js_bottom_file = js_folder + 'module-wrapper-bottom.js';
 
 var js_files = [
     js_folder + 'socialcalcconstants.js',
+    js_folder + 'dialog.js',
     js_folder + 'socialcalc-3.js',
     js_folder + 'socialcalctableeditor.js',
     js_folder + 'formatnumber2.js',
